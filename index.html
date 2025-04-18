@@ -1,1 +1,22 @@
-<!-- Placeholder for index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Performance Per TCO Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Performance Per TCO Calculator</h1>
+    <div id="about">
+        <p>This calculator estimates performance per Total Cost of Ownership (TCO) for GPU-based compute nodes based on user-defined hardware and operational cost parameters. It supports GROMACS and AMBER benchmarks and includes cost breakdown, performance per € analysis, and sensitivity charts.</p>
+    </div>
+    <div id="app"></div>
+    <button onclick="calculate()">Calculate</button>
+    <button onclick="showFormula()">Show Formula</button>
+    <div id="output"></div>
+    <div id="charts"></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
