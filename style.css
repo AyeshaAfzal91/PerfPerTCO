@@ -1,15 +1,19 @@
 
 body {
     font-family: Arial, sans-serif;
-    margin: 40px;
-    background-color: #f9f9f9;
-}
-h1 {
-    color: #004b87;
+    background-color: #f4f4f4;
+    margin: 30px;
 }
 #about {
-    background-color: #e6f0fa;
-    padding: 15px;
-    border-left: 5px solid #007acc;
+    background: #eef5fb;
+    padding: 10px;
+    border-left: 4px solid #007acc;
     margin-bottom: 20px;
+}
+label {
+    display: block;
+    margin-top: 10px;
+}
+h1, h2 {
+    color: #003366;
 }
