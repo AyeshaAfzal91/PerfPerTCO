@@ -11,11 +11,34 @@
     <div id="about">
         <p>This calculator estimates performance per Total Cost of Ownership (TCO) for GPU-based compute nodes based on user-defined hardware and operational cost parameters. It supports GROMACS and AMBER benchmarks and includes cost breakdown, performance per € analysis, and sensitivity charts.</p>
     </div>
-    <div id="app"></div>
-    <button onclick="calculate()">Calculate</button>
-    <button onclick="showFormula()">Show Formula</button>
-    <div id="output"></div>
-    <div id="charts"></div>
+
+    <div id="inputs">
+        <label>Total Budget (€): <input type="range" id="totalBudget" min="0" max="100000000" value="10000000" step="10000" oninput="updateValue('totalBudgetVal', this.value)"></label>
+        <span id="totalBudgetVal">10000000</span><br>
+
+        <label>System Usage (hrs/year): <input type="range" id="systemUsage" min="0" max="8760" value="8760" step="100" oninput="updateValue('systemUsageVal', this.value)"></label>
+        <span id="systemUsageVal">8760</span><br>
+
+        <label>Select Workload:
+            <select id="workload">
+                <option value="GROMACS">GROMACS</option>
+                <option value="AMBER">AMBER</option>
+            </select>
+        </label><br><br>
+
+        <button onclick="calculate()">Calculate</button>
+        <button onclick="showFormula()">Show Formula</button>
+    </div>
+
+    <div id="output">
+        <h2>Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div id="charts">
+        <canvas id="barChart" width="800" height="400"></canvas>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="main.js"></script>
 </body>
