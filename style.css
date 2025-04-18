@@ -1,1 +1,15 @@
-/* Placeholder for style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background-color: #f9f9f9;
+}
+h1 {
+    color: #004b87;
+}
+#about {
+    background-color: #e6f0fa;
+    padding: 15px;
+    border-left: 5px solid #007acc;
+    margin-bottom: 20px;
+}
