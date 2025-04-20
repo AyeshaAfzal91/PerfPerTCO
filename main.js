@@ -17,8 +17,16 @@ const GPU_data = [
         8: 56972608.32, 9: 60495215.82, 10: 87373738.6, 11: 96913567.9,
       }
     },
-    power: { GROMACS: 400.5, AMBER: 468.57 },
-    per_node: 4
+    power: {
+      GROMACS: {
+        1: 271.9, 2: 326.3, 3: 355.5, 4: 400.5, 5: 425.6, 6: 439.3, 7: 700,
+      },
+      AMBER: {
+        1: 252.01, 2: 573.56, 3: 124.73, 4: 440.27, 5: 463.97, 6: 204.46, 7: 204.28,
+        8: 301.66, 9: 309.72, 10: 468.57, 11: 508.50,
+      }
+    },
+    per_node: 4,
   },
   {
     name: "GH200",
@@ -28,11 +36,18 @@ const GPU_data = [
         1: 8331687.536, 2: 35826462.39, 3: 37781353.86, 4: 39618475.84, 5: 46166583.42, 6: 47407348.09, 7: 39618475.84,
       },
       AMBER: {
-        1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, // No data for GH200 AMBER
+        1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, // No data for GH200
       }
     },
-    power: { GROMACS: 412.7, AMBER: 0 },
-    per_node: 4
+    power: {
+      GROMACS: {
+        1: 287.6, 2: 272.8, 3: 373.8, 4: 412.7, 5: 443.7, 6: 459.7, 7: 1000,
+      },
+      AMBER: {
+        1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, // No data for GH200
+      }
+    },
+    per_node: 4,
   },
   {
     name: "A100",
@@ -46,8 +61,16 @@ const GPU_data = [
         8: 43691241.72, 9: 45648447.9, 10: 53568169, 11: 57057569.65,
       }
     },
-    power: { GROMACS: 264.7, AMBER: 303.63 },
-    per_node: 8
+    power: {
+      GROMACS: {
+        1: 194.6, 2: 222.7, 3: 243.5, 4: 264.7, 5: 269.5, 6: 277.7, 7: 400,
+      },
+      AMBER: {
+        1: 194.91, 2: 394.23, 3: 89.89, 4: 295.53, 5: 301.83, 6: 153.28, 7: 154.74,
+        8: 227.15, 9: 229.95, 10: 303.63, 11: 315.16,
+      }
+    },
+    per_node: 8,
   },
   {
     name: "A40",
@@ -61,8 +84,16 @@ const GPU_data = [
         8: 36343309.74, 9: 37730535.3, 10: 35779695.35, 11: 37615098.75,
       }
     },
-    power: { GROMACS: 297.0, AMBER: 289.73 },
-    per_node: 8
+    power: {
+      GROMACS: {
+        1: 259.1, 2: 293.6, 3: 294.7, 4: 297.0, 5: 293.5, 6: 293.5, 7: 300,
+      },
+      AMBER: {
+        1: 204.29, 2: 301.43, 3: 89.95, 4: 291.28, 5: 293.57, 6: 177.37, 7: 178.31,
+        8: 265.41, 9: 269.51, 10: 289.73, 11: 294.80,
+      }
+    },
+    per_node: 8,
   },
   {
     name: "L4",
@@ -76,8 +107,16 @@ const GPU_data = [
         8: 25521859.5, 9: 26132747.82, 10: 20008031.25, 11: 20680301.1,
       }
     },
-    power: { GROMACS: 71.9, AMBER: 71.76 },
-    per_node: 4
+    power: {
+      GROMACS: {
+        1: 72.6, 2: 72.1, 3: 69.2, 4: 71.9, 5: 71.7, 6: 70.8, 7: 72,
+      },
+      AMBER: {
+        1: 71.64, 2: 71.92, 3: 36.88, 4: 71.84, 5: 71.92, 6: 71.15, 7: 71.17,
+        8: 71.82, 9: 72.16, 10: 71.75, 11: 71.76,
+      }
+    },
+    per_node: 4,
   },
   {
     name: "L40",
@@ -91,8 +130,16 @@ const GPU_data = [
         8: 61876077.96, 9: 63979642.8, 10: 60002751.85, 11: 62136941.85,
       }
     },
-    power: { GROMACS: 301.3, AMBER: 293.14 },
-    per_node: 8
+    power: {
+      GROMACS: {
+        1: 228.1, 2: 288.2, 3: 286.9, 4: 301.3, 5: 292.1, 6: 288.1, 7: 300,
+      },
+      AMBER: {
+        1: 175.60, 2: 299.83, 3: 96.77, 4: 293.18, 5: 298.80, 6: 166.42, 7: 169.23,
+        8: 257.84, 9: 260.21, 10: 293.14, 11: 296.19,
+      }
+    },
+    per_node: 8,
   },
   {
     name: "L40S",
@@ -106,8 +153,16 @@ const GPU_data = [
         8: 58465284.84, 9: 61167920.22, 10: 70759069.45, 11: 75966493.05,
       }
     },
-    power: { GROMACS: 313.8, AMBER: 318.4 },
-    per_node: 8
+    power: {
+      GROMACS: {
+        1: 231.5, 2: 287.6, 3: 291.4, 4: 313.8, 5: 321.4, 6: 324.9, 7: 350,
+      },
+      AMBER: {
+        1: 181.27, 2: 349.30, 3: 100.01, 4: 319.54, 5: 326.77, 6: 164.55, 7: 174.51,
+        8: 249.74, 9: 258.47, 10: 318.40, 11: 323.18,
+      }
+    },
+    per_node: 8,
   }
 ];
 
@@ -140,137 +195,180 @@ function calculate() {
   const C_heatreuseperkWh = getSliderValue("C_heatreuseperkWh");
   const total_budget = getSliderValue("total_budget");
 
-  let baseline_perf_tco = 0;
-  const results = [];
-  const capital_components = [];
-  const operational_components = [];
+let baseline_perf_tco = 0;
+const results = [];
+const capital_components = [];
+const operational_components = [];
 
-  let min_valid_n_gpu = Infinity;
+let min_valid_n_gpu = Infinity;
 
-  // ---------- Compute n_gpu ----------
-  const n_gpu_list = GPU_data.map(gpu => {
-    const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
-    const power = gpu.power[workload];
-    if (perf === 0 || power === 0) return 0;
+// ---------- Compute n_gpu ----------
+const n_gpu_list = GPU_data.map((gpu, i) => {
+  const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
+  const power = gpu.power[workload][benchmarkId];
+  if (perf === 0 || power === 0) return 0;
 
-    const per_node = gpu.per_node;
+  const per_node = gpu.per_node;
 
-    const W_gpu_total = power * system_usage * lifetime;
-    const W_node_baseline_total = W_node_baseline * system_usage * lifetime;
+  const W_gpu_total = power * system_usage * lifetime;
+  const W_node_baseline_total = W_node_baseline * system_usage * lifetime;
 
-    const A =
-      gpu.cost +
-      ((C_electricity - C_heatreuseperkWh) * W_gpu_total / 1000) +
-      (C_cooling * W_gpu_total / 1000) +
-      (
-        C_node_server +
-        C_node_infra +
-        C_node_facility +
-        (C_maintenance * lifetime) +
-        (C_cooling * W_node_baseline_total / 1000)
-      ) / per_node;
+  const A =
+    gpu.cost +
+    ((C_electricity - C_heatreuseperkWh) * W_gpu_total / 1000) +
+    (C_cooling * W_gpu_total / 1000) +
+    ((
+      C_node_server +
+      C_node_infra +
+      C_node_facility +
+      (C_maintenance * lifetime) +
+      (C_cooling * W_node_baseline_total / 1000)
+    ) / per_node);
 
-    const C_baseline = C_software + (lifetime * (C_depreciation + C_subscription + C_uefficiency));
-    const B = total_budget - C_baseline;
+  const C_baseline = C_software + (lifetime * (C_depreciation + C_subscription + C_uefficiency));
+  const B = total_budget - C_baseline;
 
-    let n_gpu = Math.floor(B / A);
-    n_gpu = Math.floor(n_gpu / per_node) * per_node;
+  let n_gpu = Math.floor(B / A);
+    console.log(`n_gpu: ${n_gpu}`);  // Print n_gpu directly, no need for indexing
 
-    if (n_gpu < per_node) {
-      console.warn(`${gpu.name} cannot be deployed with the current budget.`);
-      return 0;
-    }
+  n_gpu = Math.floor(n_gpu / per_node) * per_node; // Ensure n_gpu is a multiple of per_node
 
-    if (same_n_gpu) {
-      min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
-    }
+// Print debug information
+  console.log(`GPU ${i + 1}:`);
+  console.log(`n_gpu: ${n_gpu}`);  // Print n_gpu directly, no need for indexing
+  console.log(`A: ${A.toFixed(4)}`);  // Print A with 4 decimal places
+  console.log(`B: ${B.toFixed(4)}`);  // Print A with 4 decimal places
+ 
+  if (n_gpu < per_node) {
+    console.warn(`${gpu.name} cannot be deployed with the current budget.`);
+    return 0;
+  }
 
-    return n_gpu;
+  // Update min_valid_n_gpu if same_n_gpu is true
+  if (same_n_gpu) {
+    min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
+    min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node; // Ensure min_valid_n_gpu is valid multiple of per_node
+  }
+
+  console.log(`GPU: ${gpu.name}, A: ${A}, B: ${B}, n_gpu: ${n_gpu}`);
+  return n_gpu;
+});
+
+// ---------- Compute cost breakdowns ----------
+GPU_data.forEach((gpu, i) => {
+  const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
+  const power = gpu.power[workload][benchmarkId];
+  if (perf === 0 || power === 0) return;
+
+  let n_gpu = n_gpu_list[i];
+  if (n_gpu === 0) return;
+
+  // Ensure same_n_gpu is applied properly
+  if (same_n_gpu) {
+    n_gpu = min_valid_n_gpu;
+  }
+
+  const per_node = gpu.per_node;
+  const n_nodes = n_gpu / per_node;
+
+  const W_gpu_total = power * system_usage * lifetime;
+  const W_node_baseline_total = W_node_baseline * system_usage * lifetime;
+
+  // --- Capital Components ---
+  const cap_gpu = gpu.cost * n_gpu;
+  const cap_server = C_node_server * n_nodes;
+  const cap_infra = C_node_infra * n_nodes;
+  const cap_facility = C_node_facility * n_nodes;
+  const cap_baseline = C_software;
+
+  // --- Operational Components ---
+  const energy = (C_electricity - C_heatreuseperkWh) * W_gpu_total * n_gpu / 1000;
+  const cooling = C_cooling * ((W_node_baseline_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000;
+  const maintenance = lifetime * C_maintenance * n_nodes;
+  const op_baseline = lifetime * (C_depreciation + C_subscription + C_uefficiency);
+
+  // --- Totals ---
+  const capital = cap_gpu + cap_server + cap_infra + cap_facility + cap_baseline;
+  const operational = energy + cooling + maintenance + op_baseline;
+  const used_budget = capital + operational;
+
+  const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
+  const total_perf = perf * n_gpu;
+  const perf_per_tco = total_perf / used_budget;
+
+  // Initialize baseline_perf_tco with the first valid perf_per_tco
+  if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
+
+  // Push results for this GPU
+  results.push({
+    name: gpu.name,
+    n_gpu,
+    total_cost: used_budget,
+    perf_per_tco,
+    baseline_pct,
+    capital,
+    operational,
+    capital_components: [cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline],
+    operational_components: [energy, cooling, maintenance, op_baseline],
+    originalGPUIndex: i  // Adding the original index
   });
 
-  // ---------- Compute cost breakdowns ----------
-  GPU_data.forEach((gpu, i) => {
-    const perf = gpu.perf[workload][benchmarkId];  // Use workload and benchmarkId
-    const power = gpu.power[workload];
-    if (perf === 0 || power === 0) return;
+  capital_components.push([cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline]);
+  operational_components.push([energy, cooling, maintenance, op_baseline]);
 
-    let n_gpu = n_gpu_list[i];
-    if (n_gpu === 0) return;
+  console.log(`GPU: ${gpu.name}, Total Cost: ${used_budget}, Perf/TCO: ${perf_per_tco}`);
+});
 
-    if (same_n_gpu) {
-      n_gpu = min_valid_n_gpu;
-    }
 
-    const per_node = gpu.per_node;
-    const n_nodes = n_gpu / per_node;
 
-    const W_gpu_total = power * system_usage * lifetime;
-    const W_node_baseline_total = W_node_baseline * system_usage * lifetime;
+// After loop, check if any valid GPU was found
+if (baseline_perf_tco === 0 && results.length > 0) {
+  baseline_perf_tco = results[0].perf_per_tco;
+} else if (results.length === 0) {
+  console.warn("No valid GPUs available.");
+}
 
-    // --- Capital Components ---
-    const cap_gpu = gpu.cost * n_gpu;
-    const cap_server = C_node_server * n_nodes;
-    const cap_infra = C_node_infra * n_nodes;
-    const cap_facility = C_node_facility * n_nodes;
-    const cap_baseline = C_software;
-
-    // --- Operational Components ---
-    const energy = (C_electricity - C_heatreuseperkWh) * W_gpu_total * n_gpu / 1000;
-    const cooling = C_cooling * ((W_node_baseline_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000;
-    const maintenance = lifetime * C_maintenance * n_nodes;
-    const op_baseline = lifetime * (C_depreciation + C_subscription + C_uefficiency);
-
-    // --- Totals ---
-    const capital = cap_gpu + cap_server + cap_infra + cap_facility + cap_baseline;
-    const operational = energy + cooling + maintenance + op_baseline;
-    const used_budget = capital + operational;
-    const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
-    const total_perf = perf * n_gpu;
-    const perf_per_tco = total_perf / used_budget;
-
-    if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
-
-    results.push({
-      name: gpu.name,
-      n_gpu,
-      total_cost: used_budget,
-      perf_per_tco,
-      baseline_pct,
-      capital,
-      operational,
-      capital_components: [cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline],
-      operational_components: [energy, cooling, maintenance, op_baseline]
-    });
-    capital_components.push([cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline]);
-    operational_components.push([energy, cooling, maintenance, op_baseline]);
-  });
 
 // ---------- Print HTML table and message ----------
 
-  // Sort the results by Performance per TCO
-  results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
+// Function to calculate the heatmap color
+function getHeatmapColor(value, maxValue) {
+  const percentage = value / maxValue;
+  const red = Math.floor((1 - percentage) * 255);
+  const green = Math.floor(percentage * 255);
+  return `rgb(${red}, ${green}, 0)`;
+}
 
-  // Filter out GPUs with zero Performance per TCO
-  const nonzeroResults = results.filter(r => r.perf_per_tco > 0);
+// Sort the results by Performance per TCO
+results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
 
-  // Find max and min among valid entries
-  const maxResult = nonzeroResults[0]; // Best GPU by Performance per TCO
-  const minResult = nonzeroResults[nonzeroResults.length - 1]; // Worst GPU by Performance per TCO
+// Filter out GPUs with zero Performance per TCO
+const nonzeroResults = results.filter(r => r.perf_per_tco > 0);
 
-  // Compute performance ratio
-  const performanceRatio = maxResult.perf_per_tco / minResult.perf_per_tco;
+// Check if nonzeroResults is empty before calculating performance ratio
+if (nonzeroResults.length === 0) {
+  document.getElementById("comparison-message-container").innerHTML = '<p>No valid GPUs found.</p>';
+  return;
+}
 
-  // Now let's append the comparison message to the screen below the table.
-  const comparisonMessageContainer = document.getElementById("comparison-message-container");
+// Find max and min among valid entries
+const maxResult = nonzeroResults[0]; // Best GPU by Performance per TCO
+const minResult = nonzeroResults[nonzeroResults.length - 1]; // Worst GPU by Performance per TCO
 
-  const comparisonMessage = `
-    <p><strong>With the fixed budget of €${total_budget.toLocaleString()},</strong></p>
-    <p>The ${maxResult.n_gpu} ${maxResult.name} GPUs (the highest Performance per TCO)</p>
-    <p>delivers <strong>${performanceRatio.toFixed(1)} times more performance</strong> over its ${lifetime}-year lifetime</p>
-    <p>compared to the ${minResult.n_gpu} ${minResult.name} GPUs (the lowest Performance per TCO).</p>
-  `;
+// Compute performance ratio
+const performanceRatio = maxResult.perf_per_tco / minResult.perf_per_tco;
 
-  comparisonMessageContainer.innerHTML = comparisonMessage;
+// Now let's append the comparison message to the screen below the table.
+const comparisonMessageContainer = document.getElementById("comparison-message-container");
+
+const comparisonMessage = `
+  <p><strong>With the fixed budget of €${total_budget.toLocaleString()},</strong></p>
+  <p>The ${maxResult.n_gpu} ${maxResult.name} GPUs (the highest Performance per TCO)</p>
+  <p>delivers <strong>${performanceRatio.toFixed(1)} times more performance</strong> over its ${lifetime}-year lifetime</p>
+  <p>compared to the ${minResult.n_gpu} ${minResult.name} GPUs (the lowest Performance per TCO).</p>
+`;
+
+comparisonMessageContainer.innerHTML = comparisonMessage;
 
 // CSV download
 
@@ -323,25 +421,27 @@ console.table(results.map(r => ({
   'Baseline %': r.baseline_pct.toFixed(2)
 })));
 
-  const maxTotalCost = Math.max(...results.map(r => Math.abs(r.total_cost)));
-  const maxPerfPerTCO = Math.max(...results.map(r => Math.abs(r.perf_per_tco)));
-  const maxBaselinePct = Math.max(...results.map(r => Math.abs(r.baseline_pct)));
-  const maxGPUs = Math.max(...results.map(r => r.n_gpu)); // Find the max number of GPUs
+// Find the maximum values for each column to use in heatmap color calculation
+const maxTotalCost = Math.max(...results.map(r => r.total_cost));
+const maxPerfPerTCO = Math.max(...results.map(r => r.perf_per_tco));
+const maxBaselinePct = Math.max(...results.map(r => r.baseline_pct));
+const maxGPUs = Math.max(...results.map(r => r.n_gpu)); // Find the max number of GPUs
 
-  const tableHTML = `
-    <h3>Performance Per Total Cost of Ownership (TCO)</h3>
-    <table border="1" cellpadding="6">
-      <thead>
-        <tr>
-          <th>GPU</th>
-          <th>#GPUs</th>
-          <th>Total TCO (€)</th>
-          <th>Perf/TCO (ns/day/€ * atoms)</th>
-          <th>Baseline %</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${results.map(r => `
+// Create the table HTML dynamically
+const tableHTML = `
+  <h3>Performance Per Total Cost of Ownership (TCO)</h3>
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>GPU</th>
+        <th>#GPUs</th>
+        <th>Total TCO (€)</th>
+        <th>Perf/TCO (ns/day/€ * atoms)</th>
+        <th>Baseline %</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${results.map(r => `
         <tr>
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
@@ -349,10 +449,11 @@ console.table(results.map(r => ({
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
         </tr>`).join('')}
-      </tbody>
-    </table>`;
+    </tbody>
+  </table>`;
 
-  document.getElementById("resultsTable").innerHTML = tableHTML;
+// Insert the table into the HTML container
+document.getElementById("resultsTable").innerHTML = tableHTML;
  
 // ---------- Plotly Bar Chart: Performance per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
 const barLabels = nonzeroResults.map(result => result.name);
@@ -455,7 +556,6 @@ document.getElementById('gpu-download-btn').addEventListener('click', () => {
   });
 });
 
-
 const chartContainer = document.getElementById('gpu-chart').parentElement;
 if (!document.getElementById('chart-title-perf-tco')) {
   const chartTitleDiv = document.createElement('div');
@@ -465,20 +565,29 @@ if (!document.getElementById('chart-title-perf-tco')) {
   chartContainer.insertBefore(chartTitleDiv, document.getElementById('gpu-chart'));
 }
 
-// ---------- Plotly Stacked TCO Char ----------
+
+/// ---------- Plotly Stacked TCO Chart ----------
+
 // Prepare the data for the TCO Breakdown
 const tcoLabels = nonzeroResults.map(r => r.name);
 
 // Define component labels
-const capLabels = ['GPU', 'Server', 'Infra', 'Facility', 'Software'];
-const opLabels = ['Energy', 'Cooling', 'Maintenance', 'Baseline OPEX'];
+const capLabels = ['GPU cost', 'Node Server cost', 'Node Infrastructure cost', 'Node Facility cost', 'Baseline cost'];
+const opLabels = ['Electricity cost', 'Cooling cost', 'Node Maintenance cost', 'Baseline cost'];
 
 // Build data arrays for each component type
 const capBreakdown = capLabels.map((_, idx) =>
-  nonzeroResults.map(r => r.capital_components[idx])
+  nonzeroResults.map(r => {
+    // Ensure capital components exist and handle missing data
+    return r.capital_components && r.capital_components[idx] !== undefined ? r.capital_components[idx] : 0;
+  })
 );
+
 const opBreakdown = opLabels.map((_, idx) =>
-  nonzeroResults.map(r => r.operational_components[idx])
+  nonzeroResults.map(r => {
+    // Ensure operational components exist and handle missing data
+    return r.operational_components && r.operational_components[idx] !== undefined ? r.operational_components[idx] : 0;
+  })
 );
 
 // Colors matching your Chart.js style
@@ -496,8 +605,8 @@ const plotlyColors = [
 
 // Calculate total costs for each GPU type
 const totalCosts = nonzeroResults.map(r => {
-  const capitalTotal = r.capital_components.reduce((sum, val) => sum + val, 0);
-  const operationalTotal = r.operational_components.reduce((sum, val) => sum + val, 0);
+  const capitalTotal = r.capital_components ? r.capital_components.reduce((sum, val) => sum + val, 0) : 0;
+  const operationalTotal = r.operational_components ? r.operational_components.reduce((sum, val) => sum + val, 0) : 0;
   return capitalTotal + operationalTotal;
 });
 
@@ -509,8 +618,8 @@ const capTraces = capLabels.map((label, i) => ({
   type: 'bar',
   marker: { color: plotlyColors[i] },
   text: capBreakdown[i].map((value, idx) => {
-    const percentage = (value / totalCosts[idx] * 100).toFixed(2);
-    return `${percentage}%`;  // Display percentage on each bar
+    const percentage = ((value / totalCosts[idx]) * 100).toFixed(2);
+    return percentage > 1 ? `${percentage}%` : '';  // Only show text for percentages above 1%
   }),
   textposition: 'inside',
   texttemplate: '%{text}',  // Show the text as percentage
@@ -523,8 +632,8 @@ const opTraces = opLabels.map((label, i) => ({
   type: 'bar',
   marker: { color: plotlyColors[i + capLabels.length] },
   text: opBreakdown[i].map((value, idx) => {
-    const percentage = (value / totalCosts[idx] * 100).toFixed(2);
-    return `${percentage}%`;  // Display percentage on each bar
+    const percentage = ((value / totalCosts[idx]) * 100).toFixed(2);
+    return percentage > 1 ? `${percentage}%` : '';  // Only show text for percentages above 1%
   }),
   textposition: 'inside',
   texttemplate: '%{text}',  // Show the text as percentage
@@ -558,6 +667,7 @@ const tcoLayout = {
   }
 };
 
+// Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
 
 // Add a button to download the plot as PNG or SVG with high resolution
@@ -574,14 +684,20 @@ document.getElementById('download-btn').addEventListener('click', () => {
     width: 1200,    // Set width for high resolution
     scale: 2        // Increase scale for higher resolution
   }).then(function (url) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'tco_breakdown_high_res.png';  // Filename for the downloaded PNG
-    link.click();
+    if (url) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tco_breakdown_high_res.png';  // Filename for the downloaded PNG
+      link.click();
+    } else {
+      console.error("Failed to generate image");
+    }
+  }).catch(err => {
+    console.error("Error during image generation:", err);
   });
 });
 
-
+// Add the chart title if it doesn't exist already
 if (!document.getElementById('chart-title')) {
   const chartTitleDiv = document.createElement('div');
   chartTitleDiv.id = 'chart-title';  // Give it an ID to avoid duplication
@@ -599,11 +715,21 @@ const elasticityLabels = [
 ];
 
 const elasticities = results.map((r, i) => {
+  const originalGPUIndex = r.originalGPUIndex;
+
+  if (originalGPUIndex === undefined || originalGPUIndex < 0 || originalGPUIndex >= GPU_data.length) {
+    console.error(`Invalid originalGPUIndex: ${originalGPUIndex} for result ${r.name}`);
+    return null;  // Skip this result
+  }
+
+  const gpu = GPU_data[originalGPUIndex];
+
   const n_gpu = r.n_gpu;
-  const n_nodes = n_gpu / GPU_data[i].per_node;
-  const W_gpu = GPU_data[i].power[workload];
-  const W_gpu_total = W_gpu * system_usage * lifetime;
-  const W_node_total = W_node_baseline * system_usage * lifetime;
+  const n_nodes = n_gpu / gpu.per_node;
+  const W_gpu = gpu.power[workload][benchmarkId];
+
+  const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
+  const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
 
   const vals = [
     n_gpu, // GPU cost
@@ -611,9 +737,9 @@ const elasticities = results.map((r, i) => {
     n_nodes, // Infra cost
     n_nodes, // Facility cost
     1, // Software cost
-    (W_gpu_total * n_gpu) / 1000, // Electricity
-    -(W_gpu_total * n_gpu) / 1000, // Heat reuse
-    ((W_node_total * n_nodes + W_gpu_total * n_gpu) / 1000), // Cooling
+    W_gpu_total, // Electricity (scaled)
+    -W_gpu_total, // Heat reuse (scaled)
+    (W_node_total + W_gpu_total), // Cooling
     n_nodes * lifetime, // Maintenance
     lifetime, // Depreciation
     lifetime, // Subscription
@@ -621,13 +747,13 @@ const elasticities = results.map((r, i) => {
   ];
 
   const baseValues = [
-    GPU_data[i].cost,
+    gpu.cost,
     C_node_server,
     C_node_infra,
-    C_node_facility,
+    C_node_facility,  
     C_software,
     C_electricity,
-    C_heatreuseperkWh,
+    C_heatreuseperkWh, 
     C_cooling,
     C_maintenance,
     C_depreciation,
@@ -635,9 +761,8 @@ const elasticities = results.map((r, i) => {
     C_uefficiency
   ];
 
-  return vals.map((v, idx) => (v * baseValues[idx]) / r.total_cost);
-});
-
+  return vals ? vals.map((v, idx) => (v * baseValues[idx]) / r.total_cost) : null;
+}).filter(val => val !== null);
 
 
 // ---------- Plotly Tornado Chart ----------
