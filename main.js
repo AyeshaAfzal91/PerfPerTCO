@@ -919,7 +919,7 @@ function renderElasticityTableWithColors() {
   // Find maximum absolute elasticity for scaling color intensity
   const maxAbsElasticity = Math.max(...elasticities.flat().map(Math.abs));
 
-  let tableHTML = "<h3>Capital Cost Elasticities</h3>";
+  let tableHTML = "<h3>Normalized Sensitivities for Capital Cost Parameters</h3>";
   tableHTML += `<table border="1" cellpadding="6"><thead><tr><th>GPU</th>`;
   capitalLabels.forEach(label => {
     tableHTML += `<th>${label}</th>`;
@@ -938,7 +938,7 @@ function renderElasticityTableWithColors() {
 
   tableHTML += "</tbody></table>";
 
-  tableHTML += `<hr><h3>Operational Cost Elasticities</h3>`;
+  tableHTML += `<hr><h3>Normalized Sensitivities for Operational Cost Parameters</h3>`;
   tableHTML += `<table border="1" cellpadding="6"><thead><tr><th>GPU</th>`;
   operationalLabels.forEach(label => {
     tableHTML += `<th>${label}</th>`;
