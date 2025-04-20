@@ -152,15 +152,6 @@ label {
     z-index: 1;
 }
 
-.tornado-plot {
-    width: 350px;  /* Set a fixed width for each plot */
-    height: 250px;  /* Set a fixed height for each plot */
-    flex: 0 0 auto;  /* Prevent the plots from stretching */
-    border-radius: 8px;  /* Rounded corners for the plots */
-    margin-bottom: 30px;  /* Add space after each plot */
-}
-
-
 
 /* Grid layout for the left and right columns */
 #parametersContainer {
