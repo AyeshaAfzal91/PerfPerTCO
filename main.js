@@ -193,6 +193,7 @@ function calculate() {
   const C_subscription = getSliderValue("C_subscription");
   const C_uefficiency = getSliderValue("C_uefficiency");
   const C_heatreuseperkWh = getSliderValue("C_heatreuseperkWh");
+  const F_heatreuse = getSliderValue("Factor_heatreuse");
   const total_budget = getSliderValue("total_budget");
 
 let baseline_perf_tco = 0;
@@ -215,13 +216,13 @@ const n_gpu_list = GPU_data.map((gpu, i) => {
 
   const A =
     gpu.cost +
-    ((C_electricity - C_heatreuseperkWh) * PUE * W_gpu_total / 1000) +
+    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * W_gpu_total / 1000) +
     ((
       C_node_server +
       C_node_infra +
       C_node_facility +
       (C_maintenance * lifetime) +
-      ((C_electricity - C_heatreuseperkWh) * PUE * W_node_baseline_total / 1000)
+      ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * W_node_baseline_total / 1000)
     ) / per_node);
 
   const C_baseline = C_software + (lifetime * (C_depreciation + C_subscription + C_uefficiency));
@@ -274,7 +275,7 @@ GPU_data.forEach((gpu, i) => {
   const cap_baseline = C_software;
 
   // --- Operational Components ---
-  const energyandcooling = (C_electricity - C_heatreuseperkWh) * PUE * ((W_node_baseline_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000;
+  const energyandcooling = (C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000;
   const maintenance = lifetime * C_maintenance * n_nodes;
   const op_baseline = lifetime * (C_depreciation + C_subscription + C_uefficiency);
 
@@ -731,11 +732,11 @@ const elasticities = results.map((r, i) => {
     1, // Software cost
      PUE * (W_node_total + W_gpu_total), // Electricity 
     - PUE * (W_node_total + W_gpu_total), // Heat reuse 
-    (C_electricity - C_heatreuseperkWh) * (W_node_total + W_gpu_total), // PUE
+    (C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * (W_node_total + W_gpu_total), // PUE
     n_nodes * lifetime, // Maintenance
-    (C_electricity - C_heatreuseperkWh) * PUE * ((W_node_baseline * lifetime * n_nodes) + (W_gpu * lifetime * n_gpu)) / 1000, // System Usage (hrs/year)
-    ((C_electricity - C_heatreuseperkWh) * PUE * ((W_node_baseline * system_usage * n_nodes) + (W_gpu * system_usage * n_gpu)) / 1000) + (C_maintenance  * n_nodes) + C_depreciation + C_subscription + C_uefficiency, // System Lifetime (years)
-    ((C_electricity - C_heatreuseperkWh) * PUE * system_usage * lifetime * n_nodes) / 1000, // Node Baseline Power w/o GPUs (W)
+    (C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * lifetime * n_nodes) + (W_gpu * lifetime * n_gpu)) / 1000, // System Usage (hrs/year)
+    ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * system_usage * n_nodes) + (W_gpu * system_usage * n_gpu)) / 1000) + (C_maintenance  * n_nodes) + C_depreciation + C_subscription + C_uefficiency, // System Lifetime (years)
+    ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * system_usage * lifetime * n_nodes) / 1000, // Node Baseline Power w/o GPUs (W)
     lifetime, // Depreciation
     lifetime, // Subscription
     lifetime // Uefficiency
@@ -1021,7 +1022,7 @@ function showFormula() {
     where:
 
     C_operational_perYear = n_gpu * (
-                  (C_electricityperkWh - C_heatreuseperkWh) * PUE * (W_node_baseline * systemusage / GPUs_per_node + W_gpu * systemusage) / 1000
+                  (C_electricityperkWh - ( Factor_heatreuse * C_heatreuseperkWh)) * PUE * (W_node_baseline * systemusage / GPUs_per_node + W_gpu * systemusage) / 1000
                  + C_node_maintenance / GPUs_per_node )
               + C_depreciation
               + C_subscription
