@@ -13,7 +13,7 @@
     <p>
       This calculator estimates the performance per Total Cost of Ownership (TCO) for GPU-based compute systems.
       It allows you to configure capital and operational cost parameters, choose benchmarks (GROMACS/AMBER),
-      and compare GPUs based on normalized efficiency.
+      and compare GPUs based on their performance per TCO.
     </p>
   </section>
 
@@ -92,10 +92,10 @@
   <span id="v_electricity">0.21</span>
 </label>
 
-<label for="C_cooling" data-tooltip="Set the cooling cost in EUR per kWh, which may include PUE or overhead cooling factor.">
-  Cooling (€/kWh):
-  <input type="range" id="C_cooling" min="0" max="3" value="0.02" step="0.01" oninput="updateValue('v_cooling', this.value)">
-  <span id="v_cooling">0.02</span>
+<label for="C_PUE" data-tooltip="Set the Power usage effectiveness (PUE) or overhead cooling factor.">
+  PUE:
+  <input type="range" id="C_PUE" min="0" max="5" value="1.2" step="0.01" oninput="updateValue('v_PUE', this.value)">
+  <span id="v_PUE">1.2</span>
 </label>
 
 <label for="C_maintenance" data-tooltip="Set the maintenance and support cost per node in EUR per year, including warranty, repairs, and system management.">
