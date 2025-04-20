@@ -1,45 +1,164 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Performance Per TCO Calculator</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Performance Per TCO Calculator</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <h1>Performance Per TCO Calculator</h1>
-    <div id="about">
-        <p>This calculator estimates performance per Total Cost of Ownership (TCO) for GPU-based compute nodes based on user-defined hardware and operational cost parameters. It supports GROMACS and AMBER benchmarks and includes cost breakdown, performance per € analysis, and sensitivity charts.</p>
+  <h1>Performance Per TCO Calculator</h1>
+
+  <section id="about">
+    <p>
+      This calculator estimates the performance per Total Cost of Ownership (TCO) for GPU-based compute systems.
+      It allows you to configure capital and operational cost parameters, choose benchmarks (GROMACS/AMBER),
+      and compare GPUs based on normalized efficiency.
+    </p>
+  </section>
+
+<form id="controls">
+<div id="parametersContainer">
+    <!-- Left column: Benchmark and Budget Setup + Capital Cost Parameters -->
+    <div id="leftColumn">
+    <fieldset>
+      <legend>Benchmark and Budget Setup</legend>
+
+      <label for="workload">Select Workload:</label>
+      <select id="workload">
+        <option value="GROMACS">GROMACS</option>
+        <option value="AMBER">AMBER</option>
+      </select>
+
+      <label for="benchmarkId">Benchmark ID (1–11):</label>
+      <input type="range" id="benchmarkId" min="1" max="11" value="4" oninput="updateValue('benchmarkVal', this.value)">
+      <span id="benchmarkVal">4</span>
+
+      <label>Total Budget (€):
+        <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100000" oninput="updateValue('v_budget', this.value)">
+        <span id="v_budget">10000000</span>
+      </label>
+      
+      <label for="sameGpuCheckbox">
+        <input type="checkbox" id="sameGpuCheckbox"> Use same number of GPUs for all GPU types
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Capital Cost Parameters</legend>
+      <label>Node Server (€):
+        <input type="range" id="C_node_server" min="0" max="50000" value="10000" step="1000" oninput="updateValue('v_node_server', this.value)">
+        <span id="v_node_server">10000</span>
+      </label>
+
+      <label>Node Infrastructure (€):
+        <input type="range" id="C_node_infra" min="0" max="25000" value="5000" step="1000" oninput="updateValue('v_node_infra', this.value)">
+        <span id="v_node_infra">5000</span>
+      </label>
+
+      <label>Node Facility (€):
+        <input type="range" id="C_node_facility" min="0" max="25000" value="0" step="1000" oninput="updateValue('v_node_facility', this.value)">
+        <span id="v_node_facility">0</span>
+      </label>
+
+      <label>Software (€):
+        <input type="range" id="C_software" min="0" max="25000" value="5000" step="1000" oninput="updateValue('v_software', this.value)">
+        <span id="v_software">5000</span>
+      </label>
+    </fieldset>
     </div>
 
-    <div id="inputs">
-        <label>Total Budget (€): <input type="range" id="totalBudget" min="0" max="100000000" value="10000000" step="10000" oninput="updateValue('totalBudgetVal', this.value)"></label>
-        <span id="totalBudgetVal">10000000</span><br>
+    <div id="rightColumn">
+            <fieldset>
+      <legend>Operational Cost Parameters</legend>
 
-        <label>System Usage (hrs/year): <input type="range" id="systemUsage" min="0" max="8760" value="8760" step="100" oninput="updateValue('systemUsageVal', this.value)"></label>
-        <span id="systemUsageVal">8760</span><br>
+      <label>Electricity (€/kWh):
+        <input type="range" id="C_electricity" min="0" max="5" value="0.21" step="0.01" oninput="updateValue('v_electricity', this.value)">
+        <span id="v_electricity">0.21</span>
+      </label>
 
-        <label>Select Workload:
-            <select id="workload">
-                <option value="GROMACS">GROMACS</option>
-                <option value="AMBER">AMBER</option>
-            </select>
-        </label><br><br>
+      <label>Cooling (€/kWh):
+        <input type="range" id="C_cooling" min="0" max="3" value="0.02" step="0.01" oninput="updateValue('v_cooling', this.value)">
+        <span id="v_cooling">0.02</span>
+      </label>
 
-        <button onclick="calculate()">Calculate</button>
-        <button onclick="showFormula()">Show Formula</button>
+      <label>Node Maintenance (€/year):
+        <input type="range" id="C_maintenance" min="0" max="2000" value="200" step="100" oninput="updateValue('v_maintenance', this.value)">
+        <span id="v_maintenance">200</span>
+      </label>
+
+      <label>System Usage (hrs/year):
+        <input type="range" id="system_usage" min="0" max="8760" value="8760" step="100" oninput="updateValue('v_usage', this.value)">
+        <span id="v_usage">8760</span>
+      </label>
+
+      <label>System Lifetime (years):
+        <input type="range" id="lifetime" min="1" max="10" value="5" step="1" oninput="updateValue('v_lifetime', this.value)">
+        <span id="v_lifetime">5</span>
+      </label>
+      
+      <label>Node Baseline Power w/o GPUs (W):
+        <input type="range" id="W_node_baseline" min="0" max="1000" value="500" step="10" oninput="updateValue('v_baseline', this.value)">
+        <span id="v_baseline">500</span>
+      </label>
+
+      <label>Depreciation (€/year):
+        <input type="range" id="C_depreciation" min="0" max="20000" value="0" step="500" oninput="updateValue('v_depreciation', this.value)">
+        <span id="v_depreciation">0</span>
+      </label>
+
+      <label>Software Subscription (€/year):
+        <input type="range" id="C_subscription" min="0" max="20000" value="0" step="500" oninput="updateValue('v_subscription', this.value)">
+        <span id="v_subscription">0</span>
+      </label>
+
+      <label>Utilization Inefficiency (€/year):
+        <input type="range" id="C_uefficiency" min="0" max="20000" value="0" step="500" oninput="updateValue('v_uefficiency', this.value)">
+        <span id="v_uefficiency">0</span>
+      </label>
+
+      <label>Heat Reuse Revenue (€/kWh):
+        <input type="range" id="C_heatreuseperkWh" min="0" max="5" value="0" step="0.1" oninput="updateValue('v_heatreuseperkWh', this.value)">
+        <span id="v_heatreuseperkWh">0</span>
+      </label>
+    </fieldset>
     </div>
+</div>
+<div style="text-align: center; margin-top: 20px;">
+     <button type="button" onclick="calculate()">Calculate</button>
+	 <button type="button" onclick="promptPassword()">Show Formula</button>
+</div>
+</div>    
+</form>
 
-    <div id="output">
-        <h2>Results</h2>
-        <div id="results"></div>
-    </div>
+<div style="text-align: center; margin-top: 20px;">
+	 <!-- Password Prompt -->
+<div id="password-prompt" style="display: none; margin-top: 10px;">
+  <label for="password">Enter Password:</label>
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="validatePassword()">Submit</button>
+  <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
+</div>
+</div>
 
-    <div id="charts">
-        <canvas id="barChart" width="800" height="400"></canvas>
-    </div>
+  <div id="output">
+    <h2>Results</h2>
+	<div id="resultsTable"></div>
+	<button id="download-csv" style="display: none;">Download CSV</button>
+    <div id="comparison-message-container" class="comparison-message"></div>
+	<div id="gpu-chart"></div>
+    <div id="stacked-tco-chart"></div>
+    <div id="gpuTornadoPlots"></div>
+  	<div id="sensitivityHeatmap"></div>
+  	<div id="elasticityTableContainer"></div> <!-- Elasticity table container -->
+  	<button id="download-elasticity-csv" style="display: none;">Download CSV</button>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
+
+  <script src="main.js" defer></script>
 </body>
+
 </html>
