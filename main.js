@@ -590,8 +590,8 @@ const plotlyColors = [
   'rgba(255,128,179,0.7)',   // Facility Cost
   'rgba(255,204,128,0.7)',   // Baseline Capital Cost
   'rgba(128,77,255,0.7)',    // Energy and Cooling Cost
-//  'rgba(204,102,179,0.7)',   // Cooling Cost
-  'rgba(179,128,255,0.7)',   // Maintenance Cost
+  'rgba(204,102,179,0.7)',   // Maintenance Cost
+//  'rgba(179,128,255,0.7)',   
   'rgba(102,153,255,0.7)'    // Baseline Op Cost
 ];
 
