@@ -1,19 +1,181 @@
-
+/* Base styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Set a clean and modern font */
+    background-color: #f4f7fb;  /* Light gray background for a soft, clean look */
+    margin: 30px;  /* Add margin around the body for spacing */
+    color: #333;  /* Set the text color to a dark gray for readability */
+    line-height: 1.6;  /* Improve line spacing for better readability */
 }
+
+/* Section and headings */
+h1, h2, h3 {
+    color: #003366;  /* Dark blue color for headings */
+    font-weight: 600;  /* Make headings bold for emphasis */
+}
+
+h1 {
+    font-size: 2em;  /* Large size for main headings */
+    margin-bottom: 20px;  /* Add spacing below the main heading */
+}
+
+h2 {
+    font-size: 1.5em;  /* Medium size for subheadings */
+    margin-bottom: 15px;  /* Add spacing below the subheading */
+}
+
+h3 {
+    font-size: 1.2em;  /* Slightly smaller size for third-level headings */
+    margin-top: 30px;  /* Add more space at the top for separation */
+    margin-bottom: 20px;  /* Add space below the heading */
+}
+
+/* About section styling */
 #about {
-    background: #eef5fb;
-    padding: 10px;
-    border-left: 4px solid #007acc;
-    margin-bottom: 20px;
+    background: #eef5fb;  /* Light blue background for the about section */
+    padding: 15px 20px;  /* Add padding inside the section */
+    border-left: 4px solid #007acc;  /* Blue border on the left for emphasis */
+    margin-bottom: 25px;  /* Add space below the section */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Add subtle shadow for depth */
 }
+
+/* Label styling */
 label {
-    display: block;
-    margin-top: 10px;
+    display: block;  /* Make labels block-level to stack on top */
+    margin-top: 12px;  /* Add margin to the top for spacing */
+    font-weight: 500;  /* Make the label slightly bold for better visibility */
 }
-h1, h2 {
-    color: #003366;
+
+/* Main content area */
+#output {
+    margin: auto;  /* Center the content horizontally */
+    padding: 25px;  /* Add padding inside the content container */
+    background-color: #fff;  /* Set a white background for the content */
+    border-radius: 8px;  /* Rounded corners for a modern, clean look */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Add shadow for depth */
+}
+
+/* Table and chart containers */
+#resultsTable {
+    overflow-x: auto;  /* Allow horizontal scrolling if the table is too wide */
+    margin-bottom: 30px;  /* Add space below the table */
+    background: #fff;  /* Set a white background */
+    border-radius: 8px;  /* Rounded corners for the table container */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Add subtle shadow for depth */
+}
+
+/* Table styling */
+#resultsTable table {
+    border-collapse: collapse;  /* Collapse borders for a clean look */
+    font-family: 'Arial', sans-serif;  /* Use Arial for table text */
+    color: #333;  /* Dark gray text for the table */
+}
+
+#resultsTable th, #resultsTable td {
+    padding: 12px 20px;  /* Add padding for table cells */
+    text-align: center;  /* Center-align text in the cells */
+    border: 1px solid #ddd;  /* Light gray borders around cells */
+}
+
+#resultsTable th {
+    background-color: #333;  /* Blue background for the header row */
+    color: #fff;  /* White text for the header */
+    font-weight: bold;  /* Make the header text bold */
+}
+
+#resultsTable tr:nth-child(even) {
+    background-color: #f9f9f9;  /* Light gray background for even rows */
+}
+
+#resultsTable tr:hover {
+    background-color: #f1f1f1;  /* Slightly darker gray on hover */
+    cursor: pointer;  /* Change cursor to indicate interactivity */
+}
+
+#download-csv, #download-elasticity-csv {
+  display: block;  /* Default state to block, will be controlled by JS */
+  z-index: 9999; /* Ensure the button is on top of other elements */
+  position: relative;
+  margin-top: 20px;
+}
+
+/* Comparison message container */
+#comparison-message-container {
+    margin: 15px 0;  /* Add margin on top and bottom */
+    font-size: 1rem;  /* Set a standard font size */
+    color: #444;  /* Slightly lighter color for the message */
+}
+
+/* Charts and visual elements */
+.chart-wrapper {
+  display: flex;
+  justify-content: center;  /* Horizontal center */
+  align-items: center;      /* Vertical center */
+  height: 100vh;            /* Full viewport height */
+}
+
+.main-chart-title, .chart-title {
+  text-align: center;  /* Center the main title */
+  font-size: 1.2em;      /* Large font size for the main title */
+    font-weight: bold;
+  color: #003366;      /* Dark blue color for the title */
+  margin-bottom: 30px; /* Space below the main title */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Clean font */
+}
+
+#gpu-chart,
+#sensitivityHeatmap {
+  max-width: 50%;
+  margin: 0 auto;  /* Center horizontally */
+  display: block;  /* Treat as block element */
+}
+
+#stacked-tco-chart {
+  max-width: 70%;
+  margin: 0 auto 120px auto;  
+  display: block;
+  height: 500px;
+  position: relative;
+  z-index: 2;
+}
+
+#gpuTornadoPlots {
+    display: flex;  /* Use flexbox to display plots */
+    flex-wrap: wrap;  /* Allow wrapping of plots on smaller screens */
+    justify-content: center;  /* Center the plots */
+    gap: 20px;  /* Add space between plots */
+    margin-top: 100px;  /* Add top margin for separation */
+    z-index: 1;
+}
+
+.tornado-plot {
+    width: 350px;  /* Set a fixed width for each plot */
+    height: 250px;  /* Set a fixed height for each plot */
+    flex: 0 0 auto;  /* Prevent the plots from stretching */
+    border-radius: 8px;  /* Rounded corners for the plots */
+}
+
+
+/* Grid layout for the left and right columns */
+#parametersContainer {
+    display: grid;               /* Use grid layout */
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 40px;                   /* Space between the columns */
+    margin-bottom: 40px;         /* Margin at the bottom */
+    padding: 20px;               /* Padding around the container */
+}
+
+/* Left column (Benchmark + Budget + Capital Cost) */
+#leftColumn {
+    background-color: #ffffff;   /* White background */
+    padding: 20px;               /* Padding inside the column */
+    border-radius: 8px;          /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow for elevation */
+}
+
+/* Right column (Operational Cost Parameters) */
+#rightColumn {
+    background-color: #ffffff;   /* White background */
+    padding: 20px;               /* Padding inside the column */
+    border-radius: 8px;          /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow for elevation */
 }
