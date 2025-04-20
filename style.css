@@ -103,6 +103,26 @@ label {
   margin-top: 20px;
 }
 
+/* Style for medium buttons */
+.medium-button {
+    padding: 12px 24px;    /* Medium padding to balance size */
+    font-size: 16px;       /* Medium font size */
+    background-color: #5bc0de; /* Light blue background */
+    color: white;          /* White text */
+    border: none;          /* Remove default border */
+    border-radius: 8px;    /* Rounded corners */
+    cursor: pointer;       /* Pointer cursor on hover */
+    margin: 10px;          /* Add some margin around the button */
+    transition: background-color 0.3s ease; /* Smooth color change on hover */
+}
+
+.medium-button:hover {
+    background-color: #31b0d5; /* Darker light blue on hover */
+}
+
+
+
+
 /* Comparison message container */
 #comparison-message-container {
     margin: 15px 0;  /* Add margin on top and bottom */
