@@ -22,7 +22,7 @@
     <!-- Left column: Benchmark and Budget Setup + Capital Cost Parameters -->
     <div id="leftColumn">
     <fieldset>
-      <legend>Benchmark and Budget Setup</legend>
+      <legend>Benchmark Setup</legend>
 
 <label for="workload" data-tooltip="Select the benchmark workload: GROMACS or AMBER.">
   Select Workload:
@@ -38,6 +38,18 @@
 <input type="range" id="benchmarkId" min="1" max="11" value="4" oninput="updateValue('benchmarkVal', this.value)">
 <span id="benchmarkVal">4</span>
       
+    </fieldset>
+    
+      <fieldset>
+      <legend>Initial Setup</legend>  
+  
+              <label for="total_budget" data-tooltip="Set the total available budget for your project in EUR.">
+  Total Budget (€):
+  <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100" 
+         oninput="updateValue('v_budget', this.value)">
+  <span id="v_budget">10000000</span>
+</label>    
+      
       <label for="sameGpuCheckbox">
         <input type="checkbox" id="sameGpuCheckbox"> Use same number of GPUs for all GPU types
       </label>
@@ -45,13 +57,6 @@
 
     <fieldset>
       <legend>Capital Cost Parameters</legend>
-      
-      <label for="total_budget" data-tooltip="Set the total available budget for your project in EUR.">
-  Total Budget (€):
-  <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100" 
-         oninput="updateValue('v_budget', this.value)">
-  <span id="v_budget">10000000</span>
-</label>
 
 <!-- Capital cost parameters -->
 <label for="C_node_server" data-tooltip="Set the server cost per node, including  CPU, RAM, storage, networking, and GPU deployment costs in EUR.">
