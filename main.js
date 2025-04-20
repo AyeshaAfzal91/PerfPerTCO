@@ -184,7 +184,7 @@ function calculate() {
   const C_node_facility = getSliderValue("C_node_facility");
   const C_software = getSliderValue("C_software");
   const C_electricity = getSliderValue("C_electricity");
-  const C_cooling = getSliderValue("C_cooling");
+  const PUE = getSliderValue("C_PUE");
   const C_maintenance = getSliderValue("C_maintenance");
   const system_usage = getSliderValue("system_usage");
   const lifetime = getSliderValue("lifetime");
@@ -215,29 +215,21 @@ const n_gpu_list = GPU_data.map((gpu, i) => {
 
   const A =
     gpu.cost +
-    ((C_electricity - C_heatreuseperkWh) * W_gpu_total / 1000) +
-    (C_cooling * W_gpu_total / 1000) +
+    ((C_electricity - C_heatreuseperkWh) * PUE * W_gpu_total / 1000) +
     ((
       C_node_server +
       C_node_infra +
       C_node_facility +
       (C_maintenance * lifetime) +
-      (C_cooling * W_node_baseline_total / 1000)
+      ((C_electricity - C_heatreuseperkWh) * PUE * W_node_baseline_total / 1000)
     ) / per_node);
 
   const C_baseline = C_software + (lifetime * (C_depreciation + C_subscription + C_uefficiency));
   const B = total_budget - C_baseline;
 
   let n_gpu = Math.floor(B / A);
-    console.log(`n_gpu: ${n_gpu}`);  // Print n_gpu directly, no need for indexing
 
   n_gpu = Math.floor(n_gpu / per_node) * per_node; // Ensure n_gpu is a multiple of per_node
-
-// Print debug information
-  console.log(`GPU ${i + 1}:`);
-  console.log(`n_gpu: ${n_gpu}`);  // Print n_gpu directly, no need for indexing
-  console.log(`A: ${A.toFixed(4)}`);  // Print A with 4 decimal places
-  console.log(`B: ${B.toFixed(4)}`);  // Print A with 4 decimal places
  
   if (n_gpu < per_node) {
     console.warn(`${gpu.name} cannot be deployed with the current budget.`);
@@ -282,14 +274,13 @@ GPU_data.forEach((gpu, i) => {
   const cap_baseline = C_software;
 
   // --- Operational Components ---
-  const energy = (C_electricity - C_heatreuseperkWh) * W_gpu_total * n_gpu / 1000;
-  const cooling = C_cooling * ((W_node_baseline_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000;
+  const energyandcooling = (C_electricity - C_heatreuseperkWh) * PUE * ((W_node_baseline_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000;
   const maintenance = lifetime * C_maintenance * n_nodes;
   const op_baseline = lifetime * (C_depreciation + C_subscription + C_uefficiency);
 
   // --- Totals ---
   const capital = cap_gpu + cap_server + cap_infra + cap_facility + cap_baseline;
-  const operational = energy + cooling + maintenance + op_baseline;
+  const operational = energyandcooling + maintenance + op_baseline;
   const used_budget = capital + operational;
 
   const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
@@ -309,12 +300,12 @@ GPU_data.forEach((gpu, i) => {
     capital,
     operational,
     capital_components: [cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline],
-    operational_components: [energy, cooling, maintenance, op_baseline],
+    operational_components: [energyandcooling, maintenance, op_baseline],
     originalGPUIndex: i  // Adding the original index
   });
 
   capital_components.push([cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline]);
-  operational_components.push([energy, cooling, maintenance, op_baseline]);
+  operational_components.push([energyandcooling, maintenance, op_baseline]);
 
   console.log(`GPU: ${gpu.name}, Total Cost: ${used_budget}, Perf/TCO: ${perf_per_tco}`);
 });
@@ -573,7 +564,7 @@ const tcoLabels = nonzeroResults.map(r => r.name);
 
 // Define component labels
 const capLabels = ['GPU cost', 'Node Server cost', 'Node Infrastructure cost', 'Node Facility cost', 'Baseline cost'];
-const opLabels = ['Electricity cost', 'Cooling cost', 'Node Maintenance cost', 'Baseline cost'];
+const opLabels = ['Electricity and Cooling cost', 'Node Maintenance cost', 'Baseline cost'];
 
 // Build data arrays for each component type
 const capBreakdown = capLabels.map((_, idx) =>
@@ -597,8 +588,8 @@ const plotlyColors = [
   'rgba(102,255,255,0.7)',   // Infra Cost
   'rgba(255,128,179,0.7)',   // Facility Cost
   'rgba(255,204,128,0.7)',   // Baseline Capital Cost
-  'rgba(128,77,255,0.7)',    // Energy Cost
-  'rgba(204,102,179,0.7)',   // Cooling Cost
+  'rgba(128,77,255,0.7)',    // Energy and Cooling Cost
+//  'rgba(204,102,179,0.7)',   // Cooling Cost
   'rgba(179,128,255,0.7)',   // Maintenance Cost
   'rgba(102,153,255,0.7)'    // Baseline Op Cost
 ];
@@ -710,7 +701,8 @@ if (!document.getElementById('chart-title')) {
 // ---------- Parameter Sensitivities Analysis ----------
 const elasticityLabels = [
   'GPU (€)', 'Node Server (€)', 'Node Infrastructure (€)', 'Node Facility (€)', 'Software (€)',
-  'Electricity (€/kWh)', 'Heat Reuse Revenue (€/kWh)', 'Cooling (€/kWh)', 'Node Maintenance (€/year)',
+  'Electricity (€/kWh)', 'Heat Reuse Revenue (€/kWh)', 'PUE', 'Node Maintenance (€/year)', 'System Usage (hrs/year)', 
+  'System Lifetime (years)',  'Node Baseline Power w/o GPUs (W)',  
   'Depreciation cost', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
@@ -737,10 +729,13 @@ const elasticities = results.map((r, i) => {
     n_nodes, // Infra cost
     n_nodes, // Facility cost
     1, // Software cost
-    W_gpu_total, // Electricity (scaled)
-    -W_gpu_total, // Heat reuse (scaled)
-    (W_node_total + W_gpu_total), // Cooling
+     PUE * (W_node_total + W_gpu_total), // Electricity 
+    - PUE * (W_node_total + W_gpu_total), // Heat reuse 
+    (C_electricity - C_heatreuseperkWh) * (W_node_total + W_gpu_total), // PUE
     n_nodes * lifetime, // Maintenance
+    (C_electricity - C_heatreuseperkWh) * PUE * ((W_node_baseline * lifetime * n_nodes) + (W_gpu * lifetime * n_gpu)) / 1000, // System Usage (hrs/year)
+    ((C_electricity - C_heatreuseperkWh) * PUE * ((W_node_baseline * system_usage * n_nodes) + (W_gpu * system_usage * n_gpu)) / 1000) + (C_maintenance  * n_nodes) + C_depreciation + C_subscription + C_uefficiency, // System Lifetime (years)
+    ((C_electricity - C_heatreuseperkWh) * PUE * system_usage * lifetime * n_nodes) / 1000, // Node Baseline Power w/o GPUs (W)
     lifetime, // Depreciation
     lifetime, // Subscription
     lifetime // Uefficiency
@@ -754,8 +749,11 @@ const elasticities = results.map((r, i) => {
     C_software,
     C_electricity,
     C_heatreuseperkWh, 
-    C_cooling,
+    PUE,
     C_maintenance,
+    system_usage, 
+    lifetime, 
+    W_node_baseline,
     C_depreciation,
     C_subscription,
     C_uefficiency
@@ -771,7 +769,7 @@ tornadoContainer.innerHTML = ""; // Clear previous charts
 
 // Add a main title above the charts
 const mainTitle = document.createElement("h2");
-mainTitle.textContent = "GPU Cost Parameters Sensitivity Analysis";  // Main title for all charts
+mainTitle.textContent = "Parameters Sensitivity Analysis";  // Main title for all charts
 mainTitle.className = "main-chart-title";  // Add a class for styling
 tornadoContainer.appendChild(mainTitle);  // Append the title before all charts
 
@@ -807,18 +805,24 @@ elasticities.forEach((gpuElasticity, i) => {
 
   const layout = {
     xaxis: {
-      title: "Normalized sensitivity",
+          title: {
+      text: "Norm. sensitivity",
+      standoff: 20  // Adjust the distance between the x-axis and its title
+    },
       zeroline: true,
       zerolinewidth: 1,
+    tickangle: 0,  // Ensure x-axis labels are not rotated
       zerolinecolor: "#000"
     },
     yaxis: {
       automargin: true,
-      title: "Cost parameter"
+    title: "Parameter",
+    tickmode: 'array',  // Ensure all labels are shown
+    tickvals: sortedLabels // Explicitly provide all label values if needed
     },
     margin: { l: 160, r: 20, t: 30, b: 30 },
     height: 250,
-    width: 350,
+    width: 400,
     showlegend: false
   };
 
@@ -860,7 +864,7 @@ Plotly.newPlot('sensitivityHeatmap', heatmapData, {
   title: '',
   xaxis: { title: 'GPU type' },
   yaxis: { title: {
-      text: "Cost parameters",  // Ensure the title is explicitly set
+      text: "Parameter",  // Ensure the title is explicitly set
       standoff: 20  // Adds some space between the axis and the title
     }, automargin: true },
   margin: { t: 60, l: 150 }
@@ -890,7 +894,7 @@ document.getElementById('heatmap-download-btn').addEventListener('click', () => 
 
 const chartTitleDiv = document.createElement('div');
 chartTitleDiv.classList.add('chart-title');
-chartTitleDiv.innerHTML = 'Heatmap: Sensitivity of Cost Parameters across GPUs';
+chartTitleDiv.innerHTML = 'Heatmap: Sensitivity of Parameters across GPUs';
 document.getElementById('sensitivityHeatmap').parentElement.insertBefore(chartTitleDiv, document.getElementById('sensitivityHeatmap'));
 
 
@@ -1017,8 +1021,7 @@ function showFormula() {
     where:
 
     C_operational_perYear = n_gpu * (
-                  (C_electricityperkWh - C_heatreuseperkWh) * W_gpu * systemusage / 1000
-                 + C_coolingperkWh * (W_node_baseline * systemusage / GPUs_per_node + W_gpu * systemusage) / 1000
+                  (C_electricityperkWh - C_heatreuseperkWh) * PUE * (W_node_baseline * systemusage / GPUs_per_node + W_gpu * systemusage) / 1000
                  + C_node_maintenance / GPUs_per_node )
               + C_depreciation
               + C_subscription
