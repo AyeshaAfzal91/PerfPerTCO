@@ -1,3 +1,8 @@
+/*!
+ * Author: Ayesha Afzal <ayesha.afzal@fau.de>
+ * © 2025 NHR@HPC, FAU Erlangen-Nuremberg. All rights reserved.
+ */
+
 /* Base styles */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Set a clean and modern font */
@@ -152,7 +157,9 @@ label {
     height: 250px;  /* Set a fixed height for each plot */
     flex: 0 0 auto;  /* Prevent the plots from stretching */
     border-radius: 8px;  /* Rounded corners for the plots */
+    margin-bottom: 30px;  /* Add space after each plot */
 }
+
 
 
 /* Grid layout for the left and right columns */
@@ -178,4 +185,141 @@ label {
     padding: 20px;               /* Padding inside the column */
     border-radius: 8px;          /* Rounded corners */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow for elevation */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    body {
+        margin: 15px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    h3 {
+        font-size: 1.1em;
+    }
+
+    /* About section */
+    #about {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+    }
+
+    /* Tables */
+    #resultsTable th, #resultsTable td {
+        padding: 10px 15px;
+    }
+
+    /* Chart Wrappers */
+    .chart-wrapper {
+        height: 70vh;
+    }
+
+    #gpu-chart, #sensitivityHeatmap {
+        max-width: 80%;
+    }
+
+    #stacked-tco-chart {
+        max-width: 90%;
+    }
+
+    /* Tornado Plots */
+    .tornado-plot {
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    /* Grid layout */
+    #parametersContainer {
+        grid-template-columns: 1fr; /* Stack the columns vertically */
+        gap: 20px;
+        padding: 10px;
+    }
+
+    #leftColumn, #rightColumn {
+        padding: 15px;
+    }
+}
+
+/* Tablet responsiveness (landscape mode) */
+@media (max-width: 1024px) {
+    /* Adjust font sizes */
+    h1 {
+        font-size: 1.9em;
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+
+    h3 {
+        font-size: 1.2em;
+    }
+
+    #about {
+        padding: 15px 20px;
+    }
+
+    #resultsTable th, #resultsTable td {
+        padding: 12px 18px;
+    }
+
+    .chart-wrapper {
+        height: 80vh;
+    }
+
+    /* Tornado plots */
+    .tornado-plot {
+        width: 45%;  /* Adjust width to fit two plots in a row */
+        height: 220px;
+    }
+
+    #parametersContainer {
+        grid-template-columns: 1fr 1fr; /* Keep two columns */
+        gap: 30px;
+    }
+
+    #leftColumn, #rightColumn {
+        padding: 18px;
+    }
+}
+
+/* Tooltip container */
+[data-tooltip] {
+  position: relative; /* Needed for positioning the tooltip */
+  cursor: pointer; /* Change the cursor to show that it's interactive */
+}
+
+/* Tooltip text */
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip); /* Get the tooltip text from the data-tooltip attribute */
+  position: absolute;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  bottom: 120%; /* Position the tooltip above the element */
+  left: 50%; /* Center it horizontally */
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 9999; /* Ensure the tooltip is on top */
+  opacity: 0;
+  animation: fadeIn 0.3s forwards; /* Make it fade in */
+}
+
+/* Fade-in effect */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
