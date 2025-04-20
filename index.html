@@ -99,13 +99,13 @@
 
 <label for="C_PUE" data-tooltip="Set the Power usage effectiveness (PUE) or overhead cooling factor.">
   PUE:
-  <input type="range" id="C_PUE" min="0" max="5" value="1.2" step="0.01" oninput="updateValue('v_PUE', this.value)">
+  <input type="range" id="C_PUE" min="1" max="5" value="1.2" step="0.01" oninput="updateValue('v_PUE', this.value)">
   <span id="v_PUE">1.2</span>
 </label>
 
 <label for="C_maintenance" data-tooltip="Set the maintenance and support cost per node in EUR per year, including warranty, repairs, and system management.">
   Node Maintenance (€/year):
-  <input type="range" id="C_maintenance" min="0" max="2000" value="200" step="5" oninput="updateValue('v_maintenance', this.value)">
+  <input type="range" id="C_maintenance" min="0" max="5000" value="200" step="5" oninput="updateValue('v_maintenance', this.value)">
   <span id="v_maintenance">200</span>
 </label>
 
@@ -117,31 +117,31 @@
 
 <label for="lifetime" data-tooltip="Set the system lifetime in years.">
   System Lifetime (years):
-  <input type="range" id="lifetime" min="1" max="10" value="5" step="1" oninput="updateValue('v_lifetime', this.value)">
+  <input type="range" id="lifetime" min="1" max="100" value="5" step="1" oninput="updateValue('v_lifetime', this.value)">
   <span id="v_lifetime">5</span>
 </label>
 
 <label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
   Node Baseline Power w/o GPUs (W):
-  <input type="range" id="W_node_baseline" min="0" max="1000" value="500" step="5" oninput="updateValue('v_baseline', this.value)">
+  <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5" oninput="updateValue('v_baseline', this.value)">
   <span id="v_baseline">500</span>
 </label>
 
 <label for="C_depreciation" data-tooltip="Set the depreciation cost over time in EUR per year, if applicable.">
   Depreciation (€/year):
-  <input type="range" id="C_depreciation" min="0" max="20000" value="0" step="5" oninput="updateValue('v_depreciation', this.value)">
+  <input type="range" id="C_depreciation" min="0" max="25000" value="0" step="5" oninput="updateValue('v_depreciation', this.value)">
   <span id="v_depreciation">0</span>
 </label>
 
 <label for="C_subscription" data-tooltip="Set the recurring software subscription costs in EUR per year.">
   Software Subscription (€/year):
-  <input type="range" id="C_subscription" min="0" max="20000" value="0" step="5" oninput="updateValue('v_subscription', this.value)">
+  <input type="range" id="C_subscription" min="0" max="25000" value="0" step="5" oninput="updateValue('v_subscription', this.value)">
   <span id="v_subscription">0</span>
 </label>
 
 <label for="C_uefficiency" data-tooltip="Set the cost due to underutilization of GPU units and inefficiency in EUR per year.">
   Utilization Inefficiency (€/year):
-  <input type="range" id="C_uefficiency" min="0" max="20000" value="0" step="5" oninput="updateValue('v_uefficiency', this.value)">
+  <input type="range" id="C_uefficiency" min="0" max="25000" value="0" step="5" oninput="updateValue('v_uefficiency', this.value)">
   <span id="v_uefficiency">0</span>
 </label>
 
@@ -150,6 +150,13 @@
   <input type="range" id="C_heatreuseperkWh" min="0" max="5" value="0" step="0.1" oninput="updateValue('v_heatreuseperkWh', this.value)">
   <span id="v_heatreuseperkWh">0</span>
 </label>
+
+<label for="Factor_heatreuse" data-tooltip="Set the factor of the heat that goes to district heating system.">
+  Heat Reuse Factor:
+  <input type="range" id="Factor_heatreuse" min="0" max="1" value="0" step="0.1" oninput="updateValue('v_Factor_heatreuse', this.value)">
+  <span id="v_Factor_heatreuse">0</span>
+</label>
+
     </fieldset>
     </div>
 </div>
