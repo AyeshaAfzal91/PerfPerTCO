@@ -1329,6 +1329,95 @@ This result can help inform purchasing and planning decisions for upcoming syste
   document.getElementById("blogOutput").value = blog;
 }
 
+function handleGPUUpload() {
+  const file = document.getElementById("gpuConfigUpload").files[0];
+  const format = document.getElementById("gpuUploadFormat").value;
+  const status = document.getElementById("uploadStatus");
+
+  if (!file) {
+    status.innerText = "No file selected.";
+    status.style.color = "red";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    try {
+      if (format === "json") {
+        const data = JSON.parse(e.target.result);
+        validateAndAppendJSON(data, status);
+      } else {
+        const csv = e.target.result;
+        const data = parseCSVToGPUData(csv);
+        validateAndAppendJSON(data, status); // Reuse JSON validator
+      }
+    } catch (err) {
+      status.innerText = "Error reading file: " + err;
+      status.style.color = "red";
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+
+function validateAndAppendJSON(data, status) {
+  if (!Array.isArray(data)) throw "Expected an array of GPU objects.";
+
+  const requiredFields = ["name", "cost", "perf", "power", "per_node"];
+  for (const [i, gpu] of data.entries()) {
+    for (const field of requiredFields) {
+      if (!(field in gpu)) throw `GPU ${i + 1} missing required field: "${field}"`;
+    }
+    if (typeof gpu.perf !== "object" || typeof gpu.power !== "object") {
+      throw `GPU ${i + 1} has invalid perf/power format. Expected nested workload structure.`;
+    }
+  }
+
+  GPU_data.push(...data);
+  status.innerText = `✅ Loaded ${data.length} custom GPU(s). You can now recalculate.`;
+  status.style.color = "green";
+}
+
+function parseCSVToGPUData(csvText) {
+  const rows = csvText.trim().split("\n");
+  const headers = rows[0].split(",");
+
+  const data = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const cols = rows[i].split(",");
+    const obj = {};
+
+    obj.name = cols[0];
+    obj.cost = parseFloat(cols[1]);
+    obj.per_node = parseInt(cols[2]);
+
+    const workload = cols[3];
+    const benchId = cols[4];
+    const perf = parseFloat(cols[5]);
+    const power = parseFloat(cols[6]);
+
+    obj.perf = { [workload]: { [benchId]: perf } };
+    obj.power = { [workload]: { [benchId]: power } };
+
+    data.push(obj);
+  }
+
+  return data;
+}
+
+function exportGPUData() {
+  const blob = new Blob([JSON.stringify(GPU_data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "gpu_config_export.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 
 const footer = document.createElement('div');
 footer.style.marginTop = "40px";

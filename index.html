@@ -187,6 +187,20 @@
   </div>
 </div>
 
+<section id="gpu-upload-section" style="margin-top: 40px;">
+  <h2> Upload Custom GPU Config</h2>
+  <label>Select File Format:</label>
+  <select id="gpuUploadFormat">
+    <option value="json">JSON</option>
+    <option value="csv">CSV</option>
+  </select>
+  <input type="file" id="gpuConfigUpload" accept=".json,.csv" />
+  <button onclick="handleGPUUpload()">Upload</button>
+  <p id="uploadStatus" style="margin-top: 10px;"></p>
+</section>
+
+<button onclick="exportGPUData()">Export Current GPU Config as JSON</button>
+
 
 <div style="text-align: center; margin-top: 20px;">
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()">Calculate</button>
@@ -207,6 +221,7 @@
   <h3>Smart Strategy Tip 💡</h3>
   <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
 </div>
+
 
 <div id="output">
   <h2>Results</h2>
