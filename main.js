@@ -1344,16 +1344,16 @@ function handleGPUUpload() {
 
   reader.onload = function (e) {
     try {
+      let data;
       if (format === "json") {
-        const data = JSON.parse(e.target.result);
-        validateAndAppendJSON(data, status);
+        data = JSON.parse(e.target.result);
       } else {
-        const csv = e.target.result;
-        const data = parseCSVToGPUData(csv);
-        validateAndAppendJSON(data, status); // Reuse JSON validator
+        data = parseCSVToGPUData(e.target.result);
       }
+
+      validateAndAppendJSON(data, status);
     } catch (err) {
-      status.innerText = "Error reading file: " + err;
+      status.innerText = "❌ Error: " + err;
       status.style.color = "red";
     }
   };
@@ -1361,14 +1361,13 @@ function handleGPUUpload() {
   reader.readAsText(file);
 }
 
-
 function validateAndAppendJSON(data, status) {
   if (!Array.isArray(data)) throw "Expected an array of GPU objects.";
 
   const requiredFields = ["name", "cost", "perf", "power", "per_node"];
   for (const [i, gpu] of data.entries()) {
     for (const field of requiredFields) {
-      if (!(field in gpu)) throw `GPU ${i + 1} missing required field: "${field}"`;
+      if (!(field in gpu)) throw `GPU ${i + 1} is missing field "${field}".`;
     }
     if (typeof gpu.perf !== "object" || typeof gpu.power !== "object") {
       throw `GPU ${i + 1} has invalid perf/power format. Expected nested workload structure.`;
@@ -1376,49 +1375,93 @@ function validateAndAppendJSON(data, status) {
   }
 
   GPU_data.push(...data);
-  status.innerText = `✅ Loaded ${data.length} custom GPU(s). You can now recalculate.`;
+  status.innerText = `✅ Loaded ${data.length} GPU(s). You can now calculate.`;
   status.style.color = "green";
 }
 
 function parseCSVToGPUData(csvText) {
   const rows = csvText.trim().split("\n");
-  const headers = rows[0].split(",");
-
   const data = [];
 
   for (let i = 1; i < rows.length; i++) {
     const cols = rows[i].split(",");
-    const obj = {};
+    const [name, cost, per_node, workload, benchId, perf, power] = cols;
 
-    obj.name = cols[0];
-    obj.cost = parseFloat(cols[1]);
-    obj.per_node = parseInt(cols[2]);
+    const gpu = {
+      name,
+      cost: parseFloat(cost),
+      per_node: parseInt(per_node),
+      perf: { [workload]: { [benchId]: parseFloat(perf) } },
+      power: { [workload]: { [benchId]: parseFloat(power) } }
+    };
 
-    const workload = cols[3];
-    const benchId = cols[4];
-    const perf = parseFloat(cols[5]);
-    const power = parseFloat(cols[6]);
-
-    obj.perf = { [workload]: { [benchId]: perf } };
-    obj.power = { [workload]: { [benchId]: power } };
-
-    data.push(obj);
+    data.push(gpu);
   }
 
   return data;
 }
 
-function exportGPUData() {
+function exportGPUDataJSON() {
   const blob = new Blob([JSON.stringify(GPU_data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = "gpu_config_export.json";
   a.click();
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(a.href);
 }
 
+function exportGPUDataCSV() {
+  let csv = "name,cost,per_node,workload,benchmark_id,performance,power\n";
+  GPU_data.forEach(gpu => {
+    const workloads = Object.keys(gpu.perf || {});
+    workloads.forEach(w => {
+      const perfEntries = gpu.perf[w];
+      const powerEntries = gpu.power[w];
+      for (const id in perfEntries) {
+        const perf = perfEntries[id];
+        const power = powerEntries?.[id] || "";
+        csv += `${gpu.name},${gpu.cost},${gpu.per_node},${w},${id},${perf},${power}\n`;
+      }
+    });
+  });
 
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "gpu_config_export.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+  function handleMainGPUUpload() {
+    const file = document.getElementById("gpuConfigUploadMain").files[0];
+    const format = document.getElementById("gpuUploadFormatMain").value;
+    const status = document.getElementById("uploadStatusMain");
+
+    if (!file) {
+      status.innerText = "No file selected.";
+      status.style.color = "red";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      try {
+        let data = format === "json"
+          ? JSON.parse(e.target.result)
+          : parseCSVToGPUData(e.target.result);
+
+        validateAndAppendJSON(data, status);
+      } catch (err) {
+        status.innerText = "❌ Error: " + err;
+        status.style.color = "red";
+      }
+    };
+
+    reader.readAsText(file);
+  }
+  
 const footer = document.createElement('div');
 footer.style.marginTop = "40px";
 footer.style.padding = "12px 0";
