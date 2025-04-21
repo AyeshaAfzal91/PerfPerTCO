@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Feedback</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #4a90e2;
+    }
+
+    form {
+      margin-top: 30px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button[type="submit"] {
+      margin-top: 20px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #3a7bd5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>I'd Love Your Feedback 💬</h1>
+  <p>Please use the form below to share ideas, bugs, or suggestions to improve this service.</p>
+
+  <!-- Netlify Form -->
+  <form name="feedback" method="POST" data-netlify="true">
+    <!-- Hidden Input for Form Name -->
+    <input type="hidden" name="form-name" value="feedback">
+
+    <label for="name">Your Name (optional):</label>
+    <input type="text" name="name" id="name" />
+
+    <label for="email">Your Email (optional):</label>
+    <input type="email" name="email" id="email" />
+
+    <label for="message">Your Feedback:</label>
+    <textarea name="message" id="message" rows="6" required></textarea>
+
+    <button type="submit">Submit Feedback</button>
+  </form>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Documentation - PerfPerTCO</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Documentation - Performance Per TCO Calculator</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="documentation.html">Documentation</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="intro">
+      <h2>What is PerfPerTCO?</h2>
+      <p>
+        PerfPerTCO is an interactive calculator that helps data center planners and computational scientists
+        evaluate GPU configurations based on performance per Total Cost of Ownership (TCO).
+      </p>
+    </section>
+
+    <section id="how-it-works">
+      <h2>How It Works</h2>
+      <p>
+        You input your budget, hardware, energy, and operational assumptions. The tool uses benchmark data (e.g., GROMACS or AMBER)
+        to compare GPUs and estimate how much compute performance you get per euro spent over the lifetime of the system.
+      </p>
+    </section>
+
+    <section id="parameters">
+      <h2>Input Parameters</h2>
+      
+      <h3>Benchmark Setup</h3>
+      <ul>
+        <li><strong>Select Workload:</strong> Choose between GROMACS or AMBER benchmarks.</li>
+        <li><strong>Benchmark ID:</strong> Refers to specific GPU benchmark cases (1–11) based on public performance data.</li>
+      </ul>
+
+      <h3>Initial Setup</h3>
+      <ul>
+        <li><strong>Total Budget (€):</strong> The capital available for all GPU setups.</li>
+        <li><strong>Same GPU Count:</strong> Toggle to force equal GPU quantity across models.</li>
+      </ul>
+
+      <h3>Capital Cost Parameters</h3>
+      <ul>
+        <li><strong>Node Server (€):</strong> Cost of server including CPU, memory, storage, networking.</li>
+        <li><strong>Node Infrastructure (€):</strong> Power distribution and cooling infrastructure cost.</li>
+        <li><strong>Node Facility (€):</strong> Cost of data center space and construction.</li>
+        <li><strong>Software (€):</strong> One-time software stack and license costs.</li>
+      </ul>
+
+      <h3>Operational Cost Parameters</h3>
+      <ul>
+        <li><strong>Electricity (€/kWh):</strong> Cost of electricity.</li>
+        <li><strong>PUE:</strong> Power Usage Effectiveness (includes cooling overhead).</li>
+        <li><strong>Maintenance (€/year):</strong> Ongoing node-level maintenance costs.</li>
+        <li><strong>System Usage (hrs/year):</strong> Expected annual usage in hours.</li>
+        <li><strong>Lifetime (years):</strong> Projected operational life of the system.</li>
+        <li><strong>Node Baseline Power (W):</strong> Server power draw excluding GPUs.</li>
+        <li><strong>Depreciation (€/year):</strong> Annual depreciation (if tracked financially).</li>
+        <li><strong>Software Subscription (€/year):</strong> Recurring license fees.</li>
+        <li><strong>Utilization Inefficiency (€/year):</strong> Expected loss due to under-utilization.</li>
+        <li><strong>Heat Reuse Revenue (€/kWh):</strong> Revenue recovered from heat recovery.</li>
+        <li><strong>Heat Reuse Factor:</strong> Portion of heat captured for reuse (0–1).</li>
+      </ul>
+    </section>
+
+    <section id="outputs">
+      <h2>Outputs</h2>
+      <ul>
+        <li><strong>Results Table:</strong> GPU-by-GPU breakdown of performance, cost, and TCO.</li>
+        <li><strong>Performance Comparison Message:</strong> Summary of best vs worst GPU configuration.</li>
+        <li><strong>Charts:</strong> Bar charts, tornado plots, and sensitivity heatmaps for visual insights.</li>
+      </ul>
+    </section>
+
+    <section id="faq-link">
+      <h2>Need More Help?</h2>
+      <p>
+        Check out the <a href="faq.html">FAQ page</a> for common questions.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+        <p>&copy; 2025, Author: Ayesha Afzal &lt;<a href="mailto:ayesha.afzal@fau.de">ayesha.afzal@fau.de</a>&gt;, NHR@HPC, FAU Erlangen-Nürnberg.</p>
+  </footer>
+</body>
+</html>
