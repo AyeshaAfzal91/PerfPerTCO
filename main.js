@@ -850,7 +850,7 @@ const elasticityLabels = [
   'GPU (€)', 'Node Server (€)', 'Node Infrastructure (€)', 'Node Facility (€)', 'Software (€)',
   'Electricity (€/kWh)', 'Heat Reuse Revenue (€/kWh)', 'PUE', 'Node Maintenance (€/year)', 'System Usage (hrs/year)', 
   'System Lifetime (years)',  'Node Baseline Power w/o GPUs (W)',  
-  'Depreciation cost', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
+  'Depreciation cost (€/year)', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
 const elasticities = results.map((r, i) => {
