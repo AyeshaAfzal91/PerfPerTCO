@@ -10,9 +10,10 @@
     <h1>Documentation - Performance Per TCO Calculator</h1>
     <nav>
       <a href="index.html">Home</a>
-      <a href="documentation.html">Documentation</a>
+      <a href="doc.html">Documentation</a>
       <a href="faq.html">FAQ</a>
-      <a href="features.html">Future Features</a>
+      <a href="features.html">On the Horizon</a>
+      <a href="feedback.html">Give Feedback</a>
     </nav>
   </header>
 
@@ -22,6 +23,8 @@
       <p>
         PerfPerTCO is an interactive calculator that helps data center planners and computational scientists
         evaluate GPU configurations based on performance per Total Cost of Ownership (TCO).
+        This page provides a detailed breakdown of the calculator's purpose, core formulas, and adjustable parameters.
+        Use it as a reference when fine-tuning inputs or interpreting output results.
       </p>
     </section>
 
@@ -75,9 +78,22 @@
     <section id="outputs">
       <h2>Outputs</h2>
       <ul>
-        <li><strong>Results Table:</strong> GPU-by-GPU breakdown of performance, cost, and TCO.</li>
-        <li><strong>Performance Comparison Message:</strong> Summary of best vs worst GPU configuration.</li>
+        <li><strong>Results Table</strong></li>
+        <ul>
+        <li>GPU-by-GPU breakdown of performance, cost, and TCO.</li>
+        <li>Results are sorted by highest performance per unit cost.</li>
+        <li>All output tables are downloadable in CSV format.</li>
+        <li>Comparison Message: Summary of best vs worst GPU configuration.</li>
+      </ul>
         <li><strong>Charts:</strong> Bar charts, tornado plots, and sensitivity heatmaps for visual insights.</li>
+    </section>
+    
+    <section>
+      <h2> Tips & Sensitivity Analysis</h2>
+      <ul>
+        <li>Real-time recommendations appear when inputs are adjusted.</li>
+        <li>Normalised sensetivity analysis highlights which parameters most affect each GPU’s cost-efficiency.</li>
+        <li>Users can generate auto-written blog summaries for reports or sharing.</li>
       </ul>
     </section>
 
@@ -94,3 +110,4 @@
   </footer>
 </body>
 </html>
+

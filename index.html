@@ -9,8 +9,8 @@
   <header>
     <nav>
       <a href="index.html">Home</a>
-      <a href="faq.html">FAQ</a>
       <a href="doc.html">Documentation</a>
+      <a href="faq.html">FAQ</a>
       <a href="features.html">On the Horizon</a>
       <a href="feedback.html">Give Feedback</a>
     </nav>
@@ -203,7 +203,7 @@
 
 <div id="aiTips" class="ai-tips">
   <h3>Smart Strategy Tip 💡</h3>
-  <p id="ai-tip-text">Adjusting values can help optimize your TCO!</p>
+  <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
 </div>
 
 <div id="output">
@@ -218,6 +218,14 @@
   <div id="elasticityTableContainer"></div>
   <button id="download-elasticity-csv" style="display: none;">Download CSV</button>
 </div>
+
+<div id="blog-output-container" style="margin-top: 40px;">
+  <h2>📝 Auto-Generated Blog Summary</h2>
+  <button class="medium-button" onclick="generateBlogPost()">Generate Blog Summary</button>
+  <textarea id="blogOutput" rows="12" style="width: 100%; margin-top: 20px; font-family: monospace;"></textarea>
+  <button class="medium-button" onclick="copyBlogText()">Copy to Clipboard</button>
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>

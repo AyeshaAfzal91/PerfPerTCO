@@ -489,6 +489,9 @@ if (nonzeroResults.length === 0) {
   return;
 }
 
+const sortedResults = [...nonzeroResults].sort((a, b) => b.perf_per_tco - a.perf_per_tco);
+window.bestResult = sortedResults[0];
+
 // Find max and min among valid entries
 const maxResult = nonzeroResults[0]; // Best GPU by Performance per TCO
 const minResult = nonzeroResults[nonzeroResults.length - 1]; // Worst GPU by Performance per TCO
@@ -1218,7 +1221,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // This function updates the tip based on slider values
 function updateAITip(event) {
   const id = event?.target?.id || "default";
-  let tip = "💡 Adjusting values can help optimize your TCO!";
+  let tip = "💡 Adjusting values can help optimize your Performance per TCO!";
 
   switch (id) {
     case "total_budget":
@@ -1274,7 +1277,7 @@ function updateAITip(event) {
       tip = "💡 Choose between GROMACS or AMBER based on your scientific simulation needs.";
       break;
     default:
-      tip = "💡 Adjusting values can help optimize your TCO!";
+      tip = "💡 Adjusting values can help optimize your Performance per TCO!";
   }
 
   document.getElementById("ai-tip-text").innerText = tip;
@@ -1286,6 +1289,45 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("input", updateAITip);
   });
 });
+
+function generateBlogPost() {
+  const workload = document.getElementById('workload').value;
+  const benchmarkId = document.getElementById('benchmarkId').value;
+  const totalBudget = document.getElementById('total_budget').value;
+
+  const bestGpu = window.bestResult?.name || "N/A";
+  const bestPerfTCO = window.bestResult?.perf_per_tco?.toFixed(2) || "N/A";
+  const tipText = document.getElementById("ai-tip-text").innerText || "No tips generated.";
+
+  if (bestGpu === "N/A") {
+    alert("Please run a calculation first before generating the blog post.");
+    return;
+  }
+
+  const blog = `## Optimizing Performance Per TCO for GPU Systems
+
+In this analysis, we used the **Performance per TCO Calculator** to evaluate GPU-based compute nodes for ${workload} workloads using Benchmark ID **${benchmarkId}**.
+
+### 🛠️ System Configuration
+- **Total Budget**: €${parseInt(totalBudget).toLocaleString()}
+- **Benchmark**: ${workload} (ID ${benchmarkId})
+- **Capital & Operational Costs**: Customized using sliders.
+
+### 📈 Results
+The best GPU configuration was:
+- **GPU**: ${bestGpu}
+- **Performance per TCO**: ${bestPerfTCO} ns/day/€ * atom
+
+### 💡 Optimization Insight
+${tipText}
+
+---
+
+This result can help inform purchasing and planning decisions for upcoming system acquisitions. You can explore further by adjusting budget, node costs, or energy parameters at [perfpertco.netlify.app](https://perfpertco.netlify.app).
+`;
+
+  document.getElementById("blogOutput").value = blog;
+}
 
 
 const footer = document.createElement('div');
