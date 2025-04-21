@@ -170,6 +170,152 @@ const GPU_data = [
 function updateValue(spanId, val) {
   document.getElementById(spanId).innerText = val;
 }
+
+let previousState = null;  // Global variable to store previous input values
+
+function resetForm() {
+  previousState = {};  // Clear previous state
+
+  const allInputs = [
+    "workload", "benchmarkId", "total_budget", "sameGpuCheckbox",
+    "C_node_server", "C_node_infra", "C_node_facility", "C_software",
+    "C_electricity", "C_PUE", "C_maintenance", "system_usage", "lifetime",
+    "W_node_baseline", "C_depreciation", "C_subscription", "C_uefficiency",
+    "C_heatreuseperkWh", "Factor_heatreuse"
+  ];
+
+  allInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    previousState[id] = (el.type === "checkbox") ? el.checked : el.value;
+  });
+
+  // Now actually reset
+  const defaultValues = {
+    workload: "GROMACS", benchmarkId: 4, total_budget: 10000000, sameGpuCheckbox: false,
+    C_node_server: 10000, C_node_infra: 5000, C_node_facility: 0, C_software: 5000,
+    C_electricity: 0.21, C_PUE: 1.2, C_maintenance: 200, system_usage: 8760, lifetime: 5,
+    W_node_baseline: 500, C_depreciation: 0, C_subscription: 0, C_uefficiency: 0,
+    C_heatreuseperkWh: 0, Factor_heatreuse: 0
+  };
+
+  const spanMap = {
+    benchmarkId: "benchmarkVal", total_budget: "v_budget",
+    C_node_server: "v_node_server", C_node_infra: "v_node_infra", C_node_facility: "v_node_facility",
+    C_software: "v_software", C_electricity: "v_electricity", C_PUE: "v_PUE", C_maintenance: "v_maintenance",
+    system_usage: "v_usage", lifetime: "v_lifetime", W_node_baseline: "v_baseline",
+    C_depreciation: "v_depreciation", C_subscription: "v_subscription", C_uefficiency: "v_uefficiency",
+    C_heatreuseperkWh: "v_heatreuseperkWh", Factor_heatreuse: "v_Factor_heatreuse"
+  };
+
+  for (const id in defaultValues) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+
+    if (el.type === "checkbox") {
+      el.checked = defaultValues[id];
+    } else {
+      el.value = defaultValues[id];
+      if (spanMap[id]) {
+        const span = document.getElementById(spanMap[id]);
+        if (span) span.innerText = defaultValues[id];
+      }
+    }
+  }
+
+  // Clear outputs
+  document.getElementById("resultsTable").innerHTML = "";
+  document.getElementById("comparison-message-container").innerHTML = "";
+  document.getElementById("gpu-chart").innerHTML = "";
+  document.getElementById("stacked-tco-chart").innerHTML = "";
+  document.getElementById("gpuTornadoPlots").innerHTML = "";
+  document.getElementById("sensitivityHeatmap").innerHTML = "";
+  document.getElementById("elasticityTableContainer").innerHTML = "";
+  document.getElementById("download-csv").style.display = "none";
+  document.getElementById("download-elasticity-csv").style.display = "none";
+
+  showUndoToast("Calculator has been reset. ", restorePreviousState);
+}
+
+
+function restorePreviousState() {
+  if (!previousState) return;
+
+  const spanMap = {
+    benchmarkId: "benchmarkVal", total_budget: "v_budget",
+    C_node_server: "v_node_server", C_node_infra: "v_node_infra", C_node_facility: "v_node_facility",
+    C_software: "v_software", C_electricity: "v_electricity", C_PUE: "v_PUE", C_maintenance: "v_maintenance",
+    system_usage: "v_usage", lifetime: "v_lifetime", W_node_baseline: "v_baseline",
+    C_depreciation: "v_depreciation", C_subscription: "v_subscription", C_uefficiency: "v_uefficiency",
+    C_heatreuseperkWh: "v_heatreuseperkWh", Factor_heatreuse: "v_Factor_heatreuse"
+  };
+
+  for (const id in previousState) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+
+    if (el.type === "checkbox") {
+      el.checked = previousState[id];
+    } else {
+      el.value = previousState[id];
+      if (spanMap[id]) {
+        const span = document.getElementById(spanMap[id]);
+        if (span) span.innerText = previousState[id];
+      }
+    }
+  }
+
+  showToast("Previous values restored.");
+}
+
+function showUndoToast(message, undoCallback) {
+  let toast = document.createElement("div");
+  toast.className = "toast";
+
+  const text = document.createElement("span");
+  text.innerText = message;
+
+  const undoBtn = document.createElement("button");
+  undoBtn.innerText = "Undo";
+  undoBtn.style.marginLeft = "12px";
+  undoBtn.style.background = "#fff";
+  undoBtn.style.color = "#007acc";
+  undoBtn.style.border = "none";
+  undoBtn.style.cursor = "pointer";
+  undoBtn.style.fontWeight = "bold";
+  undoBtn.onclick = () => {
+    undoCallback();
+    toast.classList.remove("show");
+    setTimeout(() => document.body.removeChild(toast), 300);
+  };
+
+  toast.appendChild(text);
+  toast.appendChild(undoBtn);
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => toast.classList.add("show"), 10);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => document.body.contains(toast) && document.body.removeChild(toast), 500);
+  }, 8000);
+}
+
+function showToast(message) {
+  let toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerText = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.classList.add("show"), 10);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => document.body.contains(toast) && document.body.removeChild(toast), 500);
+  }, 2000);
+}
+
+
+
 function getSliderValue(id) {
   return parseFloat(document.getElementById(id).value);
 }
@@ -1047,6 +1193,26 @@ function validatePassword() {
     document.getElementById('error-message').style.display = 'block';
   }
 }
+
+// Dark mode toggle logic
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("themeToggle");
+  const icon = document.getElementById("themeIcon");
+
+  // Load saved preference
+  const isDark = localStorage.getItem("darkMode") === "true";
+  document.body.classList.toggle("dark", isDark);
+  toggle.checked = isDark;
+  icon.textContent = isDark ? "🌙" : "🌞";
+
+  toggle.addEventListener("change", () => {
+    const enabled = toggle.checked;
+    document.body.classList.toggle("dark", enabled);
+    icon.textContent = enabled ? "🌙" : "🌞";
+    localStorage.setItem("darkMode", enabled);
+  });
+});
+
 
 const footer = document.createElement('div');
 footer.style.marginTop = "40px";
