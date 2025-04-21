@@ -2,45 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>PerfPerTCO - What’s Next</title>
+  <title>On the Horizon | PerfPerTCO</title>
   <link rel="stylesheet" href="style.css" />
+  <script>
+    function validateFeaturesPassword() {
+      const entered = document.getElementById("features-password").value;
+      const content = document.getElementById("features-content");
+      const error = document.getElementById("features-error");
+
+      // Replace this with your real password
+      const correct = "TCO25";
+
+      if (entered === correct) {
+        content.style.display = "block";
+        document.getElementById("password-section").style.display = "none";
+        error.style.display = "none";
+      } else {
+        error.style.display = "block";
+      }
+    }
+  </script>
 </head>
 <body>
   <header>
-    <h1>Upcoming Features & Roadmap</h1>
     <nav>
       <a href="index.html">Home</a>
-      <a href="doc.html">Documentation</a>
       <a href="faq.html">FAQ</a>
-      <a href="features.html">On the Horizon</a>
+      <a href="doc.html">Documentation</a>
+      <a href="features.html" class="active">On the Horizon</a>
       <a href="feedback.html">Give Feedback</a>
     </nav>
   </header>
 
   <main>
+    <h1>Upcoming Features & Roadmap</h1>
+
+    <div id="password-section" style="margin-top: 30px;">
+      <p><strong>This section is protected.</strong> Enter the password to view upcoming features:</p>
+      <input type="password" id="features-password" placeholder="Enter password" />
+      <button onclick="validateFeaturesPassword()">Submit</button>
+      <p id="features-error" style="color: red; display: none;">Incorrect password. Please try again.</p>
+    </div>
+    
+    <div id="features-content" style="display: none; margin-top: 30px;">
+    
     <section id="intro">
       <p>I'm actively improving PerfPerTCO to make it even more powerful and user-friendly. Here's a preview of the features I'm working on:</p>
     </section>
 
     <section id="roadmap">
-      <h2>🚧 Planned Features</h2>
+      <h2>Planned Features</h2>
       <ul>
-        <li><strong>Custom GPU Uploads:</strong> Users will be able to upload and benchmark their own GPU specs.</li>
+        <li><strong>Custom Upload Configurations Gallery:</strong> Users will be able to upload and benchmark their own GPU specs and benchmark data ((SON/CSV configuration import)</li>
         <li><strong>Multi-node Scaling Selector:</strong> Simulate large-scale cluster deployments with different user-defined node counts.</li>
         <li><strong>Currency Selector:</strong> Support for USD, GBP, INR, and more.</li>
-        <li><strong>Benchmark Database Expansion:</strong> More workloads like TensorFlow, PyTorch, and LAMMPS.</li>
+        <li><strong>Benchmark Database Expansion:</strong> More workloads beyond GROMACS and AMBER.</li>
+        <li><strong>Preset Profiles:</strong>  Academic Cluster, etc.</li>
         <li><strong>Detailed PDF Report Generator:</strong> Export project report with charts and explanations.</li>
-        <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique URLs.</li>
+        <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique shareable public URLs with embedded settings.</li>
         <li><strong>API Access:</strong> Programmatic access to benchmark and calculation engine for researchers/devs.</li>
       </ul>
 
+        <h2> Optional Features?</h2>
+        <ul>
+          <li>Carbon Footprint Estimator</li>
+          <li>Multi-Year TCO Projection with Depreciation Curves</li>
+          <li>Hardware Configuration Assistant</li>
+        </ul>
+        
       <h2>💡 Got a Suggestion?</h2>
       <p>If you have an idea that could make PerfPerTCO better, <a href="mailto:ayesha.afzal@fau.de">let me know!</a></p>
+      
     </section>
+    </div>
   </main>
 
   <footer>
         <p>&copy; 2025, Author: Ayesha Afzal &lt;<a href="mailto:ayesha.afzal@fau.de">ayesha.afzal@fau.de</a>&gt;, NHR@HPC, FAU Erlangen-Nürnberg.</p>
-  </footer>
+  </footer
 </body>
 </html>
+

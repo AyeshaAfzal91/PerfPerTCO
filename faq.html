@@ -2,10 +2,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ - PerfPerTCO</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Assuming you have a styles.css -->
+  <meta charset="UTF-8" />
+  <title>FAQ | PerfPerTCO</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <header>
@@ -20,25 +19,77 @@
     </header>
 
     <main>
+        <section id="about">
+            <p>
+                Here you'll find answers to common questions about using the Performance per TCO Calculator. 
+                If your question isn’t listed, feel free to use the <a href="feedback.html">feedback form</a>.
+            </p>
+        </section>
+        
         <section id="faq">
             <h2>General Questions</h2>
-            <div class="faq-item">
-                <h3>What is PerfPerTCO?</h3>
-                <p>PerfPerTCO is a platform that helps you calculate the performance-to-total-cost ratio of your GPUs...</p>
-            </div>
 
-            <div class="faq-item">
-                <h3>How do I calculate my total GPU cost?</h3>
-                <p>You can calculate your GPU cost by inputting your initial budget and selecting the GPUs you're interested in...</p>
-            </div>
+            <h3>What is Performance per TCO?</h3>
+            <p>
+                It’s a cost-efficiency metric calculated as:  
+                <strong>GPU performance ÷ Total Cost of Ownership over the system lifetime</strong>.  
+                It helps identify which GPUs deliver the most performance per euro spent.
+            </p>
+
+            <h3>Who should use this calculator?</h3>
+            <p>
+                It’s useful for researchers, HPC administrators, grant planners, and procurement teams evaluating GPU nodes based on real budget constraints and workload needs.
+            </p>
 
             <h2>Technical Documentation</h2>
-            <div class="faq-item">
-                <h3>How does the performance calculation work?</h3>
-                <p>The performance calculation is based on various benchmarks and the total cost of ownership over a specified period...</p>
-            </div>
 
-            <!-- More FAQ entries -->
+            <h3>Do I need to fill out every slider?</h3>
+            <p>
+                No. Default values are provided based on typical HPC cluster assumptions. You can modify only the parameters relevant to your scenario.
+            </p>
+
+            <h3>What does “Same number of GPUs for all types” mean?</h3>
+            <p>
+                When enabled, each GPU type is compared using the same number of GPUs per node. When disabled, the configuration scales GPUs to fit the budget.
+            </p>
+
+            <h3>How are benchmark IDs used?</h3>
+            <p>
+                Each ID corresponds to a measured or modeled performance and power for GROMACS or AMBER workloads. Select the one closest to your target use case.
+            </p>
+
+            <h3>Can I export the results?</h3>
+            <p>
+                Yes. You can export both the performance/TCO results and sensitivity analysis as CSV files and charts for further analysis or reporting.
+            </p>
+        </section>
+        
+        <section>
+            <h2>Tip Features & Blog Generator</h2>
+
+            <h3>How does the Tip Assistant work?</h3>
+            <p>
+                As you adjust inputs, the assistant provides smart suggestions based on current values and cost-impact heuristics.
+            </p>
+
+            <h3>What is the auto blog generator?</h3>
+            <p>
+                After running a calculation, you can generate a Markdown-style summary of the analysis — ideal for documentation, proposals, or sharing insights.
+            </p>
+        </section>
+
+        <section>
+            <h2>Privacy & Data</h2>
+
+            <h3>Is any data saved or tracked?</h3>
+            <p>
+                No user input is stored or sent anywhere. All calculations are performed locally in your browser.
+            </p>
+
+            <h3>Is the tool open source?</h3>
+            <p>
+                Only partially — but it may be released under a permissive license in the future. Stay tuned!
+            </p>
         </section>
     </main>
 
@@ -47,3 +98,4 @@
     </footer>
 </body>
 </html>
+
