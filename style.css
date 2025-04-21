@@ -452,3 +452,55 @@ body.dark .main-chart-title {
   color: #e0e0e0;
 }
 
+/* DARK MODE STYLES */
+body.dark {
+  background-color: #1c1c1c;
+  color: white; /* Set default text color to white */
+}
+
+body.dark #about,
+body.dark #leftColumn,
+body.dark #rightColumn,
+body.dark #output,
+body.dark #resultsTable {
+  background-color: #2a2a2a;
+  color: white; /* Ensure text color is white in these areas */
+  box-shadow: none;
+}
+
+body.dark label,
+body.dark th,
+body.dark td {
+  color: white; /* Force text color to white in these elements */
+}
+
+body.dark .medium-button {
+  background-color: #444;
+  color: white;
+}
+
+body.dark .medium-button:hover {
+  background-color: #666;
+}
+
+body.dark .chart-title,
+body.dark .main-chart-title {
+  color: white; /* Ensure chart titles are white */
+}
+
+/* Optionally, ensure any other headings or print-related elements are white */
+body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
+  color: white; /* Force white color on all headings */
+}
+
+body.dark pre, body.dark code, body.dark .print-statement {
+  color: white; /* Ensure print statements or code sections are white */
+}
+
+body.dark .dark-message p {
+  color: white;
+}
+body.dark .dark-message strong {
+  color: white; /* Ensure strong text is white too */
+}
+
