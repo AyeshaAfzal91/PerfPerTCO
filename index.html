@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-	<header>
+  <header>
     <nav>
       <a href="index.html">Home</a>
       <a href="faq.html">FAQ</a>
@@ -19,13 +18,13 @@
   
   <h1>Performance Per TCO Calculator</h1>
 
- <div id="themeToggleContainer">
-  <label class="theme-switch">
-    <input type="checkbox" id="themeToggle">
-    <span class="slider"></span>
-    <span class="emoji" id="themeIcon">🌞</span>
-  </label>
-</div>
+  <div id="themeToggleContainer">
+    <label class="theme-switch">
+      <input type="checkbox" id="themeToggle" onchange="updateAITip()">
+      <span class="slider"></span>
+      <span class="emoji" id="themeIcon">🌞</span>
+    </label>
+  </div>
 
   <section id="about">
     <p>
@@ -37,184 +36,192 @@
 
 <form id="controls">
 <div id="parametersContainer">
-    <!-- Left column: Benchmark and Budget Setup + Capital Cost Parameters -->
-    <div id="leftColumn">
+  <div id="leftColumn">
     <fieldset>
       <legend>Benchmark Setup</legend>
 
-<label for="workload" data-tooltip="Select the benchmark workload: GROMACS or AMBER.">
-  Select Workload:
-</label>
-<select id="workload">
-  <option value="GROMACS">GROMACS</option>
-  <option value="AMBER">AMBER</option>
-</select>
+      <label for="workload" data-tooltip="Select the benchmark workload: GROMACS or AMBER.">
+        Select Workload:
+      </label>
+      <select id="workload" onchange="updateAITip()">
+        <option value="GROMACS">GROMACS</option>
+        <option value="AMBER">AMBER</option>
+      </select>
 
-<label for="benchmarkId" data-tooltip="Select a benchmark ID from 1 to 11.">
-  Benchmark ID (1–11):
-</label>
-<input type="range" id="benchmarkId" min="1" max="11" value="4" oninput="updateValue('benchmarkVal', this.value)">
-<span id="benchmarkVal">4</span>
-      
+      <label for="benchmarkId" data-tooltip="Select a benchmark ID from 1 to 11.">
+        Benchmark ID (1–11):
+      </label>
+      <input type="range" id="benchmarkId" min="1" max="11" value="4" oninput="updateValue('benchmarkVal', this.value); updateAITip()">
+      <span id="benchmarkVal">4</span>
     </fieldset>
-    
-      <fieldset>
-      <legend>Initial Setup</legend>  
-  
-              <label for="total_budget" data-tooltip="Set the total available budget for your project in EUR.">
-  Total Budget (€):
-  <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100" 
-         oninput="updateValue('v_budget', this.value)">
-  <span id="v_budget">10000000</span>
-</label>    
-      
+
+    <fieldset>
+      <legend>Initial Setup</legend>
+
+      <label for="total_budget" data-tooltip="Set the total available budget for your project in EUR.">
+        Total Budget (€):
+        <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100" 
+               oninput="updateValue('v_budget', this.value); updateAITip()">
+        <span id="v_budget">10000000</span>
+      </label>    
+
       <label for="sameGpuCheckbox">
-        <input type="checkbox" id="sameGpuCheckbox"> Use same number of GPUs for all GPU types
+        <input type="checkbox" id="sameGpuCheckbox" onchange="updateAITip()"> Use same number of GPUs for all GPU types
       </label>
     </fieldset>
 
     <fieldset>
       <legend>Capital Cost Parameters</legend>
 
-<!-- Capital cost parameters -->
-<label for="C_node_server" data-tooltip="Set the server cost per node, including  CPU, RAM, storage, networking, and GPU deployment costs in EUR.">
-  Node Server (€):
-  <input type="range" id="C_node_server" min="0" max="50000" value="10000" step="5" oninput="updateValue('v_node_server', this.value)">
-  <span id="v_node_server">10000</span>
-</label>
+      <label for="C_node_server" data-tooltip="Set the server cost per node.">
+        Node Server (€):
+        <input type="range" id="C_node_server" min="0" max="50000" value="10000" step="5"
+               oninput="updateValue('v_node_server', this.value); updateAITip()">
+        <span id="v_node_server">10000</span>
+      </label>
 
-<label for="C_node_infra" data-tooltip="Set the cost for cooling and power distribution units per node in EUR.">
-  Node Infrastructure (€):
-  <input type="range" id="C_node_infra" min="0" max="25000" value="5000" step="5" oninput="updateValue('v_node_infra', this.value)">
-  <span id="v_node_infra">5000</span>
-</label>
+      <label for="C_node_infra" data-tooltip="Cost for cooling and power distribution units.">
+        Node Infrastructure (€):
+        <input type="range" id="C_node_infra" min="0" max="25000" value="5000" step="5"
+               oninput="updateValue('v_node_infra', this.value); updateAITip()">
+        <span id="v_node_infra">5000</span>
+      </label>
 
-<label for="C_node_facility" data-tooltip="Set the cost for data center space and setup in EUR.">
-  Node Facility (€):
-  <input type="range" id="C_node_facility" min="0" max="25000" value="0" step="5" oninput="updateValue('v_node_facility', this.value)">
-  <span id="v_node_facility">0</span>
-</label>
+      <label for="C_node_facility">
+        Node Facility (€):
+        <input type="range" id="C_node_facility" min="0" max="25000" value="0" step="5"
+               oninput="updateValue('v_node_facility', this.value); updateAITip()">
+        <span id="v_node_facility">0</span>
+      </label>
 
-<label for="C_software" data-tooltip="Set the cost for the software stack, including drivers and software licenses in EUR.">
-  Software (€):
-  <input type="range" id="C_software" min="0" max="25000" value="5000" step="5" oninput="updateValue('v_software', this.value)">
-  <span id="v_software">5000</span>
-</label>
-
+      <label for="C_software">
+        Software (€):
+        <input type="range" id="C_software" min="0" max="25000" value="5000" step="5"
+               oninput="updateValue('v_software', this.value); updateAITip()">
+        <span id="v_software">5000</span>
+      </label>
     </fieldset>
-    </div>
+  </div>
 
-    <div id="rightColumn">
-            <fieldset>
+  <div id="rightColumn">
+    <fieldset>
       <legend>Operational Cost Parameters</legend>
 
-<!-- Operational cost parameters -->
-<label for="C_electricity" data-tooltip="Set the electricity cost in EUR per kWh.">
-  Electricity (€/kWh):
-  <input type="range" id="C_electricity" min="0" max="5" value="0.21" step="0.01" oninput="updateValue('v_electricity', this.value)">
-  <span id="v_electricity">0.21</span>
-</label>
+      <label for="C_electricity">
+        Electricity (€/kWh):
+        <input type="range" id="C_electricity" min="0" max="5" value="0.21" step="0.01"
+               oninput="updateValue('v_electricity', this.value); updateAITip()">
+        <span id="v_electricity">0.21</span>
+      </label>
 
-<label for="C_PUE" data-tooltip="Set the Power usage effectiveness (PUE) or overhead cooling factor.">
-  PUE:
-  <input type="range" id="C_PUE" min="1" max="5" value="1.2" step="0.01" oninput="updateValue('v_PUE', this.value)">
-  <span id="v_PUE">1.2</span>
-</label>
+      <label for="C_PUE">
+        PUE:
+        <input type="range" id="C_PUE" min="1" max="5" value="1.2" step="0.01"
+               oninput="updateValue('v_PUE', this.value); updateAITip()">
+        <span id="v_PUE">1.2</span>
+      </label>
 
-<label for="C_maintenance" data-tooltip="Set the maintenance and support cost per node in EUR per year, including warranty, repairs, and system management.">
-  Node Maintenance (€/year):
-  <input type="range" id="C_maintenance" min="0" max="5000" value="200" step="5" oninput="updateValue('v_maintenance', this.value)">
-  <span id="v_maintenance">200</span>
-</label>
+      <label for="C_maintenance">
+        Node Maintenance (€/year):
+        <input type="range" id="C_maintenance" min="0" max="5000" value="200" step="5"
+               oninput="updateValue('v_maintenance', this.value); updateAITip()">
+        <span id="v_maintenance">200</span>
+      </label>
 
-<label for="system_usage" data-tooltip="Set the total hours of system use per year (max. 24/7 operation).">
-  System Usage (hrs/year):
-  <input type="range" id="system_usage" min="0" max="8760" value="8760" step="5" oninput="updateValue('v_usage', this.value)">
-  <span id="v_usage">8760</span>
-</label>
+      <label for="system_usage">
+        System Usage (hrs/year):
+        <input type="range" id="system_usage" min="0" max="8760" value="8760" step="5"
+               oninput="updateValue('v_usage', this.value); updateAITip()">
+        <span id="v_usage">8760</span>
+      </label>
 
-<label for="lifetime" data-tooltip="Set the system lifetime in years.">
-  System Lifetime (years):
-  <input type="range" id="lifetime" min="1" max="100" value="5" step="1" oninput="updateValue('v_lifetime', this.value)">
-  <span id="v_lifetime">5</span>
-</label>
+      <label for="lifetime">
+        System Lifetime (years):
+        <input type="range" id="lifetime" min="1" max="100" value="5" step="1"
+               oninput="updateValue('v_lifetime', this.value); updateAITip()">
+        <span id="v_lifetime">5</span>
+      </label>
 
-<label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
-  Node Baseline Power w/o GPUs (W):
-  <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5" oninput="updateValue('v_baseline', this.value)">
-  <span id="v_baseline">500</span>
-</label>
+      <label for="W_node_baseline">
+        Node Baseline Power (W):
+        <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5"
+               oninput="updateValue('v_baseline', this.value); updateAITip()">
+        <span id="v_baseline">500</span>
+      </label>
 
-<label for="C_depreciation" data-tooltip="Set the depreciation cost over time in EUR per year, if applicable.">
-  Depreciation (€/year):
-  <input type="range" id="C_depreciation" min="0" max="25000" value="0" step="5" oninput="updateValue('v_depreciation', this.value)">
-  <span id="v_depreciation">0</span>
-</label>
+      <label for="C_depreciation">
+        Depreciation (€/year):
+        <input type="range" id="C_depreciation" min="0" max="25000" value="0" step="5"
+               oninput="updateValue('v_depreciation', this.value); updateAITip()">
+        <span id="v_depreciation">0</span>
+      </label>
 
-<label for="C_subscription" data-tooltip="Set the recurring software subscription costs in EUR per year.">
-  Software Subscription (€/year):
-  <input type="range" id="C_subscription" min="0" max="25000" value="0" step="5" oninput="updateValue('v_subscription', this.value)">
-  <span id="v_subscription">0</span>
-</label>
+      <label for="C_subscription">
+        Software Subscription (€/year):
+        <input type="range" id="C_subscription" min="0" max="25000" value="0" step="5"
+               oninput="updateValue('v_subscription', this.value); updateAITip()">
+        <span id="v_subscription">0</span>
+      </label>
 
-<label for="C_uefficiency" data-tooltip="Set the cost due to underutilization of GPU units and inefficiency in EUR per year.">
-  Utilization Inefficiency (€/year):
-  <input type="range" id="C_uefficiency" min="0" max="25000" value="0" step="5" oninput="updateValue('v_uefficiency', this.value)">
-  <span id="v_uefficiency">0</span>
-</label>
+      <label for="C_uefficiency">
+        Utilization Inefficiency (€/year):
+        <input type="range" id="C_uefficiency" min="0" max="25000" value="0" step="5"
+               oninput="updateValue('v_uefficiency', this.value); updateAITip()">
+        <span id="v_uefficiency">0</span>
+      </label>
 
-<label for="C_heatreuseperkWh" data-tooltip="Set the revenue generated from heat reuse in EUR per kWh (e.g., district heating revenue).">
-  Heat Reuse Revenue (€/kWh):
-  <input type="range" id="C_heatreuseperkWh" min="0" max="5" value="0" step="0.1" oninput="updateValue('v_heatreuseperkWh', this.value)">
-  <span id="v_heatreuseperkWh">0</span>
-</label>
+      <label for="C_heatreuseperkWh">
+        Heat Reuse Revenue (€/kWh):
+        <input type="range" id="C_heatreuseperkWh" min="0" max="5" value="0" step="0.1"
+               oninput="updateValue('v_heatreuseperkWh', this.value); updateAITip()">
+        <span id="v_heatreuseperkWh">0</span>
+      </label>
 
-<label for="Factor_heatreuse" data-tooltip="Set the factor of the heat that goes to district heating system.">
-  Heat Reuse Factor:
-  <input type="range" id="Factor_heatreuse" min="0" max="1" value="0" step="0.1" oninput="updateValue('v_Factor_heatreuse', this.value)">
-  <span id="v_Factor_heatreuse">0</span>
-</label>
-
+      <label for="Factor_heatreuse">
+        Heat Reuse Factor:
+        <input type="range" id="Factor_heatreuse" min="0" max="1" value="0" step="0.1"
+               oninput="updateValue('v_Factor_heatreuse', this.value); updateAITip()">
+        <span id="v_Factor_heatreuse">0</span>
+      </label>
     </fieldset>
-    </div>
+  </div>
 </div>
+
 <div style="text-align: center; margin-top: 20px;">
-    <button type="button" class="medium-button" onclick="calculate()">Calculate</button>
-    <button type="button" class="medium-button" onclick="resetForm()">Reset All</button> 
-    <button type="button" class="medium-button" onclick="promptPassword()">Show Model</button>
+  <button type="button" class="medium-button" onclick="calculate(); updateAITip()">Calculate</button>
+  <button type="button" class="medium-button" onclick="resetForm(); updateAITip()">Reset All</button> 
+  <button type="button" class="medium-button" onclick="promptPassword()">Show Model</button>
 </div>
-</div>    
 </form>
 
-<div style="text-align: center; margin-top: 20px;">
-	 <!-- Password Prompt -->
 <div id="password-prompt" style="display: none; margin-top: 10px;">
   <label for="password">Enter Password:</label>
   <input type="password" id="password" placeholder="Password">
   <button onclick="validatePassword()">Submit</button>
   <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
 </div>
+
+<div id="aiTips" class="ai-tips">
+  <h3>Smart Strategy Tip 💡</h3>
+  <p id="ai-tip-text">Adjusting values can help optimize your TCO!</p>
 </div>
 
-  <div id="output">
-    <h2>Results</h2>
-	<div id="resultsTable"></div>
-	<button id="download-csv" style="display: none;">Download CSV</button>
-    <div id="comparison-message-container" class="comparison-message"></div>
-	<div id="gpu-chart"></div>
-    <div id="stacked-tco-chart"></div>
-    <div id="gpuTornadoPlots"></div>
-  	<div id="sensitivityHeatmap"></div>
-  	<div id="elasticityTableContainer"></div> <!-- Elasticity table container -->
-  	<button id="download-elasticity-csv" style="display: none;">Download CSV</button>
-  </div>
+<div id="output">
+  <h2>Results</h2>
+  <div id="resultsTable"></div>
+  <button id="download-csv" style="display: none;">Download CSV</button>
+  <div id="comparison-message-container" class="comparison-message"></div>
+  <div id="gpu-chart"></div>
+  <div id="stacked-tco-chart"></div>
+  <div id="gpuTornadoPlots"></div>
+  <div id="sensitivityHeatmap"></div>
+  <div id="elasticityTableContainer"></div>
+  <button id="download-elasticity-csv" style="display: none;">Download CSV</button>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
-
-  <script src="main.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
+<script src="main.js" defer></script>
 </body>
-
 </html>

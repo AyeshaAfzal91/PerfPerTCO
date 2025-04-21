@@ -1215,6 +1215,78 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// This function updates the tip based on slider values
+function updateAITip(event) {
+  const id = event?.target?.id || "default";
+  let tip = "💡 Adjusting values can help optimize your TCO!";
+
+  switch (id) {
+    case "total_budget":
+      tip = "💡 With a high budget, you can focus on premium components for better performance. Higher budget gives flexibility, but consider diminishing returns!";
+      break;
+    case "C_node_server":
+      tip = "💡 Server cost significantly impacts capital expenses. Choose wisely. Investing in higher node server costs may result in better long-term performance.";
+      break;
+    case "C_node_infra":
+      tip = "💡 High infrastructure costs might impact the overall TCO, consider more efficient setups with power and cooling consolidation.";
+      break;
+    case "C_node_facility":
+      tip = "💡 Optimize facility overhead if co-locating or using containerized systems. Facility costs may be low if you're co-locating equipment.";
+      break;
+    case "C_software":
+      tip = "💡 High software costs? Consider academic/open-source solutions or alternative software packages.";
+      break;
+    case "C_electricity":
+      tip = "💡 Electricity is a major operating cost, consider more energy-efficient solutions.. Efficient hardware = long-term savings.";
+      break;
+    case "C_PUE":
+      tip = "💡 Lower PUE improves energy efficiency. Lower = better. Target ≤1.3 if possible.";
+      break;        
+    case "C_maintenance":
+      tip = "💡 High maintenance costs? You may want to review your hardware warranty and support contracts. Maintenance costs grow over time. Consider long-term warranties to reduce Annual maintenance adds up.";
+      break; 
+    case "system_usage":
+      tip = "💡 Higher system usage increases amortization but also operational cost. More hours per year = better GPU utilization. With lower system usage, you might optimize costs by lowering the power consumption.";
+      break;    
+    case "lifetime":
+      tip = "💡 Longer lifetime reduces yearly cost but may increase risk of obsolescence.";
+      break;      
+    case "W_node_baseline":
+      tip = "💡 Baseline power matters. Lower baseline power = less wasted energy during idle workloads. Consider optimizing the power usage of nodes for better operational efficiency.";
+      break;  
+    case "C_depreciation":
+      tip = "💡 Depreciation impacts financial reporting. Keep it aligned with hardware lifecycle. High depreciation values may reduce your overall return on investment. Consider reviewing your asset management.";
+      break;
+    case "C_subscription":
+      tip = "💡 Subscriptions add recurring costs. Compare long-term licensing vs. perpetual. Look for alternative pricing models.";
+      break;
+    case "C_uefficiency":
+      tip = "💡 Utilization inefficiency means idle GPUs. Underutilized GPUs are costly, aim for workload balancing. Monitor workloads and consider optimizing system usage.";
+      break;
+    case "C_heatreuseperkWh":
+    case "Factor_heatreuse":
+      tip = "💡 Heat reuse offsets electricity costs. A higher heat reuse factor will significantly reduce effective energy costs. Optimize your heat recovery system!";
+      break;
+    case "benchmarkId":
+      tip = "💡 Benchmark choice impacts performance and power estimates. Choose the closest match to your workload.";
+      break;
+    case "workload":
+      tip = "💡 Choose between GROMACS or AMBER based on your scientific simulation needs.";
+      break;
+    default:
+      tip = "💡 Adjusting values can help optimize your TCO!";
+  }
+
+  document.getElementById("ai-tip-text").innerText = tip;
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('input[type="range"], input[type="number"], select').forEach(input => {
+    input.addEventListener("input", updateAITip);
+  });
+});
+
 
 const footer = document.createElement('div');
 footer.style.marginTop = "40px";

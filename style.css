@@ -504,3 +504,19 @@ body.dark .dark-message strong {
   color: white; /* Ensure strong text is white too */
 }
 
+.ai-tips {
+  background-color: #f0f8ff;
+  color: #333;
+  padding: 16px;
+  border-left: 4px solid #4a90e2;
+  margin-top: 20px;
+  border-radius: 6px;
+  max-width: 1300px;
+  font-size: 14px;
+}
+body.dark .ai-tips {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+  border-left-color: #77aaff;
+}
+
