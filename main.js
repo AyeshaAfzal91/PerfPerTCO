@@ -499,6 +499,8 @@ const performanceRatio = maxResult.perf_per_tco / minResult.perf_per_tco;
 // Now let's append the comparison message to the screen below the table.
 const comparisonMessageContainer = document.getElementById("comparison-message-container");
 
+comparisonMessageContainer.classList.add('dark-message');
+
 const comparisonMessage = `
   <p><strong>With the fixed budget of €${total_budget.toLocaleString()},</strong></p>
   <p>The ${maxResult.n_gpu} ${maxResult.name} GPUs (the highest Performance per TCO)</p>
