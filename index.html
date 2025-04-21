@@ -9,6 +9,14 @@
 <body>
   <h1>Performance Per TCO Calculator</h1>
 
+ <div id="themeToggleContainer">
+  <label class="theme-switch">
+    <input type="checkbox" id="themeToggle">
+    <span class="slider"></span>
+    <span class="emoji" id="themeIcon">🌞</span>
+  </label>
+</div>
+
   <section id="about">
     <p>
       This calculator estimates the performance per Total Cost of Ownership (TCO) for GPU-based compute systems.
@@ -162,6 +170,7 @@
 </div>
 <div style="text-align: center; margin-top: 20px;">
     <button type="button" class="medium-button" onclick="calculate()">Calculate</button>
+    <button type="button" class="medium-button" onclick="resetForm()">Reset All</button> 
     <button type="button" class="medium-button" onclick="promptPassword()">Show Formula</button>
 </div>
 </div>    
