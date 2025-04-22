@@ -342,6 +342,11 @@ function calculate() {
   const F_heatreuse = getSliderValue("Factor_heatreuse");
   const total_budget = getSliderValue("total_budget");
 
+if (workload === "GROMACS" && benchmarkId > 7) {
+  alert("⚠️ GROMACS benchmark data is only available up to ID 7.\nPlease select a lower Benchmark ID.");
+  return;
+}
+
 let baseline_perf_tco = 0;
 const results = [];
 const capital_components = [];
