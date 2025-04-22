@@ -4,7 +4,7 @@
  */
 
 
-const GPU_data = [
+const activeGPUData = [
   {
     name: "H100",
     cost: 25818 * 1.19, // Final cost with VAT
@@ -165,6 +165,10 @@ const GPU_data = [
     per_node: 8,
   }
 ];
+
+if (typeof GPU_data === "undefined") {
+  var GPU_data = [...activeGPUData];
+}
 
 function updateValue(spanId, val) {
   document.getElementById(spanId).innerText = val;
@@ -1413,10 +1417,12 @@ function validateAndAppendJSON(data, status) {
     }
   }
 
-  GPU_data.push(...data);
+  GPU_data = data;
+
   status.innerText = `✅ Loaded ${data.length} GPU(s). You can now calculate.`;
   status.style.color = "green";
 }
+
 
 function parseCSVToGPUData(csvText) {
   const rows = csvText.trim().split("\n");
