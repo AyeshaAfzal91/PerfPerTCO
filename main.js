@@ -1381,25 +1381,37 @@ function validateAndAppendJSON(data, status) {
 
 function parseCSVToGPUData(csvText) {
   const rows = csvText.trim().split("\n");
+  const header = rows[0].split(",");
   const data = [];
+  const gpuMap = {};
 
   for (let i = 1; i < rows.length; i++) {
     const cols = rows[i].split(",");
     const [name, cost, per_node, workload, benchId, perf, power] = cols;
 
-    const gpu = {
-      name,
-      cost: parseFloat(cost),
-      per_node: parseInt(per_node),
-      perf: { [workload]: { [benchId]: parseFloat(perf) } },
-      power: { [workload]: { [benchId]: parseFloat(power) } }
-    };
+    if (!gpuMap[name]) {
+      gpuMap[name] = {
+        name,
+        cost: parseFloat(cost),
+        per_node: parseInt(per_node),
+        perf: {},
+        power: {}
+      };
+    }
 
-    data.push(gpu);
+    const gpu = gpuMap[name];
+
+    if (!gpu.perf[workload]) gpu.perf[workload] = {};
+    if (!gpu.power[workload]) gpu.power[workload] = {};
+
+    gpu.perf[workload][benchId] = parseFloat(perf);
+    gpu.power[workload][benchId] = parseFloat(power);
   }
 
-  return data;
+  // Convert map to array
+  return Object.values(gpuMap);
 }
+
 
 function exportGPUDataJSON() {
   const blob = new Blob([JSON.stringify(GPU_data, null, 2)], { type: "application/json" });
