@@ -211,6 +211,7 @@
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()">Calculate</button>
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()">Reset All</button> 
   <button type="button" class="medium-button" onclick="promptPassword()">Show Model</button>
+  <button type="button" onclick="generatePDFReport()">🖨️ Generate PDF Report</button>
 </div>
 </form>
 
@@ -240,6 +241,8 @@
   <div id="elasticityTableContainer"></div>
   <button id="download-elasticity-csv" style="display: none;">Download CSV</button>
 </div>
+<div id="report-container" style="display: none;"></div>
+
 
 <div id="blog-output-container" style="margin-top: 40px;">
   <h2>📝 Auto-Generated Blog Summary</h2>
@@ -252,6 +255,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script src="main.js" defer></script>
 </body>
 </html>
