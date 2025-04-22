@@ -58,15 +58,71 @@
         <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique shareable public URLs with embedded settings.</li>
         <li><strong>API Access:</strong> Programmatic access to benchmark and calculation engine for researchers/devs.</li>
         <li><strong>Detailed PDF Report Generator:</strong> Export project report with charts and explanations.</li>
+          <li><strong>Currency Selector:</strong> supporting USD, GBP, INR, and more.</li>
+          <li><strong>Hardware Configuration Assistant</strong></li>
       </ul>
 
-        <h2> Optional Features?</h2>
+
+        <h2> Model Assessment of Current Extensions; 🚦Overengineered?</h2>
+<ul>
+    <li>
+        <strong>❓ Cooling Types & PUE Modeling</strong>
         <ul>
-          <li>Currency Selector, supporting USD, GBP, INR, and more.</li>
-          <li>Carbon Footprint Estimator</li>
-          <li>Multi-Year TCO Projection with Depreciation Curves</li>
-          <li>Hardware Configuration Assistant</li>
+            <li><strong>Model:</strong> PUE = (factor_air * PUE_Air + factor_water * PUE_Water) / 2</li>
+            <li><strong>Comment:</strong> Incorporates cooling types (air-cooled, water-cooled), weighting factors, and heat dissipation shares to model heterogeneous clusters.</li>
         </ul>
+    </li>
+    <li>
+        <strong>❓ Maintenance Cost Split: Capital vs. Operational</strong>
+        <ul>
+            <li><strong>Comment:</strong> Capital cost applies to the first 3 years (as per DFG rules), while operational cost covers the remaining lifetime.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>❓ Hardware vs. Software Maintenance Split</strong>
+    </li>
+    <li>
+        <strong>❓ Software Cost Dependency on Node Count</strong>
+        <ul>
+            <li><strong>Comment:</strong> Many commercial licenses scale with node count, such as Moya scheduler, SUSE Enterprise, or IBM file systems like GPFS.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>❓ Data Center Temperature as a Factor</strong>
+        <ul>
+            <li><strong>Comment:</strong> Temperature is a side effect of cooling infrastructure; efforts to reduce it (e.g., via chilled air or cooling systems) must be factored into the TCO.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>❓ CO2 Emission Factor</strong>
+        <ul>
+            <li><strong>Comment:</strong> Assumes 100% green electricity usage at FAU.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>❓ Net Present Value (NPV) Factor</strong>
+        <ul>
+            <li><strong>Comment:</strong> NPV compares the value of future cash flows to the initial investment. Clearly define cash flow periods in the model.</li>
+        </ul>
+    </li>
+                      <li> ❓Multi-Year TCO Projection with Depreciation Curves</li>
+    <li>
+        <strong>⚠️ Conflict: Billed per hour vs. per kWh</strong>
+        <ul>
+            <li><strong>Comment:</strong> A high-efficiency application may consume more power but finish faster—lowering runtime costs while increasing energy bills. Flag in documentation or include as a toggle option.</li>
+        </ul>
+    </li>
+    <li>
+        <strong> ✅ Frequency Factor</strong>
+        <ul>
+            <li><strong>Model:</strong> W_node_baseline(f_cCPU, f_ucCPU) = W_baseCPU + W_dynamicCPU + W_noncompute</li>
+            <li><strong>Model:</strong> W_gpu(f_GPU)</li>
+            <li><strong>Comment:</strong> f_cCPU represents core CPU frequency, f_ucCPU represents uncore CPU frequency, and f_GPU represents GPU frequency.</li>
+        </ul>
+    </li>
+</ul>
+
+    </ul>
         
     </section>
     </div>

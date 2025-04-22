@@ -166,7 +166,6 @@ const GPU_data = [
   }
 ];
 
-
 function updateValue(spanId, val) {
   document.getElementById(spanId).innerText = val;
 }
@@ -190,7 +189,6 @@ function resetForm() {
     previousState[id] = (el.type === "checkbox") ? el.checked : el.value;
   });
 
-  // Now actually reset
   const defaultValues = {
     workload: "GROMACS", benchmarkId: 4, total_budget: 10000000, sameGpuCheckbox: false,
     C_node_server: 10000, C_node_infra: 5000, C_node_facility: 0, C_software: 5000,
@@ -231,12 +229,45 @@ function resetForm() {
   document.getElementById("gpuTornadoPlots").innerHTML = "";
   document.getElementById("sensitivityHeatmap").innerHTML = "";
   document.getElementById("elasticityTableContainer").innerHTML = "";
+  document.getElementById("blogOutput").value = "";
   document.getElementById("download-csv").style.display = "none";
   document.getElementById("download-elasticity-csv").style.display = "none";
 
-  showUndoToast("Calculator has been reset. ", restorePreviousState);
+  // Remove extra chart titles and download buttons
+  const elementsToRemove = [
+    "chart-title-perf-tco",
+    "chart-title-tco-breakdown",
+    "gpu-download-btn",
+    "download-btn",
+    "heatmap-download-btn"
+  ];
+
+  elementsToRemove.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+
+  document.querySelectorAll(".chart-title").forEach(el => {
+    if ([
+      "Heatmap: Sensitivity of Parameters across GPUs",
+      "Performance per TCO and GPU Count by GPU Type",
+      "TCO Breakdown (Capital vs Operational costs)"
+    ].includes(el.innerText.trim())) {
+      el.remove();
+    }
+  });
+  
+  // Clear uploaded file input
+const fileInput = document.getElementById("gpuConfigUploadMain");
+if (fileInput) {
+  fileInput.value = "";
+  document.getElementById("uploadStatusMain").innerText = ""; // Clear any status text
 }
 
+  showUndoToast("Calculator has been reset. ", restorePreviousState);
+}
 
 function restorePreviousState() {
   if (!previousState) return;
@@ -314,13 +345,15 @@ function showToast(message) {
   }, 2000);
 }
 
-
-
 function getSliderValue(id) {
   return parseFloat(document.getElementById(id).value);
 }
 
+console.log("after getSliderValue: GPU_data used for calculation:", GPU_data.map(g => g.name));
+
 function calculate() {
+console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.name));
+
   const workload = document.getElementById("workload").value;
   const same_n_gpu = document.getElementById("sameGpuCheckbox").checked;
   const benchmarkId = parseInt(document.getElementById("benchmarkId").value); // Get benchmarkId
@@ -848,7 +881,7 @@ document.getElementById('download-btn').addEventListener('click', () => {
 // Add the chart title if it doesn't exist already
 if (!document.getElementById('chart-title')) {
   const chartTitleDiv = document.createElement('div');
-  chartTitleDiv.id = 'chart-title';  // Give it an ID to avoid duplication
+  chartTitleDiv.id = 'chart-title-tco-breakdown';  // Give it an ID to avoid duplication
   chartTitleDiv.classList.add('chart-title');
   chartTitleDiv.innerHTML = 'TCO Breakdown (Capital vs Operational costs)';
   document.getElementById('stacked-tco-chart').parentElement.insertBefore(chartTitleDiv, document.getElementById('stacked-tco-chart'));
@@ -1478,6 +1511,7 @@ function exportGPUDataCSV() {
     };
 
     reader.readAsText(file);
+
   }
 
 // generatePDFReport

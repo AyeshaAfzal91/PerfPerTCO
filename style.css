@@ -30,7 +30,7 @@ h2 {
 
 h3 {
     font-size: 1.2em;  /* Slightly smaller size for third-level headings */
-    margin-top: 30px;  /* Add more space at the top for separation */
+    margin-top: 20px;  /* Add more space at the top for separation */
     margin-bottom: 20px;  /* Add space below the heading */
 }
 
@@ -507,11 +507,11 @@ body.dark .dark-message strong {
 .ai-tips {
   background-color: #f0f8ff;
   color: #333;
-  padding: 16px;
-  border-left: 4px solid #4a90e2;
-  margin-top: 20px;
+  padding: 4px;
+  border-left: 10px solid #4a90e2;
+  margin-top: -40px;
   border-radius: 6px;
-  max-width: 1300px;
+  max-width: 1280px;
   font-size: 14px;
 }
 body.dark .ai-tips {
