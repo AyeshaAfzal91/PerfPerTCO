@@ -53,27 +53,27 @@
     <section id="roadmap">
 <h2>Planned Features</h2>
 <ul>
-  <li><strong>Benchmark/GPU Database Expansion:</strong> Support for more and mixed workloads and includes export config with licensing notes. Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
+  <li><strong>Benchmark/GPU Database Expansion:</strong> Support for more and mixed workloads. Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
   
   <li><strong>Preset Profiles:</strong> Top 10 clusters from the Top500 or Green500 list, etc.</li>
-  
+
+  <li><strong>Scenario Comparison Tool / What-if Simulator:</strong> Show side-by-side summaries of two or more configurations in memory (or localStorage) / Display delta changes relative to a saved baseline.</li>
+
+  <li><strong>Configuration Recommendation Engine:</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). Currently only provides a basic rule-based Smart Strategy Tip.</li>
+
+  <li><strong>Detailed PDF Report Generator:</strong> Export project reports with charts and explanations and add a report format toggle (Summary vs. Detailed). Currently offers only a simple PDF report generator.</li>
+    
   <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique, bookmarkable, shareable public URLs with embedded settings. Currently includes a simple auto-generated blog summary share option.</li>
   
   <li><strong>Programmatic Access:</strong> API access to the benchmark and calculation engine for researchers and developers. Currently limited to a private GitHub repository.</li>
-  
-  <li><strong>Detailed PDF Report Generator:</strong> Export project reports with charts and explanations and add a report format toggle (Summary vs. Detailed). Currently offers only a simple PDF report generator.</li>
-  
-  <li><strong>Scenario Comparison Tool / What-if Simulator:</strong> Show side-by-side summaries of two or more configurations in memory (or localStorage) / Display delta changes relative to a saved baseline.</li>
-    
-  <li><strong>Configuration Recommendation Engine:</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). Currently only provides a basic rule-based Smart Strategy Tip.</li>
-
+      
   <li><strong>Currency Selector:</strong> Support for USD, GBP, INR, and more. Currently only supports EUR.</li>
 
   <li><strong>SEO Optimization :</strong> Add meta tags, sitemap.xml, alt text.</li>
  
   <li><strong>Improved Visualisation:</strong>
     <ul>
-      <li><strong>Multi-Year Cost Projection:</strong> Visualize how total cost accumulates over the system’s lifetime (X-axis: 0 to lifetime in years; Y-axis: €).</li>
+      <li><strong>Multi-Year TCO Projection with/wo Depreciation Curves:</strong> Visualize how total cost accumulates over the system’s lifetime. GPU cluster loses value over time affects Accounting, TCO realism and ROI and resale value (X-axis: 0 to lifetime in years; Y-axis: Cumulative TCO as a line and Depreciated asset value as shaded area).</li>
       
       <li><strong>Heatmap:</strong> GPU × Benchmark performance and power visualization. Currently only available for sensitivity analysis.</li>
       
@@ -128,7 +128,6 @@
             <li><strong>Comment:</strong> NPV compares the value of future cash flows to the initial investment. Clearly define cash flow periods in the model.</li>
         </ul>
     </li>
-                      <li> ❓Multi-Year TCO Projection with Depreciation Curves</li>
     <li>
         <strong>⚠️ Conflict: Billed per hour vs. per kWh</strong>
         <ul>
@@ -140,7 +139,7 @@
         <ul>
             <li><strong>Model:</strong> W_node_baseline(f_cCPU, f_ucCPU) = W_baseCPU + W_dynamicCPU + W_noncompute</li>
             <li><strong>Model:</strong> W_gpu(f_GPU)</li>
-            <li><strong>Comment:</strong> f_cCPU represents core CPU frequency, f_ucCPU represents uncore CPU frequency, and f_GPU represents GPU frequency.</li>
+            <li><strong>Comment:</strong> f_cCPU, f_ucCPU and f_GPU represents core CPU frequency, uncore CPU frequency and GPU frequency. Example: On Alex, 11.6% CPU power, 55% GPU power, and 33.4% non-compute components power (6% Fan power and 27.4% other non-compute components power) </li>
         </ul>
     </li>
 </ul>
