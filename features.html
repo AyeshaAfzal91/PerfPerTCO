@@ -51,16 +51,37 @@
     </section>
 
     <section id="roadmap">
-      <h2>Planned Features</h2>
-      <ul>
-        <li><strong>Benchmark Database Expansion:</strong> More workloads; Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users.</li>
-        <li><strong>Preset Profiles:</strong>  Top 10 Clusters from Top500 of Green500 list, etc.</li>
-        <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique shareable public URLs with embedded settings; Currently simple Auto-Generated Blog Summary share option</li>
-        <li><strong>Programmatic Access:</strong> Programmatic access to benchmark and calculation engine for researchers/devs; Currently its private GitHub repo</li>
-        <li><strong>Detailed PDF Report Generator:</strong> Export project report with charts and explanations; Currently only simple PDF Report Generator.</li>
-        <li><strong>Currency Selector:</strong> supporting USD, GBP, INR, and more; Currently only EUR</li>
-        <li><strong>Hardware Configuration Assistant; Currently only simple Smart Strategy Tip</strong></li>
-      </ul>
+<h2>Planned Features</h2>
+<ul>
+  <li><strong>Benchmark/GPU Database Expansion:</strong> Support for more workloads and includes export config with licensing notes. Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
+  
+  <li><strong>Preset Profiles:</strong> Top 10 clusters from the Top500 or Green500 list, etc.</li>
+  
+  <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique, bookmarkable, shareable public URLs with embedded settings. Currently includes a simple auto-generated blog summary share option.</li>
+  
+  <li><strong>Programmatic Access:</strong> API access to the benchmark and calculation engine for researchers and developers. Currently limited to a private GitHub repository.</li>
+  
+  <li><strong>Detailed PDF Report Generator:</strong> Export project reports with charts and explanations and add a report format toggle (Summary vs. Detailed). Currently offers only a simple PDF report generator.</li>
+  
+  <li><strong>Scenario Comparison Tool / What-if Simulator:</strong> Show side-by-side summaries of two or more configurations in memory (or localStorage) / Display delta changes relative to a saved baseline.</li>
+  
+  <li><strong>Currency Selector:</strong> Support for USD, GBP, INR, and more. Currently only supports EUR.</li>
+  
+  <li><strong>Configuration Recommendation Engine:</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). Currently only provides a basic Smart Strategy Tip.</li>
+  
+  <li><strong>Improved Visualisation:</strong>
+    <ul>
+      <li><strong>Multi-Year Cost Projection:</strong> Visualize how total cost accumulates over the system’s lifetime (X-axis: 0 to lifetime in years; Y-axis: €).</li>
+      
+      <li><strong>Heatmap:</strong> GPU × Benchmark performance and power visualization. Currently only available for sensitivity analysis.</li>
+      
+      <li><strong>TCO Breakdown Pie Chart:</strong> Currently only a stacked chart is available.</li>
+      
+      <li><strong>Monte Carlo / Uncertainty Analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results.</li>
+    </ul>
+  </li>
+</ul>
+
 
 
         <h2> Model Assessment of Current Extensions; 🚦Overengineered?</h2>
