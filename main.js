@@ -53,12 +53,13 @@ function maybeRefreshGPUPrices() {
 
   if (!cacheTimestamp || (now - cacheTimestamp) > oneDay) {
     console.log("🔄 Cache expired. Fetching fresh GPU prices...");
-    fetchGPUPrices();
+    updateGPUPrices();
   } else {
     console.log("✅ Using cached GPU prices.");
     loadCachedGPUPrices();
   }
 }
+
 
 
 const activeGPUData = [
