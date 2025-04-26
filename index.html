@@ -207,9 +207,13 @@
   </div>
 </div>
 
+<div id="aiTips" class="ai-tips">
+  <h3>Smart Strategy Tip 💡</h3>
+  <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
+</div>
 
-<fieldset style="margin-top: 20px; text-align: center;">
-  <legend>Price Source</legend>
+<fieldset style="margin-top: 0px; text-align: center;">
+  <legend>GPU Price Source</legend>
   
   <label style="margin-right: 15px;">
     <input type="radio" name="priceSource" value="static" checked onchange="handlePriceSourceChange()">
@@ -222,15 +226,12 @@
   </label>
 </fieldset>
 
-<div id="aiTips" class="ai-tips">
-  <h3>Smart Strategy Tip 💡</h3>
-  <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
-</div>
-
 <div style="text-align: center; margin-top: 20px;">
-  <button type="button" class="medium-button" onclick="calculate(); updateAITip()">Calculate</button>
-  <button type="button" class="medium-button" onclick="resetForm(); updateAITip()">Reset All</button> 
-  <button type="button" class="medium-button" onclick="maybeRefreshGPUPrices()">🔄 Refresh GPU Prices</button>
+  <button type="button" class="medium-button" onclick="calculate(); updateAITip()"> 🧮 Calculate</button>
+  <button type="button" class="medium-button" onclick="resetForm(); updateAITip()"> 🔄 Reset All</button> 
+  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
+  <button type="button" class="medium-button" onclick="generatePDFReport()">🖨️ Generate PDF Summary Report</button>
+  <button type="button" class="medium-button" onclick="maybeRefreshGPUPrices()">🔄 Refresh Live GPU Prices</button>
   <!-- Spinner (Hidden by Default) -->
 <div id="loading-spinner" style="display: none; margin-top: 10px;">
   <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
@@ -240,10 +241,12 @@
 <p id="last-updated" style="font-size: 0.9em; margin-top: 10px; color: gray;">
   Last Updated: Never
 </p>
-
-  <button type="button" class="medium-button" onclick="promptPassword()">Show Model</button>
-  <button type="button" onclick="generatePDFReport()">🖨️ Generate PDF Report</button>
 </div>
+<div id="price-difference-panel" style="margin-top: 20px;">
+  <h3>📈 Price Change Summary</h3>
+  <ul id="price-difference-list" style="list-style-type: none; padding-left: 0;"></ul>
+</div>
+
 </form>
 
 <div id="password-prompt" style="display: none; margin-top: 10px;">

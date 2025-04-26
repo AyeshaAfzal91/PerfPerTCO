@@ -21,16 +21,14 @@ async function updateGPUPrices() {
     activeGPUData.forEach(gpu => {
       if (updatedPrices[gpu.name]) {
         gpu.cost = updatedPrices[gpu.name] * 1.19; // add VAT
+        gpu.priceSource = "Live"; // ✅ mark it
       }
     });
 
     console.log("✅ Updated GPU prices:", updatedPrices);
-
-    // Save in localStorage
     localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
     localStorage.setItem('cacheTimestamp', Date.now());
 
-    // Update Last Updated Timestamp
     const now = new Date();
     document.getElementById('last-updated').innerText = "Last Updated: " + now.toLocaleString();
 
@@ -41,6 +39,7 @@ async function updateGPUPrices() {
     document.getElementById('loading-spinner').style.display = 'none'; // Hide spinner
   }
 }
+
 
 function loadCachedGPUPrices() {
   const cached = localStorage.getItem('cachedGPUPrices');
@@ -70,29 +69,38 @@ function maybeRefreshGPUPrices() {
 }
 
 let selectedPriceSource = "static"; // default
+let previousPrices = {}; // Store prices before switch
 
 function handlePriceSourceChange() {
   const radios = document.getElementsByName('priceSource');
   for (const radio of radios) {
     if (radio.checked) {
       selectedPriceSource = radio.value;
-      console.log("Selected Price Source:", selectedPriceSource);
       break;
     }
   }
+
+  // Save current prices before switching
+  previousPrices = {};
+  activeGPUData.forEach(gpu => {
+    previousPrices[gpu.name] = gpu.cost;
+  });
+
   updatePricesAccordingToSelection();
 }
 
+
 function updatePricesAccordingToSelection() {
   if (selectedPriceSource === "live") {
-    loadCachedGPUPrices(); // load live prices from localStorage
+    loadCachedGPUPrices();
   } else {
-    loadStaticGPUPrices(); // restore default static prices
+    loadStaticGPUPrices();
   }
+  compareAndShowPriceDifferences(); 
 }
 
+
 function loadStaticGPUPrices() {
-  // Rebuild your activeGPUData with original static prices
   activeGPUData.forEach(gpu => {
     switch (gpu.name) {
       case "H100":
@@ -117,9 +125,42 @@ function loadStaticGPUPrices() {
         gpu.cost = 6100 * 1.19;
         break;
     }
+    gpu.priceSource = "Static"; // ✅ Mark Static
   });
 
   console.log("✅ Restored static GPU prices.");
+}
+
+
+function compareAndShowPriceDifferences() {
+  const list = document.getElementById('price-difference-list');
+  list.innerHTML = ''; // Clear previous results
+
+  activeGPUData.forEach(gpu => {
+    const oldPrice = previousPrices[gpu.name];
+    const newPrice = gpu.cost;
+
+    if (oldPrice && newPrice) {
+      const diff = newPrice - oldPrice;
+      const percentChange = (diff / oldPrice) * 100;
+
+      const listItem = document.createElement('li');
+      listItem.style.marginBottom = '8px';
+
+      if (diff > 0) {
+        listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
+        listItem.style.color = 'red';
+      } else if (diff < 0) {
+        listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: ${percentChange.toFixed(2)}% cheaper`;
+        listItem.style.color = 'green';
+      } else {
+        listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
+        listItem.style.color = 'gray';
+      }
+
+      list.appendChild(listItem);
+    }
+  });
 }
 
 const activeGPUData = [
@@ -599,7 +640,7 @@ GPU_data.forEach((gpu, i) => {
 
   // Push results for this GPU
   results.push({
-    name: gpu.name,
+    name: gpu.name + (gpu.priceSource ? ` (${gpu.priceSource})` : ''),
     n_gpu,
     total_cost: used_budget,
     perf_per_tco,
