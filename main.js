@@ -14,8 +14,13 @@ async function updateGPUPrices() {
       const response = await fetch(`/.netlify/functions/fetch-price?gpu=${gpu}`);
       const data = await response.json();
       if (data.price) {
-        updatedPrices[gpu] = data.price;
-      }
+  updatedPrices[gpu] = data.price;
+  const matchingGpu = activeGPUData.find(g => g.name === gpu);
+  if (matchingGpu) {
+    matchingGpu.cost = data.price * 1.19;
+    matchingGpu.priceSource = data.source === "static" ? "Static" : "Live"; // 🔧 fix here
+  }
+}
     }
 
     activeGPUData.forEach(gpu => {
