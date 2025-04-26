@@ -13,14 +13,13 @@ async function updateGPUPrices() {
     for (const gpu of gpuNames) {
       const response = await fetch(`/.netlify/functions/fetch-price?gpu=${gpu}`);
       const data = await response.json();
-      if (data.price) {
-  updatedPrices[gpu] = data.price;
-  const matchingGpu = activeGPUData.find(g => g.name === gpu);
-  if (matchingGpu) {
-    matchingGpu.cost = data.price * 1.19;
-    matchingGpu.priceSource = data.source === "static" ? "Static" : "Live"; // 🔧 fix here
-  }
+if (data.price) {
+  updatedPrices[gpu] = {
+    price: data.price,
+    source: data.source || "live"
+  };
 }
+
     }
 
     activeGPUData.forEach(gpu => {
@@ -31,7 +30,7 @@ async function updateGPUPrices() {
     });
 
     console.log("✅ Updated GPU prices:", updatedPrices);
-    localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
+localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
     localStorage.setItem('cacheTimestamp', Date.now());
 
     const now = new Date();
@@ -132,14 +131,16 @@ function loadCachedGPUPrices() {
   if (cached) {
     const parsed = JSON.parse(cached);
     activeGPUData.forEach(gpu => {
-      if (parsed[gpu.name]) {
-        gpu.cost = parsed[gpu.name] * 1.19;
-        gpu.priceSource = "Live"; // ✅ Very important!
+      const cachedData = parsed[gpu.name];
+      if (cachedData) {
+        gpu.cost = cachedData.price * 1.19;
+        gpu.priceSource = cachedData.source === "static" ? "Static" : "Live";
       }
     });
     console.log("✅ Loaded GPU prices from local cache.");
   }
 }
+
 
 
 function compareOldAndNewPrices() {
