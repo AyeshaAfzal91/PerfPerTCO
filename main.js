@@ -68,42 +68,6 @@ function maybeRefreshGPUPrices() {
   }
 }
 
-let selectedPriceSource = "static"; // default
-let previousPrices = {}; // Store prices before switch
-
-function handlePriceSourceChange() {
-  const radios = document.getElementsByName('priceSource');
-  for (const radio of radios) {
-    if (radio.checked) {
-      selectedPriceSource = radio.value;
-      break;
-    }
-  }
-
-  // Save current prices before switching
-  previousPrices = {};
-activeGPUData.forEach(gpu => {
-  previousPrices[gpu.name] = {
-    cost: gpu.cost,
-    source: gpu.priceSource || "Static" // Default if missing
-  };
-});
-
-
-  updatePricesAccordingToSelection();
-}
-
-
-function updatePricesAccordingToSelection() {
-  if (selectedPriceSource === "live") {
-    loadCachedGPUPrices();
-  } else {
-    loadStaticGPUPrices();
-  }
-  compareAndShowPriceDifferences(); 
-}
-
-
 function loadStaticGPUPrices() {
   activeGPUData.forEach(gpu => {
     switch (gpu.name) {
@@ -135,45 +99,80 @@ function loadStaticGPUPrices() {
   console.log("✅ Restored static GPU prices.");
 }
 
+let selectedPriceSource = "static"; // default
+let previousPrices = {}; // Store prices before switch
+
+function handlePriceSourceChange() {
+  const radios = document.getElementsByName('priceSource');
+  for (const radio of radios) {
+    if (radio.checked) {
+      selectedPriceSource = radio.value;
+      break;
+    }
+  }
+
+  updatePricesAccordingToSelection().then(() => {
+    saveCurrentPrices(); // ✅ AFTER updating prices
+    compareAndShowPriceDifferences();
+  });
+}
+
+async function updatePricesAccordingToSelection() {
+  if (selectedPriceSource === "live") {
+    await loadCachedGPUPrices(); // wait till prices loaded
+  } else {
+    await loadStaticGPUPrices(); // wait till prices loaded
+  }
+}
+
+function saveCurrentPrices() {
+  previousPrices = {};
+  activeGPUData.forEach(gpu => {
+    previousPrices[gpu.name] = {
+      cost: gpu.cost,
+      source: gpu.priceSource || "Static"
+    };
+  });
+}
+
 
 function compareAndShowPriceDifferences() {
   const list = document.getElementById('price-difference-list');
-  list.innerHTML = ''; // Clear previous
+  list.innerHTML = '';
 
   activeGPUData.forEach(gpu => {
     const previous = previousPrices[gpu.name];
-    const currentPrice = gpu.cost;
+    if (!previous) return;
+
+    const currentCost = gpu.cost;
     const currentSource = gpu.priceSource;
 
-    if (previous && currentPrice) {
-      const listItem = document.createElement('li');
-      listItem.style.marginBottom = '8px';
+    const listItem = document.createElement('li');
+    listItem.style.marginBottom = '8px';
 
-      // If source changed, show real price % difference
-      if (previous.source !== currentSource) {
-        const diff = currentPrice - previous.cost;
-        const percentChange = (diff / previous.cost) * 100;
+    if (previous.source !== currentSource) {
+      const diff = currentCost - previous.cost;
+      const percentChange = (diff / previous.cost) * 100;
 
-        if (diff > 0) {
-          listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
-          listItem.style.color = 'red';
-        } else if (diff < 0) {
-          listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: ${percentChange.toFixed(2)}% cheaper`;
-          listItem.style.color = 'green';
-        } else {
-          listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
-          listItem.style.color = 'gray';
-        }
+      if (diff > 0) {
+        listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
+        listItem.style.color = 'red';
+      } else if (diff < 0) {
+        listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: ${percentChange.toFixed(2)}% cheaper`;
+        listItem.style.color = 'green';
       } else {
-        // Source did not change (Static ➔ Static or Live ➔ Live)
         listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
         listItem.style.color = 'gray';
       }
-
-      list.appendChild(listItem);
+    } else {
+      listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
+      listItem.style.color = 'gray';
     }
+
+    list.appendChild(listItem);
   });
 }
+
 
 
 
