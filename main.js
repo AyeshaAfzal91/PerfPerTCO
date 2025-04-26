@@ -72,6 +72,10 @@ let selectedPriceSource = "static"; // default
 let previousPrices = {}; // Store prices before switch
 
 function handlePriceSourceChange() {
+  // 1. Save the current state FIRST
+  saveCurrentPrices();
+
+  // 2. Then detect user choice
   const radios = document.getElementsByName('priceSource');
   for (const radio of radios) {
     if (radio.checked) {
@@ -80,11 +84,13 @@ function handlePriceSourceChange() {
     }
   }
 
+  // 3. Update to new prices
   updatePricesAccordingToSelection().then(() => {
-    saveCurrentPrices(); // ✅ AFTER updating prices
+    // 4. Compare after update
     compareAndShowPriceDifferences();
   });
 }
+
 
 async function updatePricesAccordingToSelection() {
   if (selectedPriceSource === "live") {
