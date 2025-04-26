@@ -640,7 +640,7 @@ GPU_data.forEach((gpu, i) => {
 
   // Push results for this GPU
   results.push({
-    name: gpu.name + (gpu.priceSource ? ` (${gpu.priceSource})` : ''),
+    name: gpu.name,
     n_gpu,
     total_cost: used_budget,
     perf_per_tco,
