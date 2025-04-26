@@ -1,5 +1,3 @@
-const fetch = require('node-fetch'); // Netlify provides it
-
 exports.handler = async function(event, context) {
   const gpuName = event.queryStringParameters.gpu || 'H100';
 
@@ -21,10 +19,9 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const res = await fetch(deltaPages[gpuName]);
+    const res = await fetch(deltaPages[gpuName]); // ✅ No require needed
     const html = await res.text();
 
-    // VERY basic parsing: look for € or Price keyword
     const match = html.match(/(\d{1,3}(\.\d{3})*,\d{2})\s*€/);
 
     if (!match) {
@@ -42,3 +39,4 @@ exports.handler = async function(event, context) {
     return { statusCode: 500, body: "Server error: " + err.toString() };
   }
 };
+
