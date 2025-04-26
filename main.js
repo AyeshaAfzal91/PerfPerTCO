@@ -41,19 +41,6 @@ async function updateGPUPrices() {
 }
 
 
-function loadCachedGPUPrices() {
-  const cached = localStorage.getItem('cachedGPUPrices');
-  if (cached) {
-    const parsed = JSON.parse(cached);
-    activeGPUData.forEach(gpu => {
-      if (parsed[gpu.name]) {
-        gpu.cost = parsed[gpu.name] * 1.19;
-      }
-    });
-    console.log("✅ Loaded GPU prices from local cache.");
-  }
-}
-
 function maybeRefreshGPUPrices() {
   const cacheTimestamp = localStorage.getItem('cacheTimestamp');
   const now = Date.now();
@@ -69,12 +56,10 @@ function maybeRefreshGPUPrices() {
 }
 
 let selectedPriceSource = "static"; // default
-let previousPrices = {}; // Save old prices for comparison
+let oldGPUPrices = {}; // Old prices snapshot before switching
 
-function handlePriceSourceChange() {
-  const oldSource = selectedPriceSource; // Remember old selection (Static or Live)
-  
-  saveCurrentPrices(oldSource); // ✅ Save prices with their source before changing!
+async function handlePriceSourceChange() {
+  saveOldGPUPrices(); // 1️⃣ Save old prices BEFORE switching
 
   const radios = document.getElementsByName('priceSource');
   for (const radio of radios) {
@@ -84,8 +69,17 @@ function handlePriceSourceChange() {
     }
   }
 
-  updatePricesAccordingToSelection().then(() => {
-    compareAndShowPriceDifferences();
+  await updatePricesAccordingToSelection(); // 2️⃣ Load new prices
+  compareOldAndNewPrices(); // 3️⃣ Compare old vs new prices
+}
+
+function saveOldGPUPrices() {
+  oldGPUPrices = {};
+  activeGPUData.forEach(gpu => {
+    oldGPUPrices[gpu.name] = {
+      cost: gpu.cost,
+      source: gpu.priceSource || "Static"
+    };
   });
 }
 
@@ -93,7 +87,7 @@ async function updatePricesAccordingToSelection() {
   if (selectedPriceSource === "live") {
     await loadCachedGPUPrices(); 
   } else {
-    await loadStaticGPUPrices();
+    await loadStaticGPUPrices(); 
   }
 }
 
@@ -128,34 +122,40 @@ function loadStaticGPUPrices() {
   console.log("✅ Restored static GPU prices.");
 }
 
-function saveCurrentPrices(source) {
-  previousPrices = {};
-  activeGPUData.forEach(gpu => {
-    previousPrices[gpu.name] = {
-      cost: gpu.cost,
-      source: source || "Static"
-    };
-  });
+function loadCachedGPUPrices() {
+  const cached = localStorage.getItem('cachedGPUPrices');
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    activeGPUData.forEach(gpu => {
+      if (parsed[gpu.name]) {
+        gpu.cost = parsed[gpu.name] * 1.19;
+      }
+    });
+    console.log("✅ Loaded GPU prices from local cache.");
+  }
 }
 
-function compareAndShowPriceDifferences() {
+function compareOldAndNewPrices() {
   const list = document.getElementById('price-difference-list');
   list.innerHTML = '';
 
   activeGPUData.forEach(gpu => {
-    const previous = previousPrices[gpu.name];
-    if (!previous) return;
+    const old = oldGPUPrices[gpu.name];
+    const current = gpu;
 
-    const currentCost = gpu.cost;
-    const currentSource = gpu.priceSource;
+    if (!old) return;
+
+    const oldCost = old.cost;
+    const newCost = current.cost;
+    const oldSource = old.source;
+    const newSource = current.priceSource;
 
     const listItem = document.createElement('li');
     listItem.style.marginBottom = '8px';
 
-    // Only compare if source changed
-    if (previous.source !== currentSource) {
-      const diff = currentCost - previous.cost;
-      const percentChange = (diff / previous.cost) * 100;
+    if (oldSource !== newSource) {
+      const diff = newCost - oldCost;
+      const percentChange = (diff / oldCost) * 100;
 
       if (diff > 0) {
         listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
@@ -175,6 +175,7 @@ function compareAndShowPriceDifferences() {
     list.appendChild(listItem);
   });
 }
+
 
 
 
