@@ -129,11 +129,13 @@ function loadCachedGPUPrices() {
     activeGPUData.forEach(gpu => {
       if (parsed[gpu.name]) {
         gpu.cost = parsed[gpu.name] * 1.19;
+        gpu.priceSource = "Live"; // ✅ Very important!
       }
     });
     console.log("✅ Loaded GPU prices from local cache.");
   }
 }
+
 
 function compareOldAndNewPrices() {
   const list = document.getElementById('price-difference-list');
