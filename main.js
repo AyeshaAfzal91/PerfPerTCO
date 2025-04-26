@@ -12,7 +12,9 @@ async function updateGPUPrices() {
         // 🔁 Fetch latest prices
         for (const gpu of gpuNames) {
             const response = await fetch(`/.netlify/functions/fetch-price?gpu=${gpu}`);
+            console.log(`---LOG--- updateGPUPrices - ${gpu} Response Status:`, response.status);
             const data = await response.json();
+            console.log(`---LOG--- updateGPUPrices - ${gpu} Raw Data:`, JSON.stringify(data));
             if (data.price) {
                 updatedPrices[gpu] = data.price;
             }
@@ -63,16 +65,15 @@ async function handlePriceSourceChange() {
     console.log("---LOG--- handlePriceSourceChange - Start. selectedPriceSource:", selectedPriceSource);
     console.log("---LOG--- handlePriceSourceChange - activeGPUData before loading:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
 
-    // 🛠 Step 0: Ensure we are loading the current prices BEFORE saving the snapshot
     if (selectedPriceSource === "live") {
-        await loadCachedGPUPrices(); // This is the "currently selected" source
+        await loadCachedGPUPrices();
     } else {
         await loadStaticGPUPrices();
     }
 
-    console.log("---LOG--- handlePriceSourceChange - activeGPUData after loading (before save):", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
-    saveOldGPUPrices(); // ✅ Snapshot AFTER we’re sure the current prices are loaded
-    console.log("---LOG--- handlePriceSourceChange - oldGPUPrices after save:", JSON.stringify(oldGPUPrices));
+    console.log("---LOG--- handlePriceSourceChange - Before saveOldGPUPrices - selectedPriceSource:", selectedPriceSource, "activeGPUData:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
+    saveOldGPUPrices();
+    console.log("---LOG--- handlePriceSourceChange - After saveOldGPUPrices - oldGPUPrices:", JSON.stringify(oldGPUPrices));
 
     // 🧭 Step 1: Get the newly selected price source
     const radios = document.getElementsByName('priceSource');
