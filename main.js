@@ -134,34 +134,40 @@ function loadStaticGPUPrices() {
 
 function compareAndShowPriceDifferences() {
   const list = document.getElementById('price-difference-list');
-  list.innerHTML = ''; // Clear previous results
+  list.innerHTML = ''; // Clear previous
 
   activeGPUData.forEach(gpu => {
     const oldPrice = previousPrices[gpu.name];
     const newPrice = gpu.cost;
 
     if (oldPrice && newPrice) {
-      const diff = newPrice - oldPrice;
-      const percentChange = (diff / oldPrice) * 100;
-
       const listItem = document.createElement('li');
       listItem.style.marginBottom = '8px';
 
-      if (diff > 0) {
-        listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
-        listItem.style.color = 'red';
-      } else if (diff < 0) {
-        listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: ${percentChange.toFixed(2)}% cheaper`;
-        listItem.style.color = 'green';
-      } else {
-        listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
+      if (gpu.priceSource === "Static") {
+        listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change (Static)`;
         listItem.style.color = 'gray';
+      } else {
+        const diff = newPrice - oldPrice;
+        const percentChange = (diff / oldPrice) * 100;
+
+        if (diff > 0) {
+          listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
+          listItem.style.color = 'red';
+        } else if (diff < 0) {
+          listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: ${percentChange.toFixed(2)}% cheaper`;
+          listItem.style.color = 'green';
+        } else {
+          listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
+          listItem.style.color = 'gray';
+        }
       }
 
       list.appendChild(listItem);
     }
   });
 }
+
 
 const activeGPUData = [
   {
