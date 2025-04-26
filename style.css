@@ -520,3 +520,7 @@ body.dark .ai-tips {
   border-left-color: #77aaff;
 }
 
+#loading-spinner {
+  text-align: center;
+}
+

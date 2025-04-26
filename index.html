@@ -212,10 +212,33 @@
   <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
 </div>
 
+<fieldset style="margin-top: 20px;">
+  <legend>Price Source</legend>
+  <label>
+    <input type="radio" name="priceSource" value="static" checked onchange="handlePriceSourceChange()">
+    Use Static Prices
+  </label>
+  <label style="margin-left: 15px;">
+    <input type="radio" name="priceSource" value="live" onchange="handlePriceSourceChange()">
+    Use Live Delta Prices
+  </label>
+</fieldset>
+
+
 <div style="text-align: center; margin-top: 20px;">
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()">Calculate</button>
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()">Reset All</button> 
   <button type="button" class="medium-button" onclick="maybeRefreshGPUPrices()">🔄 Refresh GPU Prices</button>
+  <!-- Spinner (Hidden by Default) -->
+<div id="loading-spinner" style="display: none; margin-top: 10px;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
+</div>
+
+<!-- Last Updated Time -->
+<p id="last-updated" style="font-size: 0.9em; margin-top: 10px; color: gray;">
+  Last Updated: Never
+</p>
+
   <button type="button" class="medium-button" onclick="promptPassword()">Show Model</button>
   <button type="button" onclick="generatePDFReport()">🖨️ Generate PDF Report</button>
 </div>

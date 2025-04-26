@@ -4,6 +4,8 @@
  */
 
 async function updateGPUPrices() {
+  document.getElementById('loading-spinner').style.display = 'block'; // Show spinner
+
   const gpuNames = ["H100", "GH200", "A100", "A40", "L4", "L40", "L40S"];
   const updatedPrices = {};
 
@@ -23,15 +25,22 @@ async function updateGPUPrices() {
     });
 
     console.log("✅ Updated GPU prices:", updatedPrices);
+
+    // Save in localStorage
     localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
     localStorage.setItem('cacheTimestamp', Date.now());
+
+    // Update Last Updated Timestamp
+    const now = new Date();
+    document.getElementById('last-updated').innerText = "Last Updated: " + now.toLocaleString();
 
   } catch (error) {
     console.error("❌ Failed to fetch live GPU prices:", error);
     loadCachedGPUPrices();
+  } finally {
+    document.getElementById('loading-spinner').style.display = 'none'; // Hide spinner
   }
 }
-
 
 function loadCachedGPUPrices() {
   const cached = localStorage.getItem('cachedGPUPrices');
@@ -60,7 +69,58 @@ function maybeRefreshGPUPrices() {
   }
 }
 
+let selectedPriceSource = "static"; // default
 
+function handlePriceSourceChange() {
+  const radios = document.getElementsByName('priceSource');
+  for (const radio of radios) {
+    if (radio.checked) {
+      selectedPriceSource = radio.value;
+      console.log("Selected Price Source:", selectedPriceSource);
+      break;
+    }
+  }
+  updatePricesAccordingToSelection();
+}
+
+function updatePricesAccordingToSelection() {
+  if (selectedPriceSource === "live") {
+    loadCachedGPUPrices(); // load live prices from localStorage
+  } else {
+    loadStaticGPUPrices(); // restore default static prices
+  }
+}
+
+function loadStaticGPUPrices() {
+  // Rebuild your activeGPUData with original static prices
+  activeGPUData.forEach(gpu => {
+    switch (gpu.name) {
+      case "H100":
+        gpu.cost = 25818 * 1.19;
+        break;
+      case "GH200":
+        gpu.cost = 25000 * 1.19;
+        break;
+      case "A100":
+        gpu.cost = 7264 * 1.19;
+        break;
+      case "A40":
+        gpu.cost = 4275 * 1.19;
+        break;
+      case "L4":
+        gpu.cost = 2200 * 1.19;
+        break;
+      case "L40":
+        gpu.cost = 6024 * 1.19;
+        break;
+      case "L40S":
+        gpu.cost = 6100 * 1.19;
+        break;
+    }
+  });
+
+  console.log("✅ Restored static GPU prices.");
+}
 
 const activeGPUData = [
   {
