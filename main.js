@@ -82,9 +82,13 @@ function handlePriceSourceChange() {
 
   // Save current prices before switching
   previousPrices = {};
-  activeGPUData.forEach(gpu => {
-    previousPrices[gpu.name] = gpu.cost;
-  });
+activeGPUData.forEach(gpu => {
+  previousPrices[gpu.name] = {
+    cost: gpu.cost,
+    source: gpu.priceSource || "Static" // Default if missing
+  };
+});
+
 
   updatePricesAccordingToSelection();
 }
@@ -137,19 +141,18 @@ function compareAndShowPriceDifferences() {
   list.innerHTML = ''; // Clear previous
 
   activeGPUData.forEach(gpu => {
-    const oldPrice = previousPrices[gpu.name];
-    const newPrice = gpu.cost;
+    const previous = previousPrices[gpu.name];
+    const currentPrice = gpu.cost;
+    const currentSource = gpu.priceSource;
 
-    if (oldPrice && newPrice) {
+    if (previous && currentPrice) {
       const listItem = document.createElement('li');
       listItem.style.marginBottom = '8px';
 
-      if (gpu.priceSource === "Static") {
-        listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change (Static)`;
-        listItem.style.color = 'gray';
-      } else {
-        const diff = newPrice - oldPrice;
-        const percentChange = (diff / oldPrice) * 100;
+      // If source changed, show real price % difference
+      if (previous.source !== currentSource) {
+        const diff = currentPrice - previous.cost;
+        const percentChange = (diff / previous.cost) * 100;
 
         if (diff > 0) {
           listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
@@ -161,12 +164,17 @@ function compareAndShowPriceDifferences() {
           listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
           listItem.style.color = 'gray';
         }
+      } else {
+        // Source did not change (Static ➔ Static or Live ➔ Live)
+        listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
+        listItem.style.color = 'gray';
       }
 
       list.appendChild(listItem);
     }
   });
 }
+
 
 
 const activeGPUData = [
