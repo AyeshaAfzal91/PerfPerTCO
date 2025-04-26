@@ -13,13 +13,13 @@ exports.handler = async function(event, context) {
 
 // Used when fetching live price fails
   const staticPrices = {
-    "H100": 25818,
-    "GH200": 25000,
-    "A100": 7264,
-    "A40": 4275,
-    "L4": 2200,
-    "L40": 6024,
-    "L40S": 6100
+    "H100": 25818 * 1.19,
+    "GH200": 25000 * 1.19,
+    "A100": 7264 * 1.19,
+    "A40": 4275 * 1.19,
+    "L4": 2200 * 1.19,
+    "L40": 6024 * 1.19,
+    "L40S": 6100 * 1.19
   };
 
   const targetURL = deltaPages[gpuName];
