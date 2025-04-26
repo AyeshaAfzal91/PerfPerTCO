@@ -64,8 +64,16 @@ let selectedPriceSource = "static"; // default
 let oldGPUPrices = {}; // Old prices snapshot before switching
 
 async function handlePriceSourceChange() {
-  saveOldGPUPrices(); // 1️⃣ Save old prices BEFORE switching
+  // 🛠 Step 0: Ensure we are loading the current prices BEFORE saving the snapshot
+  if (selectedPriceSource === "live") {
+    await loadCachedGPUPrices(); // This is the "currently selected" source
+  } else {
+    await loadStaticGPUPrices();
+  }
 
+  saveOldGPUPrices(); // ✅ Snapshot AFTER we’re sure the current prices are loaded
+
+  // 🧭 Step 1: Get the newly selected price source
   const radios = document.getElementsByName('priceSource');
   for (const radio of radios) {
     if (radio.checked) {
@@ -74,9 +82,13 @@ async function handlePriceSourceChange() {
     }
   }
 
-  await updatePricesAccordingToSelection(); // 2️⃣ Load new prices
-  compareOldAndNewPrices(); // 3️⃣ Compare old vs new prices
+  // 🔄 Step 2: Load the new prices
+  await updatePricesAccordingToSelection();
+
+  // 📊 Step 3: Compare old vs new
+  compareOldAndNewPrices();
 }
+
 
 function saveOldGPUPrices() {
   oldGPUPrices = {};
