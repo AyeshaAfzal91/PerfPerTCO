@@ -207,23 +207,25 @@
   </div>
 </div>
 
-<div id="aiTips" class="ai-tips">
-  <h3>Smart Strategy Tip 💡</h3>
-  <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
-</div>
 
-<fieldset style="margin-top: 20px;">
+<fieldset style="margin-top: 20px; text-align: center;">
   <legend>Price Source</legend>
-  <label>
+  
+  <label style="margin-right: 15px;">
     <input type="radio" name="priceSource" value="static" checked onchange="handlePriceSourceChange()">
     Use Static Prices
   </label>
-  <label style="margin-left: 15px;">
+
+  <label>
     <input type="radio" name="priceSource" value="live" onchange="handlePriceSourceChange()">
     Use Live Delta Prices
   </label>
 </fieldset>
 
+<div id="aiTips" class="ai-tips">
+  <h3>Smart Strategy Tip 💡</h3>
+  <p id="ai-tip-text">Adjusting values can help optimize your Performance per TCO!</p>
+</div>
 
 <div style="text-align: center; margin-top: 20px;">
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()">Calculate</button>
