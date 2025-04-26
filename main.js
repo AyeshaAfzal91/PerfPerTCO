@@ -69,13 +69,13 @@ function maybeRefreshGPUPrices() {
 }
 
 let selectedPriceSource = "static"; // default
-let previousPrices = {}; // Store prices before switch
+let previousPrices = {}; // Save old prices for comparison
 
 function handlePriceSourceChange() {
-  // 1. Save the current state FIRST
-  saveCurrentPrices();
+  const oldSource = selectedPriceSource; // Remember old selection (Static or Live)
+  
+  saveCurrentPrices(oldSource); // ✅ Save prices with their source before changing!
 
-  // 2. Then detect user choice
   const radios = document.getElementsByName('priceSource');
   for (const radio of radios) {
     if (radio.checked) {
@@ -84,19 +84,16 @@ function handlePriceSourceChange() {
     }
   }
 
-  // 3. Update to new prices
   updatePricesAccordingToSelection().then(() => {
-    // 4. Compare after update
     compareAndShowPriceDifferences();
   });
 }
 
-
 async function updatePricesAccordingToSelection() {
   if (selectedPriceSource === "live") {
-    await loadCachedGPUPrices(); // wait till prices loaded
+    await loadCachedGPUPrices(); 
   } else {
-    await loadStaticGPUPrices(); // wait till prices loaded
+    await loadStaticGPUPrices();
   }
 }
 
@@ -125,22 +122,21 @@ function loadStaticGPUPrices() {
         gpu.cost = 6100 * 1.19;
         break;
     }
-    gpu.priceSource = "Static"; // ✅ Mark Static
+    gpu.priceSource = "Static"; 
   });
 
   console.log("✅ Restored static GPU prices.");
 }
 
-function saveCurrentPrices() {
+function saveCurrentPrices(source) {
   previousPrices = {};
   activeGPUData.forEach(gpu => {
     previousPrices[gpu.name] = {
       cost: gpu.cost,
-      source: gpu.priceSource || "Static"
+      source: source || "Static"
     };
   });
 }
-
 
 function compareAndShowPriceDifferences() {
   const list = document.getElementById('price-difference-list');
@@ -156,6 +152,7 @@ function compareAndShowPriceDifferences() {
     const listItem = document.createElement('li');
     listItem.style.marginBottom = '8px';
 
+    // Only compare if source changed
     if (previous.source !== currentSource) {
       const diff = currentCost - previous.cost;
       const percentChange = (diff / previous.cost) * 100;
@@ -178,7 +175,6 @@ function compareAndShowPriceDifferences() {
     list.appendChild(listItem);
   });
 }
-
 
 
 
