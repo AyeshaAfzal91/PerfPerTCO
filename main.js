@@ -10,23 +10,20 @@ async function updateGPUPrices() {
   const updatedPrices = {};
 
   try {
+    // 🔁 Fetch latest prices
     for (const gpu of gpuNames) {
       const response = await fetch(`/.netlify/functions/fetch-price?gpu=${gpu}`);
       const data = await response.json();
       if (data.price) {
-  updatedPrices[gpu] = data.price;
-  const matchingGpu = activeGPUData.find(g => g.name === gpu);
-  if (matchingGpu) {
-    matchingGpu.cost = data.price * 1.19;
-    matchingGpu.priceSource = data.source === "static" ? "Static" : "Live"; // 🔧 fix here
-  }
-}
+        updatedPrices[gpu] = data.price;
+      }
     }
 
+    // ✅ Apply the updates to activeGPUData (after old prices are saved elsewhere)
     activeGPUData.forEach(gpu => {
       if (updatedPrices[gpu.name]) {
-        gpu.cost = updatedPrices[gpu.name] * 1.19; // add VAT
-        gpu.priceSource = "Live"; // ✅ mark it
+        gpu.cost = updatedPrices[gpu.name] * 1.19; // Add VAT
+        gpu.priceSource = "Live";
       }
     });
 
