@@ -3,6 +3,63 @@
  * © 2025 NHR@HPC, FAU Erlangen-Nuremberg. All rights reserved.
  */
 
+async function updateGPUPrices() {
+  const gpuNames = ["H100", "GH200", "A100", "A40", "L4", "L40", "L40S"];
+  const updatedPrices = {};
+
+  try {
+    for (const gpu of gpuNames) {
+      const response = await fetch(`/.netlify/functions/fetch-price?gpu=${gpu}`);
+      const data = await response.json();
+      if (data.price) {
+        updatedPrices[gpu] = data.price;
+      }
+    }
+
+    activeGPUData.forEach(gpu => {
+      if (updatedPrices[gpu.name]) {
+        gpu.cost = updatedPrices[gpu.name] * 1.19; // add VAT
+      }
+    });
+
+    console.log("✅ Updated GPU prices:", updatedPrices);
+    localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
+    localStorage.setItem('cacheTimestamp', Date.now());
+
+  } catch (error) {
+    console.error("❌ Failed to fetch live GPU prices:", error);
+    loadCachedGPUPrices();
+  }
+}
+
+
+function loadCachedGPUPrices() {
+  const cached = localStorage.getItem('cachedGPUPrices');
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    activeGPUData.forEach(gpu => {
+      if (parsed[gpu.name]) {
+        gpu.cost = parsed[gpu.name] * 1.19;
+      }
+    });
+    console.log("✅ Loaded GPU prices from local cache.");
+  }
+}
+
+function maybeRefreshGPUPrices() {
+  const cacheTimestamp = localStorage.getItem('cacheTimestamp');
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  if (!cacheTimestamp || (now - cacheTimestamp) > oneDay) {
+    console.log("🔄 Cache expired. Fetching fresh GPU prices...");
+    fetchGPUPrices();
+  } else {
+    console.log("✅ Using cached GPU prices.");
+    loadCachedGPUPrices();
+  }
+}
+
 
 const activeGPUData = [
   {
