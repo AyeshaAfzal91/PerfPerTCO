@@ -1826,6 +1826,33 @@ async function generatePDFReport() {
   doc.save(`PerfPerTCO_Report_${now.replace(/[^\d]/g, "_")}.pdf`);
 }
 
+function saveScenario(keyName) {
+  const scenario = {
+    sliders: {},
+    selects: {},
+    checkboxes: {}
+  };
+
+  // Save all sliders (input[type="range"] and input[type="number"])
+  document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
+    scenario.sliders[input.id] = parseFloat(input.value);
+  });
+
+  // Save all select dropdowns
+  document.querySelectorAll('select').forEach(select => {
+    scenario.selects[select.id] = select.value;
+  });
+
+  // Save all checkboxes
+  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    scenario.checkboxes[checkbox.id] = checkbox.checked;
+  });
+
+  // Save to localStorage
+  localStorage.setItem(keyName, JSON.stringify(scenario));
+  console.log(`✅ Scenario '${keyName}' saved successfully.`);
+  alert(`✅ Scenario 1 saved!`);
+}
 
 
 const footer = document.createElement('div');
