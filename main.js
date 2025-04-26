@@ -155,28 +155,26 @@ function compareOldAndNewPrices() {
     const listItem = document.createElement('li');
     listItem.style.marginBottom = '8px';
 
-    if (oldSource !== newSource) {
-      const diff = newCost - oldCost;
-      const percentChange = (diff / oldCost) * 100;
+    const priceDiff = Math.abs(newCost - oldCost);
+    const threshold = 0.01; // negligible price difference
 
-      if (diff > 0) {
-        listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
-        listItem.style.color = 'red';
-      } else if (diff < 0) {
-        listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: ${percentChange.toFixed(2)}% cheaper`;
-        listItem.style.color = 'green';
-      } else {
-        listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
-        listItem.style.color = 'gray';
-      }
-    } else {
+    if (priceDiff < threshold) {
       listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change`;
       listItem.style.color = 'gray';
+    } else if (newCost > oldCost) {
+      const percentChange = ((newCost - oldCost) / oldCost) * 100;
+      listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive`;
+      listItem.style.color = 'red';
+    } else {
+      const percentChange = ((oldCost - newCost) / oldCost) * 100;
+      listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: -${percentChange.toFixed(2)}% cheaper`;
+      listItem.style.color = 'green';
     }
 
     list.appendChild(listItem);
   });
 }
+
 
 
 
