@@ -155,15 +155,20 @@ function loadCachedGPUPrices() {
         activeGPUData.forEach(gpu => {
             if (parsed[gpu.name]) {
                 gpu.cost = parsed[gpu.name] * 1.19;
-                gpu.priceSource = "Live"; // ✅ Very important!
+                gpu.priceSource = "Live";
+            } else {
+                gpu.priceSource = "Live"; // Mark as attempting live even if no specific cached price
             }
         });
-        console.log("---LOG--- loadCachedGPUPrices - End. activeGPUData after:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
+        console.log("---LOG--- loadCachedGPUPrices - End. activeGPUData after (cache found):", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
     } else {
-        console.log("---LOG--- loadCachedGPUPrices - No cached prices found.");
+        activeGPUData.forEach(gpu => {
+            gpu.priceSource = "Live"; // Mark as attempting live even if no cache
+        });
+        console.log("---LOG--- loadCachedGPUPrices - No cached prices found. Marking as 'Live'.");
+        // Optionally, you could call updateGPUPrices() here if you want to force a fetch when no cache.
     }
 }
-
 
 function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - Start. oldGPUPrices:", JSON.stringify(oldGPUPrices), "activeGPUData:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
