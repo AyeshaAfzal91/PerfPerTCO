@@ -1,5 +1,6 @@
 exports.handler = async function(event, context) {
   const gpuName = event.queryStringParameters.gpu || 'H100';
+  console.log("---LOG--- fetch-price.js - Received gpuName:", gpuName);
 
   const deltaPages = {
     "H100": "https://www.deltacomputer.com/nvidia-h100-80gb.html",
@@ -11,18 +12,8 @@ exports.handler = async function(event, context) {
     "L40S": "https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html"
   };
 
-// Used when fetching live price fails
-  const staticPrices = {
-    "H100": 25818,
-    "GH200": 25000,
-    "A100": 7264,
-    "A40": 4275,
-    "L4": 2200,
-    "L40": 6024,
-    "L40S": 6100
-  };
-
   const targetURL = deltaPages[gpuName];
+  console.log("---LOG--- fetch-price.js - Target URL:", targetURL);
 
   if (!targetURL) {
     return {
@@ -31,28 +22,29 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // If Delta page is "Not Available", fallback to static price
-if (targetURL === "Not Available") {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
-  };
-}
-
+  if (targetURL === "Not Available") {
+    const staticPrices = { /* ... */ };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+    };
+  }
 
   try {
     const res = await fetch(targetURL);
+    console.log("---LOG--- fetch-price.js - Response Status:", res.status);
     const html = await res.text();
+    console.log("---LOG--- fetch-price.js - Fetched HTML (first 200 chars):", html.substring(0, 200));
 
-    // VERY basic parsing: look for € price format
     const match = html.match(/(\d{1,3}(\.\d{3})*,\d{2})\s*€/);
 
-if (!match) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
-  };
-}
+    if (!match) {
+      const staticPrices = { /* ... */ };
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+      };
+    }
 
     const priceRaw = match[1];
     const normalizedPrice = parseFloat(priceRaw.replace('.', '').replace(',', '.'));
@@ -61,10 +53,12 @@ if (!match) {
       statusCode: 200,
       body: JSON.stringify({ gpu: gpuName, price: normalizedPrice })
     };
-} catch (err) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
-  };
-}
+  } catch (err) {
+    console.error("---LOG--- fetch-price.js - Fetch Error:", err);
+    const staticPrices = { /* ... */ };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+    };
+  }
 };
