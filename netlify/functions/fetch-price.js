@@ -32,12 +32,13 @@ exports.handler = async function(event, context) {
   }
 
   // If Delta page is "Not Available", fallback to static price
-  if (targetURL === "Not Available") {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName] })
-    };
-  }
+if (targetURL === "Not Available") {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+  };
+}
+
 
   try {
     const res = await fetch(targetURL);
@@ -46,13 +47,12 @@ exports.handler = async function(event, context) {
     // VERY basic parsing: look for € price format
     const match = html.match(/(\d{1,3}(\.\d{3})*,\d{2})\s*€/);
 
-    if (!match) {
-      // No price found, fallback to static
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName] })
-      };
-    }
+if (!match) {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+  };
+}
 
     const priceRaw = match[1];
     const normalizedPrice = parseFloat(priceRaw.replace('.', '').replace(',', '.'));
@@ -61,11 +61,10 @@ exports.handler = async function(event, context) {
       statusCode: 200,
       body: JSON.stringify({ gpu: gpuName, price: normalizedPrice })
     };
-  } catch (err) {
-    // Fetch error (maybe website offline), fallback to static
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName] })
-    };
-  }
+} catch (err) {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+  };
+}
 };
