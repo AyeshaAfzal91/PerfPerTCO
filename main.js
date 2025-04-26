@@ -68,6 +68,32 @@ function maybeRefreshGPUPrices() {
   }
 }
 
+let selectedPriceSource = "static"; // default
+let previousPrices = {}; // Store prices before switch
+
+function handlePriceSourceChange() {
+  const radios = document.getElementsByName('priceSource');
+  for (const radio of radios) {
+    if (radio.checked) {
+      selectedPriceSource = radio.value;
+      break;
+    }
+  }
+
+  updatePricesAccordingToSelection().then(() => {
+    saveCurrentPrices(); // ✅ AFTER updating prices
+    compareAndShowPriceDifferences();
+  });
+}
+
+async function updatePricesAccordingToSelection() {
+  if (selectedPriceSource === "live") {
+    await loadCachedGPUPrices(); // wait till prices loaded
+  } else {
+    await loadStaticGPUPrices(); // wait till prices loaded
+  }
+}
+
 function loadStaticGPUPrices() {
   activeGPUData.forEach(gpu => {
     switch (gpu.name) {
@@ -97,32 +123,6 @@ function loadStaticGPUPrices() {
   });
 
   console.log("✅ Restored static GPU prices.");
-}
-
-let selectedPriceSource = "static"; // default
-let previousPrices = {}; // Store prices before switch
-
-function handlePriceSourceChange() {
-  const radios = document.getElementsByName('priceSource');
-  for (const radio of radios) {
-    if (radio.checked) {
-      selectedPriceSource = radio.value;
-      break;
-    }
-  }
-
-  updatePricesAccordingToSelection().then(() => {
-    saveCurrentPrices(); // ✅ AFTER updating prices
-    compareAndShowPriceDifferences();
-  });
-}
-
-async function updatePricesAccordingToSelection() {
-  if (selectedPriceSource === "live") {
-    await loadCachedGPUPrices(); // wait till prices loaded
-  } else {
-    await loadStaticGPUPrices(); // wait till prices loaded
-  }
 }
 
 function saveCurrentPrices() {
