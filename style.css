@@ -520,9 +520,21 @@ body.dark .ai-tips {
   border-left-color: #77aaff;
 }
 
-#loading-spinner {
+#refresh-container {
+  display: none;
+  margin-top: 10px;
   text-align: center;
 }
+
+#loading-spinner {
+  margin-bottom: 10px;
+}
+
+#last-updated {
+  font-size: 0.9em;
+  color: gray;
+}
+
 
 table {
   border-radius: 8px;

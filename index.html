@@ -235,16 +235,20 @@
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()"> 🔄 Reset All</button> 
   <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
   <button type="button" class="medium-button" onclick="generatePDFReport()">🖨️ Generate PDF Summary Report</button>
-  <button type="button" class="medium-button" onclick="maybeRefreshGPUPrices()">🔄 Refresh Live GPU Prices</button>
+  <button type="button" class="medium-button" onclick="maybeRefreshGPUPrices()">
+  🔄 Refresh Live GPU Prices
+</button>
+<div id="refresh-container" style="margin-top: 10px; text-align: center; display: none;">
   <!-- Spinner (Hidden by Default) -->
-<div id="loading-spinner" style="display: none; margin-top: 10px;">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
+  <div id="loading-spinner" style="display: none; margin-bottom: 10px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
+  </div>
+  <!-- Last Updated Time -->
+  <p id="last-updated" style="font-size: 0.9em; color: gray;">
+    Last Updated: Never
+  </p>
 </div>
 
-<!-- Last Updated Time -->
-<p id="last-updated" style="font-size: 0.9em; margin-top: 10px; color: gray;">
-  Last Updated: Never
-</p>
 
 <button type="button" class="medium-button" onclick="saveScenario('scenario1')"> 📥 Save Scenario 1 </button>
 <button type="button" class="medium-button" onclick="saveScenario('scenario2')"> 📥 Save Scenario 2 </button>

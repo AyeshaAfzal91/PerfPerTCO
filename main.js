@@ -45,18 +45,22 @@ async function updateGPUPrices() {
 
 
 function maybeRefreshGPUPrices() {
-    const cacheTimestamp = localStorage.getItem('cacheTimestamp');
-    const now = Date.now();
-    const oneDay = 24 * 60 * 60 * 1000;
-
-    if (!cacheTimestamp || (now - cacheTimestamp) > oneDay) {
-        console.log("---LOG--- maybeRefreshGPUPrices - Cache expired. Fetching fresh GPU prices...");
-        updateGPUPrices();
-    } else {
-        console.log("---LOG--- maybeRefreshGPUPrices - Using cached GPU prices.");
-        loadCachedGPUPrices();
-    }
+  // Show the spinner and hide the "Last Updated" message during the refresh
+  document.getElementById('loading-spinner').style.display = 'inline-block';
+  document.getElementById('last-updated').style.display = 'none';
+  
+  // Show the refresh container
+  document.getElementById('refresh-container').style.display = 'block';
+  
+  // Simulate GPU price refresh (replace with actual refresh logic)
+  setTimeout(function() {
+    // Hide the spinner and show the "Last Updated" message after the refresh
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('last-updated').style.display = 'inline-block';
+    document.getElementById('last-updated').innerText = 'Last Updated: ' + new Date().toLocaleString();
+  }, 3000); // Simulate a 3-second delay for the refresh (replace with actual logic)
 }
+
 
 let selectedPriceSource = "static"; // default
 let oldGPUPrices = {}; // Old prices snapshot before switching
