@@ -1998,7 +1998,7 @@ const maxPerf2 = Math.max(...perf2);
         ${renderChangeCell(percentageChange(result1.n_gpu, result2.n_gpu))}
       </tr>
       <tr>
-        <td>Performance (ns/day/atom) for all ${result1.name}</td>
+        <td>Performance (ns/day*atom) for all ${result1.name}</td>
         <td>${result1.performance.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         <td>${result2.performance.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         ${renderChangeCell(percentageChange(result1.performance, result2.performance))}
@@ -2010,7 +2010,7 @@ const maxPerf2 = Math.max(...perf2);
         ${renderChangeCell(percentageChange(result1.power, result2.power))}
       </tr>
 <tr>
-  <td><strong>Performance per TCO (ns/day/atom/€) for ${result1.name}</strong></td>
+  <td><strong>Performance per TCO (ns/day/€ * atom) for ${result1.name}</strong></td>
   <td style="background: ${getGreenScale(result1.perf_per_tco, minPerf1, maxPerf1)};">
     <strong>${result1.perf_per_tco.toFixed(1)}</strong>
   </td>
