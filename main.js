@@ -196,15 +196,15 @@ function compareOldAndNewPrices() {
         const threshold = 0.01; // negligible price difference
 
         if (priceDiff < threshold) {
-            listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change (Old: ${oldCost.toFixed(2)} ${oldSource}, New: ${newCost.toFixed(2)} ${newSource})`;
+            listItem.innerHTML = `➖ <strong>${gpu.name}</strong>: No change (Old: ${oldCost.toFixed(2)} € ${oldSource}, New: ${newCost.toFixed(1)} € ${newSource})`;
             listItem.style.color = 'gray';
         } else if (newCost > oldCost) {
             const percentChange = ((newCost - oldCost) / oldCost) * 100;
-            listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% more expensive (Old: ${oldCost.toFixed(2)} ${oldSource}, New: ${newCost.toFixed(2)} ${newSource})`;
+            listItem.innerHTML = `📈 <strong>${gpu.name}</strong>: +${percentChange.toFixed(2)}% € more expensive (Old: ${oldCost.toFixed(1)} ${oldSource}, New: ${newCost.toFixed(1)} € ${newSource})`;
             listItem.style.color = 'red';
         } else {
             const percentChange = ((oldCost - newCost) / oldCost) * 100;
-            listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: -${percentChange.toFixed(2)}% cheaper (Old: ${oldCost.toFixed(2)} ${oldSource}, New: ${newCost.toFixed(2)} ${newSource})`;
+            listItem.innerHTML = `📉 <strong>${gpu.name}</strong>: -${percentChange.toFixed(2)}% € cheaper (Old: ${oldCost.toFixed(1)} ${oldSource}, New: ${newCost.toFixed(1)} € ${newSource})`;
             listItem.style.color = 'green';
         }
 
