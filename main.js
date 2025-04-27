@@ -479,7 +479,7 @@ function resetForm() {
 document.getElementById("scenario-comparison").innerHTML = "";
 localStorage.removeItem("scenario1");
 localStorage.removeItem("scenario2");
-
+  
   // Clear uploaded file input
 const fileInput = document.getElementById("gpuConfigUploadMain");
 if (fileInput) {
