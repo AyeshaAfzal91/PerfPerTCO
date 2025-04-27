@@ -524,3 +524,18 @@ body.dark .ai-tips {
   text-align: center;
 }
 
+table {
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 8px 12px;
+  text-align: center;
+}
+
+thead {
+  background-color: #f5f5f5;
+}
+
+

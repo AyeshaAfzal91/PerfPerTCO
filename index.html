@@ -226,11 +226,11 @@
   </label>
 </fieldset>
 
+<div id="price-difference-panel" style="margin-top: 20px;">
+  <h3>📈 Price Change Summary</h3>
+  <ul id="price-difference-list" style="list-style-type: none; padding-left: 0;"></ul>
+</div>
 <div style="text-align: center; margin-top: 20px;">
-<button type="button" class="medium-button" onclick="saveScenario('scenario1')">
-  📥 Save Scenario 1
-</button>
-
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()"> 🧮 Calculate</button>
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()"> 🔄 Reset All</button> 
   <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
@@ -245,12 +245,13 @@
 <p id="last-updated" style="font-size: 0.9em; margin-top: 10px; color: gray;">
   Last Updated: Never
 </p>
-</div>
-<div id="price-difference-panel" style="margin-top: 20px;">
-  <h3>📈 Price Change Summary</h3>
-  <ul id="price-difference-list" style="list-style-type: none; padding-left: 0;"></ul>
-</div>
 
+<button type="button" class="medium-button" onclick="saveScenario('scenario1')"> 📥 Save Scenario 1 </button>
+<button type="button" class="medium-button" onclick="saveScenario('scenario2')"> 📥 Save Scenario 2 </button>
+<button type="button" class="medium-button" onclick="compareScenarios()"> 📊 Compare Scenarios </button>
+<button type="button" class="medium-button" onclick="downloadComparisonPDF()"> 🖨️ Download Comparison as PDF </button>
+<div id="scenario-comparison" style="margin-top: 20px;"></div>
+</div>
 
 </form>
 

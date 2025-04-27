@@ -598,7 +598,7 @@ if (workload === "GROMACS" && benchmarkId > 7) {
 }
 
 let baseline_perf_tco = 0;
-const results = [];
+window.results = [];
 const capital_components = [];
 const operational_components = [];
 
@@ -693,7 +693,7 @@ GPU_data.forEach((gpu, i) => {
   if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
 
   // Push results for this GPU
-  results.push({
+  window.results.push({
     name: gpu.name,
     n_gpu,
     total_cost: used_budget,
@@ -703,7 +703,9 @@ GPU_data.forEach((gpu, i) => {
     operational,
     capital_components: [cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline],
     operational_components: [energyandcooling, maintenance, op_baseline],
-    originalGPUIndex: i  // Adding the original index
+    originalGPUIndex: i,
+    performance: total_perf,
+    power: power * n_gpu
   });
 
   capital_components.push([cap_gpu, cap_server, cap_infra, cap_facility, cap_baseline]);
@@ -715,9 +717,9 @@ GPU_data.forEach((gpu, i) => {
 
 
 // After loop, check if any valid GPU was found
-if (baseline_perf_tco === 0 && results.length > 0) {
-  baseline_perf_tco = results[0].perf_per_tco;
-} else if (results.length === 0) {
+if (baseline_perf_tco === 0 && window.results.length > 0) {
+  baseline_perf_tco = window.results[0].perf_per_tco;
+} else if (window.results.length === 0) {
   console.warn("No valid GPUs available.");
 }
 
@@ -733,10 +735,10 @@ function getHeatmapColor(value, maxValue) {
 }
 
 // Sort the results by Performance per TCO
-results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
+window.results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
 
 // Filter out GPUs with zero Performance per TCO
-const nonzeroResults = results.filter(r => r.perf_per_tco > 0);
+const nonzeroResults = window.results.filter(r => r.perf_per_tco > 0);
 
 // Check if nonzeroResults is empty before calculating performance ratio
 if (nonzeroResults.length === 0) {
@@ -807,11 +809,11 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
 
 // Attach the download to a button
 document.getElementById("download-csv").addEventListener("click", () => {
-  downloadCSV2(results);
+  downloadCSV2(window.results);
 });
 
 // Optional debug print
-console.table(results.map(r => ({
+console.table(window.results.map(r => ({
   GPU: r.name,
   '#GPUs': r.n_gpu,
   'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
@@ -820,10 +822,10 @@ console.table(results.map(r => ({
 })));
 
 // Find the maximum values for each column to use in heatmap color calculation
-const maxTotalCost = Math.max(...results.map(r => r.total_cost));
-const maxPerfPerTCO = Math.max(...results.map(r => r.perf_per_tco));
-const maxBaselinePct = Math.max(...results.map(r => r.baseline_pct));
-const maxGPUs = Math.max(...results.map(r => r.n_gpu)); // Find the max number of GPUs
+const maxTotalCost = Math.max(...window.results.map(r => r.total_cost));
+const maxPerfPerTCO = Math.max(...window.results.map(r => r.perf_per_tco));
+const maxBaselinePct = Math.max(...window.results.map(r => r.baseline_pct));
+const maxGPUs = Math.max(...window.results.map(r => r.n_gpu)); // Find the max number of GPUs
 
 // Create the table HTML dynamically
 const tableHTML = `
@@ -839,7 +841,7 @@ const tableHTML = `
       </tr>
     </thead>
     <tbody>
-      ${results.map(r => `
+      ${window.results.map(r => `
         <tr>
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
@@ -1113,7 +1115,7 @@ const elasticityLabels = [
   'Depreciation cost (€/year)', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
-const elasticities = results.map((r, i) => {
+const elasticities = window.results.map((r, i) => {
   const originalGPUIndex = r.originalGPUIndex;
 
   if (originalGPUIndex === undefined || originalGPUIndex < 0 || originalGPUIndex >= GPU_data.length) {
@@ -1181,7 +1183,7 @@ mainTitle.className = "main-chart-title";  // Add a class for styling
 tornadoContainer.appendChild(mainTitle);  // Append the title before all charts
 
 elasticities.forEach((gpuElasticity, i) => {
-  const gpuName = results[i].name;
+  const gpuName = window.results[i].name;
 
   // Sort by absolute value of elasticity
   const sorted = gpuElasticity
@@ -1255,7 +1257,7 @@ const zMax = Math.max(...allZ);
 
 const heatmapData = [{
   z: elasticities[0].map((_, i) => elasticities.map(row => row[i])), 
-  x: results.map(r => r.name),
+  x: window.results.map(r => r.name),
   y: elasticityLabels,
   type: 'heatmap',
   colorscale: whiteToRedColorscale,
@@ -1334,7 +1336,7 @@ function renderElasticityTableWithColors() {
   tableHTML += "</tr></thead><tbody>";
 
   elasticities.forEach((gpuElasticity, i) => {
-    tableHTML += `<tr><td>${results[i].name}</td>`;
+    tableHTML += `<tr><td>${window.results[i].name}</td>`;
     for (let j = 0; j < 5; j++) {
       const val = gpuElasticity[j];
       const bgColor = getHeatmapColor(val, maxAbsElasticity);
@@ -1353,7 +1355,7 @@ function renderElasticityTableWithColors() {
   tableHTML += "</tr></thead><tbody>";
 
   elasticities.forEach((gpuElasticity, i) => {
-    tableHTML += `<tr><td>${results[i].name}</td>`;
+    tableHTML += `<tr><td>${window.results[i].name}</td>`;
     for (let j = 5; j < elasticityLabels.length; j++) {
       const val = gpuElasticity[j];
       const bgColor = getHeatmapColor(val, maxAbsElasticity);
@@ -1370,7 +1372,7 @@ function renderElasticityTableWithColors() {
 document.getElementById("download-elasticity-csv").addEventListener("click", () => {
   const headers = ["GPU", ...elasticityLabels];
   const rows = elasticities.map((row, i) => [
-    results[i].name,
+    window.results[i].name,
     ...row.map(val => val.toFixed(2))
   ]);
   const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
@@ -1405,6 +1407,8 @@ function downloadCSV(data, filename) {
     console.error("Error while downloading the CSV:", error);
   }
 }
+
+//return nonzeroResults;
 
 }
 
@@ -1851,7 +1855,250 @@ function saveScenario(keyName) {
   // Save to localStorage
   localStorage.setItem(keyName, JSON.stringify(scenario));
   console.log(`✅ Scenario '${keyName}' saved successfully.`);
-  alert(`✅ Scenario 1 saved!`);
+  alert(`✅ '${keyName}' saved!`);
+}
+
+function getGreenScale(value, min, max) {
+  if (value === null || value === undefined || isNaN(value)) return 'white';
+  const percent = (value - min) / (max - min || 1); // prevent divide-by-zero
+  const g = Math.round(200 + percent * 55); // 200 (light) to 255 (full green)
+  return `rgb(200, ${g}, 200)`; // green tint, soft RGB mix
+}
+
+
+async function compareScenarios() {
+  console.log("Scenario 1 Data:", localStorage.getItem('scenario1'));
+  console.log("Scenario 2 Data:", localStorage.getItem('scenario2'));
+
+  const scenario1 = JSON.parse(localStorage.getItem('scenario1'));
+  const scenario2 = JSON.parse(localStorage.getItem('scenario2'));
+
+  if (!scenario1 || !scenario2) {
+    alert("❗ Please save both Scenario 1 and Scenario 2 first!");
+    return;
+  }
+
+  // Simulate
+  const results1 = simulateCalculation(scenario1);
+  const results2 = simulateCalculation(scenario2);
+
+  console.log("Results 1: ", results1);
+  console.log("Results 2: ", results2);
+
+  if (!Array.isArray(results1) || !Array.isArray(results2)) {
+    alert("❗ Calculation results are not arrays.");
+    return;
+  }
+
+  if (results1.length === 0 || results2.length === 0) {
+    alert("❗ No GPU results available.");
+    return;
+  }
+
+const perf1 = results1.map(r => r.perf_per_tco);
+const perf2 = results2.map(r => r.perf_per_tco);
+
+const minPerf1 = Math.min(...perf1);
+const maxPerf1 = Math.max(...perf1);
+const minPerf2 = Math.min(...perf2);
+const maxPerf2 = Math.max(...perf2);
+
+  // 🎨 Helper to color and emoji based on % change
+  function renderChangeCell(change) {
+    if (change === "N/A") {
+      return `<td style="text-align: center; background: lightgray;">N/A</td>`;
+    }
+
+    const absChange = Math.abs(change);
+    let bgColor = "white";
+    let emoji = "➖";
+
+    if (change > 0) {
+      emoji = "📈";
+      if (absChange > 15) bgColor = "#c8e6c9"; // strong green
+      else if (absChange > 5) bgColor = "#e8f5e9"; // soft green
+    } else if (change < 0) {
+      emoji = "📉";
+      if (absChange > 15) bgColor = "#ffcdd2"; // strong red
+      else if (absChange > 5) bgColor = "#ffebee"; // soft red
+    }
+
+    const sign = change > 0 ? "+" : "";
+    return `<td style="text-align: center; background: ${bgColor};">${emoji} ${sign}${change.toFixed(2)}%</td>`;
+  }
+
+  function percentageChange(a, b) {
+    if (a === 0) return "N/A";
+    return (((b - a) / a) * 100);
+  }
+
+  // Start HTML
+  let html = `<h3>📊 Scenario Comparison (What-if Simulation)</h3>`;
+
+  // 🛠 Inputs Section
+  html += `<h3 style="margin-top: 40px;">🛠 Input Comparison</h3>`;
+  html += `<table style="width: 100%; border-collapse: collapse; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <thead>
+      <tr>
+        <th>Input Parameter</th>
+        <th>Scenario 1</th>
+        <th>Scenario 2</th>
+        <th>Δ Change</th>
+      </tr>
+    </thead><tbody>`;
+
+  for (const id in scenario1.sliders) {
+    const val1 = scenario1.sliders[id];
+    const val2 = scenario2.sliders[id];
+    const diff = val2 - val1;
+    const pctChange = val1 !== 0 ? (diff / val1) * 100 : "N/A";
+
+    html += `
+      <tr>
+        <td>${id}</td>
+        <td>${val1}</td>
+        <td>${val2}</td>
+        ${renderChangeCell(pctChange)}
+      </tr>
+    `;
+  }
+  html += `</tbody></table>`;
+
+  // 📈 Outputs Section
+  html += `<h3 style="margin-top: 40px;">📈 Output Comparison</h3>`;
+  html += `<table style="width: 100%; border-collapse: collapse; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <thead>
+      <tr>
+        <th>Output Parameter</th>
+        <th>Scenario 1</th>
+        <th>Scenario 2</th>
+        <th>Δ Change</th>
+      </tr>
+    </thead><tbody>`;
+
+  results1.forEach((result1, index) => {
+    const result2 = results2[index];
+
+    html += `
+      <tr>
+        <td>Total TCO (€) for ${result1.name}</td>
+        <td>${result1.total_cost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        <td>${result2.total_cost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        ${renderChangeCell(percentageChange(result1.total_cost, result2.total_cost))}
+      </tr>
+      <tr>
+        <td>Number of GPUs for ${result1.name}</td>
+        <td>${result1.n_gpu}</td>
+        <td>${result2.n_gpu}</td>
+        ${renderChangeCell(percentageChange(result1.n_gpu, result2.n_gpu))}
+      </tr>
+      <tr>
+        <td>Performance (ns/day/atom) for ${result1.name}</td>
+        <td>${result1.performance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        <td>${result2.performance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        ${renderChangeCell(percentageChange(result1.performance, result2.performance))}
+      </tr>
+      <tr>
+        <td>Total Power (W) for ${result1.name}</td>
+        <td>${result1.power.toFixed(2)}</td>
+        <td>${result2.power.toFixed(2)}</td>
+        ${renderChangeCell(percentageChange(result1.power, result2.power))}
+      </tr>
+<tr>
+  <td><strong>Performance per TCO (ns/day/atom/€) for ${result1.name}</strong></td>
+  <td style="background: ${getGreenScale(result1.perf_per_tco, minPerf1, maxPerf1)};">
+    <strong>${result1.perf_per_tco.toFixed(5)}</strong>
+  </td>
+  <td style="background: ${getGreenScale(result2.perf_per_tco, minPerf2, maxPerf2)};">
+    <strong>${result2.perf_per_tco.toFixed(5)}</strong>
+  </td>
+  ${renderChangeCell(percentageChange(result1.perf_per_tco, result2.perf_per_tco))}
+</tr>
+
+    `;
+  });
+
+  html += `</tbody></table>`;
+
+  // Inject final HTML
+  document.getElementById('scenario-comparison').innerHTML = html;
+}
+
+
+
+
+
+function renderChangeCell(change) {
+  if (change === "N/A") {
+    return `<td style="text-align: center; background: lightgray;">N/A</td>`;
+  }
+
+  const absChange = Math.abs(change);
+  let bgColor = "white";
+  let emoji = "➖";
+
+  if (change > 0) {
+    emoji = "📈";
+    if (absChange > 15) bgColor = "#c8e6c9"; // light green
+    else if (absChange > 5) bgColor = "#e8f5e9"; // very light green
+  } else if (change < 0) {
+    emoji = "📉";
+    if (absChange > 15) bgColor = "#ffcdd2"; // light red
+    else if (absChange > 5) bgColor = "#ffebee"; // very light red
+  }
+
+  const sign = change > 0 ? "+" : "";
+  return `<td style="text-align: center; background: ${bgColor};">${emoji} ${sign}${change.toFixed(2)}%</td>`;
+}
+
+function simulateCalculation(scenario) {
+    console.log("Simulating for scenario:", scenario);
+
+    for (const id in scenario.sliders) {
+        const input = document.getElementById(id);
+        if (input) input.value = scenario.sliders[id];
+    }
+
+    for (const id in scenario.selects) {
+        const select = document.getElementById(id);
+        if (select) select.value = scenario.selects[id];
+    }
+
+    for (const id in scenario.checkboxes) {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = scenario.checkboxes[id];
+    }
+
+    // Reset results before re-calculate
+    window.results = [];
+
+    // Call your real calculation
+    calculate();
+
+    console.log("Calculation Results:", window.results);
+
+    return window.results; 
+}
+
+
+
+function downloadComparisonPDF() {
+  const element = document.getElementById('scenario-comparison');
+
+  if (!element) {
+    alert("❗ Please compare scenarios first!");
+    return;
+  }
+
+  const opt = {
+    margin:       0.5,
+    filename:     'scenario_comparison.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save();
 }
 
 

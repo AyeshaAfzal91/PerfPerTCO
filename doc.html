@@ -57,6 +57,13 @@
         <li><strong>Node Infrastructure (€):</strong> Power distribution and cooling infrastructure cost.</li>
         <li><strong>Node Facility (€):</strong> Cost of data center space and construction.</li>
         <li><strong>Software (€):</strong> One-time software stack and license costs.</li>
+        <li><strong>GPU Cost Mode:</strong> Choose how GPU prices are determined.</li>
+<ul>
+  <li><strong>Static Prices:</strong> Default mode. Uses hardcoded base prices for each GPU.</li>
+  <li>
+    <strong>Live Delta Prices:</strong> Attempts to fetch up-to-date GPU prices from Delta Computer when the "Refresh Live Prices" button is manually triggered. If fetching fails (i.e., "Not Available"), static prices are used automatically to ensure the user never sees a missing value.
+  </li>
+</ul>
       </ul>
 
       <h3>Operational Cost Parameters</h3>
@@ -73,6 +80,7 @@
         <li><strong>Heat Reuse Revenue (€/kWh):</strong> Revenue recovered from heat recovery.</li>
         <li><strong>Heat Reuse Factor:</strong> Portion of heat captured for reuse (0–1).</li>
       </ul>
+       
     </section>
 
     <section id="outputs">
@@ -85,6 +93,7 @@
         <li>All output tables are downloadable in CSV format.</li>
         <li>Comparison Message: Summary of best vs worst GPU configuration.</li>
       </ul>
+        <li><strong>Scenario Comparison (what-if Simulation)</strong>: Show side-by-side summaries of two configurations in localStorage and display delta changes.</li>
         <li><strong>Charts:</strong> Bar and stack charts, tornado plots, and sensitivity heatmaps for visual insights.</li>
     </section>
     
