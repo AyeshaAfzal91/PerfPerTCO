@@ -1940,11 +1940,8 @@ const maxPerf2 = Math.max(...perf2);
     return (((b - a) / a) * 100);
   }
 
-  // Start HTML
-  let html = `<h3>📊 Scenario Comparison (What-if Simulation)</h3>`;
-
-  // 🛠 Inputs Section
-  html += `<h3 style="margin-top: 40px;">🛠 Input Comparison</h3>`;
+  // Start HTML: Inputs Section
+  let html = `<h3 style="margin-top: 40px;">🛠 Input Comparison</h3>`;
   html += `<table style="width: 100%; border-collapse: collapse; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
     <thead>
       <tr>
@@ -2001,13 +1998,13 @@ const maxPerf2 = Math.max(...perf2);
         ${renderChangeCell(percentageChange(result1.n_gpu, result2.n_gpu))}
       </tr>
       <tr>
-        <td>Performance (ns/day/atom) for ${result1.name}</td>
+        <td>Performance (ns/day/atom) for all ${result1.name}</td>
         <td>${result1.performance.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         <td>${result2.performance.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         ${renderChangeCell(percentageChange(result1.performance, result2.performance))}
       </tr>
       <tr>
-        <td>Total Power (W) for ${result1.name}</td>
+        <td>Total Power (W) for all ${result1.name}</td>
         <td>${result1.power.toFixed(1)}</td>
         <td>${result2.power.toFixed(1)}</td>
         ${renderChangeCell(percentageChange(result1.power, result2.power))}
