@@ -475,7 +475,11 @@ function resetForm() {
       el.remove();
     }
   });
-  
+
+document.getElementById("scenario-comparison").innerHTML = "";
+localStorage.removeItem("scenario1");
+localStorage.removeItem("scenario2");
+
   // Clear uploaded file input
 const fileInput = document.getElementById("gpuConfigUploadMain");
 if (fileInput) {
@@ -1982,8 +1986,8 @@ const maxPerf2 = Math.max(...perf2);
     html += `
       <tr>
         <td>Total TCO (€) for ${result1.name}</td>
-        <td>${result1.total_cost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-        <td>${result2.total_cost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        <td>${result1.total_cost.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
+        <td>${result2.total_cost.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         ${renderChangeCell(percentageChange(result1.total_cost, result2.total_cost))}
       </tr>
       <tr>
@@ -1994,23 +1998,23 @@ const maxPerf2 = Math.max(...perf2);
       </tr>
       <tr>
         <td>Performance (ns/day/atom) for ${result1.name}</td>
-        <td>${result1.performance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-        <td>${result2.performance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        <td>${result1.performance.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
+        <td>${result2.performance.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         ${renderChangeCell(percentageChange(result1.performance, result2.performance))}
       </tr>
       <tr>
         <td>Total Power (W) for ${result1.name}</td>
-        <td>${result1.power.toFixed(2)}</td>
-        <td>${result2.power.toFixed(2)}</td>
+        <td>${result1.power.toFixed(1)}</td>
+        <td>${result2.power.toFixed(1)}</td>
         ${renderChangeCell(percentageChange(result1.power, result2.power))}
       </tr>
 <tr>
   <td><strong>Performance per TCO (ns/day/atom/€) for ${result1.name}</strong></td>
   <td style="background: ${getGreenScale(result1.perf_per_tco, minPerf1, maxPerf1)};">
-    <strong>${result1.perf_per_tco.toFixed(5)}</strong>
+    <strong>${result1.perf_per_tco.toFixed(1)}</strong>
   </td>
   <td style="background: ${getGreenScale(result2.perf_per_tco, minPerf2, maxPerf2)};">
-    <strong>${result2.perf_per_tco.toFixed(5)}</strong>
+    <strong>${result2.perf_per_tco.toFixed(1)}</strong>
   </td>
   ${renderChangeCell(percentageChange(result1.perf_per_tco, result2.perf_per_tco))}
 </tr>
