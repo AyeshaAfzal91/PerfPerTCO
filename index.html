@@ -224,7 +224,24 @@
     <input type="radio" name="priceSource" value="live" onchange="handlePriceSourceChange()">
     Use Live Delta Prices
   </label>
+
+  <!-- Moved Refresh button, Spinner, and Last Updated section next to Live Delta Prices -->
+  <div id="refresh-container" style="display: inline-block; text-align: center; margin-top: 10px;">
+    <!-- Refresh Button -->
+    <button type="button" onclick="maybeRefreshGPUPrices()"> 🔄 Refresh Live GPU Prices </button>
+    
+    <!-- Spinner (Hidden by Default) -->
+    <div id="loading-spinner" style="display: none; margin-bottom: 10px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
+    </div>
+    
+    <!-- Last Updated Time -->
+    <p id="last-updated" style="font-size: 0.9em; color: gray; margin-top: 5px;">
+      Last Updated: Never
+    </p>
+  </div>
 </fieldset>
+
 
 <div id="price-difference-panel" style="margin-top: 20px;">
   <h3>📈 Price Change Summary</h3>
@@ -235,19 +252,6 @@
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()"> 🔄 Reset All</button> 
   <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
   <button type="button" class="medium-button" onclick="generatePDFReport()">🖨️ Generate PDF Summary Report</button>
-  <button type="button" class="medium-button" onclick="maybeRefreshGPUPrices()">
-  🔄 Refresh Live GPU Prices
-</button>
-<div id="refresh-container" style="margin-top: 10px; text-align: center; display: none;">
-  <!-- Spinner (Hidden by Default) -->
-  <div id="loading-spinner" style="display: none; margin-bottom: 10px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
-  </div>
-  <!-- Last Updated Time -->
-  <p id="last-updated" style="font-size: 0.9em; color: gray;">
-    Last Updated: Never
-  </p>
-</div>
 </div>
 
 <div style="text-align: center; margin-top: 20px;">
