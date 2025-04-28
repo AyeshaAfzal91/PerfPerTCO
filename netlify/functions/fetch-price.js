@@ -8,7 +8,7 @@ exports.handler = async function(event, context) {
     "A100": "Not Available",
     "A40": "Not Available",
     "L4": "https://www.deltacomputer.com/nvidia-l4.html",
-    "L40": "Not Available",
+    "L40": "https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html"
     "L40S": "https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html"
   };
 
