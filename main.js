@@ -226,8 +226,83 @@ function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - End.");
 }
 
+/*
+Alex Assumptions for Capital Costs:
+* A100 node (same hardware spec): range from €53k–€78k. Let's take a mid-range value: €65k (node with 4x A100 → €16.25k per GPU).
+* A40 node: about €40k per node (if it's <50% of A100) → 4x A40 → €10k per GPU.
+* Server cost (C_node_server): Use €10,000 per GPU (split of full node cost).
+* Infrastructure and facility cost:
+ ** For 100 nodes, CDU + piping = €1.5 million → €15k per node → €3,750 per GPU (assuming 4 GPUs per node).
+ ** Facility: We'll separate infra vs. facility costs:
+* C_node_infrastructure: €3,750
+* C_node_facility: ~€1,000 per GPU (very rough split)
+* Software license per GPU: €2,000 (example estimate).
+* Maintenance (C_node_maintenance): Assume €400/year per GPU.
+* Electricity and energy cost: C_electricityperkWh: €0.30
+* PUE: 1.3
+* systemusage: 8760 (full usage)
+* W_node_baseline: 500 W
+* Lifetime: 5 years
+* Depreciation, subscription, efficiency: 0 unless otherwise noted
+* Heat reuse factors: Not used for Alex
+*/
+const presetProfiles = {
+  Alex: {
+    name: "Alex Cluster (A100, A40 realistic)",
+    sliders: {
+      total_budget: 10000000,
+      C_node_server: 10000,           // Approx. €10k per GPU
+      C_node_infrastructure: 3750,    // Cooling infra cost split
+      C_node_facility: 1000,          // Facility portion
+      C_software: 2000,               // Licenses or support per GPU
+      C_electricityperkWh: 0.30,      // €0.30 per kWh
+      PUE: 1.3,                       // Slightly higher than minimal PUE
+      C_node_maintenance: 400,        // Yearly cost per GPU
+      systemusage: 8760,              // Max usage
+      lifetime: 5,                    // 5-year lifetime
+      W_node_baseline: 500,           // Baseline node power (W)
+      C_depreciation: 0,              // Not separately calculated here
+      C_subscription: 0,              // No additional subscription
+      C_uefficiency: 0,               // No unused efficiency cost
+      C_heatreuseperkWh: 0,
+      Factor_heatreuse: 0
+    },
+    checkboxes: {
+      sameGPUCount: false
+    }
+  }
+};
 
 
+function applyPresetProfile() {
+  const selected = document.getElementById("preset-profile").value;
+
+  // Exit if no profile is selected or not found
+  if (!selected || !presetProfiles[selected]) {
+    console.log("⚠️ No valid profile selected.");
+    return;
+  }
+
+  const profile = presetProfiles[selected];
+
+  // Apply slider values
+  Object.entries(profile.sliders).forEach(([id, value]) => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.value = value;
+      input.dispatchEvent(new Event('input')); // Trigger UI update
+    }
+  });
+
+  // Apply checkboxes
+  Object.entries(profile.checkboxes || {}).forEach(([id, value]) => {
+    const checkbox = document.getElementById(id);
+    if (checkbox) checkbox.checked = value;
+  });
+
+  alert(`✅ '${profile.name}' profile applied.`);
+  calculate(); // Run calculation immediately after applying
+}
 
 
 const activeGPUData = [
