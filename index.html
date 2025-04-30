@@ -225,21 +225,31 @@
     Use Live Delta Prices
   </label>
 
-  <!-- Moved Refresh button, Spinner, and Last Updated section next to Live Delta Prices -->
-  <div id="refresh-container" style="display: inline-block; text-align: center; margin-top: 10px;">
-    <!-- Refresh Button -->
-    <button type="button" onclick="maybeRefreshGPUPrices()"> 🔄 Refresh Live GPU Prices </button>
+<div id="refresh-controls" style="margin-top: 10px; text-align: center;">
+  <!-- Toggle for forcing live fetch -->
+  <div class="toggle-container" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
+    <label class="switch">
+      <input type="checkbox" id="force-fetch-toggle" />
+      <span class="slider round"></span>
+    </label>
+    <span class="toggle-label">🔄 Always fetch fresh prices</span>
+  </div>
+
+  <!-- Refresh Button + Spinner + Timestamp -->
+  <div id="refresh-container" style="display: inline-block; text-align: center;">
+    <button type="button" onclick="maybeRefreshGPUPrices()">🔄 Refresh Live GPU Prices</button>
     
-    <!-- Spinner (Hidden by Default) -->
-    <div id="loading-spinner" style="display: none; margin-bottom: 10px;">
+    <div id="loading-spinner" style="display: none; margin-top: 10px;">
       <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="Loading..." width="40">
     </div>
-    
-    <!-- Last Updated Time -->
+
     <p id="last-updated" style="font-size: 0.9em; color: gray; margin-top: 5px;">
       Last Updated: Never
     </p>
   </div>
+</div>
+
+
 </fieldset>
 
 
