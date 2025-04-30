@@ -29,7 +29,7 @@ async function updateGPUPrices() {
         });
 
         console.log("---LOG--- updateGPUPrices - Updated GPU prices:", updatedPrices);
-        localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices)); 
+        localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
         localStorage.setItem('cacheTimestamp', Date.now());
 
         const now = new Date();
@@ -45,28 +45,21 @@ async function updateGPUPrices() {
 
 
 function maybeRefreshGPUPrices() {
-  const forceFetch = document.getElementById('force-fetch-toggle')?.checked;
-
-  const cacheTimestamp = localStorage.getItem('cacheTimestamp');
-  const now = Date.now();
-  const oneDay = 24 * 60 * 60 * 1000;
-
-  console.log("---LOG--- maybeRefreshGPUPrices - forceFetch:", forceFetch);
-
-  //  Always fetch fresh prices if toggle is on
-  if (forceFetch || !cacheTimestamp || (now - cacheTimestamp) > oneDay) {
-    console.log("Fetching fresh GPU prices (toggle or cache expired)...");
-    updateGPUPrices();
-  } else {
-    console.log("Using cached GPU prices.");
-    loadCachedGPUPrices();
-
-    // Still update the UI timestamp even if using cache
-    const cachedTime = new Date(parseInt(cacheTimestamp));
-    document.getElementById('last-updated').innerText = "Last Updated: " + cachedTime.toLocaleString();
-  }
+  // Show the spinner and hide the "Last Updated" message during the refresh
+  document.getElementById('loading-spinner').style.display = 'inline-block';
+  document.getElementById('last-updated').style.display = 'none';
+  
+  // Show the refresh container
+  document.getElementById('refresh-container').style.display = 'block';
+  
+  // Simulate GPU price refresh (replace with actual refresh logic)
+  setTimeout(function() {
+    // Hide the spinner and show the "Last Updated" message after the refresh
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('last-updated').style.display = 'inline-block';
+    document.getElementById('last-updated').innerText = 'Last Updated: ' + new Date().toLocaleString();
+  }, 3000); // Simulate a 3-second delay for the refresh (replace with actual logic)
 }
-
 
 
 let selectedPriceSource = "static"; // default
@@ -119,24 +112,21 @@ function saveOldGPUPrices() {
 
 async function updatePricesAccordingToSelection() {
   console.log("---LOG--- updatePricesAccordingToSelection - Start. selectedPriceSource:", selectedPriceSource);
-  const forceFetch = document.getElementById('force-fetch-toggle')?.checked;
-
   if (selectedPriceSource === "live") {
-    if (forceFetch) {
-      console.log("⚡ Toggle ON: Always fetching fresh prices...");
-      await updateGPUPrices();        // Fetch fresh from server
-      loadCachedGPUPrices();          // Apply just-fetched data
+    const cached = localStorage.getItem('cachedGPUPrices');
+    if (cached) {
+      console.log("Cached prices found. Loading from cache...");
+      loadCachedGPUPrices();
     } else {
-      console.log("📦 Using cached prices if valid...");
-      maybeRefreshGPUPrices();        // Use cache if not expired
+      console.log("No cache found. Fetching live prices now...");
+      await updateGPUPrices();  
+      loadCachedGPUPrices();    
     }
   } else {
-    loadStaticGPUPrices();            // Fall back to static
+    loadStaticGPUPrices();
   }
-
   console.log("---LOG--- updatePricesAccordingToSelection - End.");
 }
-
 
 
 function loadStaticGPUPrices() {
