@@ -29,8 +29,8 @@ async function updateGPUPrices() {
         });
 
         console.log("---LOG--- updateGPUPrices - Updated GPU prices:", updatedPrices);
-        localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices)); % commit it to always fetch fresh live prices (ignoring cache)
-        localStorage.setItem('cacheTimestamp', Date.now()); % commit it to always fetch fresh live prices (ignoring cache)
+        localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices)); 
+        localStorage.setItem('cacheTimestamp', Date.now());
 
         const now = new Date();
         document.getElementById('last-updated').innerText = "Last Updated: " + now.toLocaleString();
