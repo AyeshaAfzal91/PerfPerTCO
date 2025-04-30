@@ -111,14 +111,23 @@ function saveOldGPUPrices() {
 }
 
 async function updatePricesAccordingToSelection() {
-    console.log("---LOG--- updatePricesAccordingToSelection - Start. selectedPriceSource:", selectedPriceSource);
-    if (selectedPriceSource === "live") {
-        await loadCachedGPUPrices();
+  console.log("---LOG--- updatePricesAccordingToSelection - Start. selectedPriceSource:", selectedPriceSource);
+  if (selectedPriceSource === "live") {
+    const cached = localStorage.getItem('cachedGPUPrices');
+    if (cached) {
+      console.log("Cached prices found. Loading from cache...");
+      loadCachedGPUPrices();
     } else {
-        await loadStaticGPUPrices();
+      console.log("No cache found. Fetching live prices now...");
+      await updateGPUPrices();  
+      loadCachedGPUPrices();    
     }
-    console.log("---LOG--- updatePricesAccordingToSelection - End.");
+  } else {
+    loadStaticGPUPrices();
+  }
+  console.log("---LOG--- updatePricesAccordingToSelection - End.");
 }
+
 
 function loadStaticGPUPrices() {
     console.log("---LOG--- loadStaticGPUPrices - Start. activeGPUData before:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
