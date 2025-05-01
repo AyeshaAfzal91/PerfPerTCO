@@ -228,7 +228,7 @@ function compareOldAndNewPrices() {
 
 const presetProfiles = {
   Alex: { // (44 A40-40GB + 20 A100-40GB + 18 A100-80GB) nodes; 8 x (44 + 20 + 18) GPUs
-    name: "Alex Cluster (A100, A40)",
+    name: "NHR@FAU Alex Cluster (A100, A40)",
     sliders: {
       total_budget: 10000000,		  // (example estimate)
       C_node_server: 60000,           // A100 node: (40k€ for <50% of A100) / 53k€ / 73k€ / 78k€ (depending on the time without tax, network costs and cooling infrastructure, etc.). Let's take a mid-range value: €60k per A100 node.
@@ -252,7 +252,7 @@ const presetProfiles = {
     }
   },
   Helma: { // 96 nodes; 4 x 96 GPUs
-    name: "Helma Cluster (H100)",
+    name: "NHR@FAU Helma Cluster (H100)",
     sliders: {
       total_budget: 10000000,		  // (example estimate)
       C_node_server: 140000,          // H100 node: range: <100k€ -- 200k€ (depending on the time without tax, network costs and cooling infrastructure, etc.). Let's take a mid-range value: €140k per Helma node. 
