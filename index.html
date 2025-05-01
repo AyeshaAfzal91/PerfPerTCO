@@ -290,15 +290,25 @@
 </div>
 
 <!-- In the output section -->
-<div id="output" style="margin-top: 40px;">
+<div id="output" style="margin-top: 40px; ">
   <h2>Results</h2>
   <div id="resultsTable"></div>
   <button id="download-csv" style="display: none;">Download CSV</button>
   <div id="comparison-message-container" class="comparison-message"></div>
   <div id="gpu-chart"></div>
-  <div id="stacked-tco-chart"></div>
-  <div id="gpuTornadoPlots"></div>
+  
+<div id="tco-chart-container" style="display: flex; flex-direction: row; gap: 0px; flex-wrap: nowrap; justify-content: space-between; align-items: flex-start; margin-top: 40px;"> 
+  <div style="flex: 0 0 65%; min-width: 700px;">
+    <div id="stacked-tco-chart"></div>
+  </div>
+  
+  <div style="flex: 0 0 35%; min-width: 0; margin-top: 60px;">
+    <div id="pie-tco-chart" style="margin-top: 0; max-height: 1000px; overflow-y: auto;"></div>
+  </div>
+</div>
+
   <div id="sensitivityHeatmap"></div>
+  <div id="gpuTornadoPlots"></div>
   <div id="elasticityTableContainer"></div>
   <button id="download-elasticity-csv" style="display: none;">Download CSV</button>
 </div>

@@ -1154,11 +1154,13 @@ const tcoLayout = {
   },
   height: 600,
   margin: { t: 60, b: 80, l: 80, r: 200 }, // Extra right margin for vertical legend
-  legend: {
-    orientation: 'v',
-    x: 1.02,
-    y: 1
-  },
+legend: {
+  orientation: 'h',   // Horizontal for bottom placement
+  x: 0.5,
+  y: -0.2,            // Negative y for bottom placement
+  xanchor: 'center',
+  yanchor: 'top'      // Anchor the top of the legend box to the y position
+},
   config: {
     toImageButtonOptions: {
       format: 'png',   // You can set the format (png, jpeg, svg, etc.)
@@ -1172,10 +1174,19 @@ const tcoLayout = {
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
 
+// Add the chart title if it doesn't exist already
+if (!document.getElementById('chart-title')) {
+  const chartTitleDiv = document.createElement('div');
+  chartTitleDiv.id = 'chart-title-tco-breakdown';  // Give it an ID to avoid duplication
+  chartTitleDiv.classList.add('chart-title');
+  chartTitleDiv.innerHTML = 'TCO Breakdown (Capital vs Operational costs)';
+  document.getElementById('stacked-tco-chart').parentElement.insertBefore(chartTitleDiv, document.getElementById('stacked-tco-chart'));
+}
+
 // Add a button to download the plot as PNG or SVG with high resolution
 const downloadButtonDiv = document.createElement('div');
 downloadButtonDiv.classList.add('download-btn-container');
-downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Chart (High Resolution)</button>`;
+downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
 document.getElementById('stacked-tco-chart').parentElement.insertBefore(downloadButtonDiv, document.getElementById('stacked-tco-chart'));
 
 // Add event listener for the button
@@ -1199,14 +1210,81 @@ document.getElementById('download-btn').addEventListener('click', () => {
   });
 });
 
-// Add the chart title if it doesn't exist already
-if (!document.getElementById('chart-title')) {
-  const chartTitleDiv = document.createElement('div');
-  chartTitleDiv.id = 'chart-title-tco-breakdown';  // Give it an ID to avoid duplication
-  chartTitleDiv.classList.add('chart-title');
-  chartTitleDiv.innerHTML = 'TCO Breakdown (Capital vs Operational costs)';
-  document.getElementById('stacked-tco-chart').parentElement.insertBefore(chartTitleDiv, document.getElementById('stacked-tco-chart'));
+/// ---------- Plotly Pi TCO Chart ----------
+const pieTraces = nonzeroResults.map((gpu, index) => {
+  const capital = gpu.capital_components.reduce((sum, val) => sum + val, 0);
+  const operational = gpu.operational_components.reduce((sum, val) => sum + val, 0);
+
+  return {
+    type: 'pie',
+    values: [capital, operational],
+    labels: ['Capital Costs', 'Operational Costs'],
+    domain: {
+      row: Math.floor(index / 3),
+      column: index % 3
+    },
+    name: gpu.name,
+    title: { text: gpu.name, font: { size: 12 } },
+    textinfo: 'percent',  // You can also try `'none'` to remove all text from slices
+    hoverinfo: 'label+percent+value',
+    hole: 0.4,
+    showlegend: index === 0,
+    legendgroup: 'costs',
+    marker: {
+      colors: ['rgba(100,149,237,0.7)', 'rgba(255,160,122,0.7)']
+    }
+  };
+});
+
+const rows = Math.ceil(nonzeroResults.length / 3);
+
+const pieLayout = {
+  grid: { rows: rows, columns: 3 }, //If the number of GPUs is large, consider increasing the number of columns 
+  height: rows * 180,  // Reduced height per row
+  showlegend: true,
+legend: {
+  orientation: 'h',   // Horizontal for bottom placement
+  x: 0.5,
+  y: -0.2,            // Negative y for bottom placement
+  xanchor: 'center',
+  yanchor: 'top'      // Anchor the top of the legend box to the y position
+},
+  margin: { t: 40, b: 60 }
+};
+
+Plotly.newPlot('pie-tco-chart', pieTraces, pieLayout);
+
+
+if (!document.getElementById('download-pie-btn')) {
+  const pieDownloadBtn = document.createElement('div');
+  pieDownloadBtn.classList.add('download-btn-container'); // Optional styling hook
+  pieDownloadBtn.innerHTML = `
+    <button id="download-pie-btn">Download TCO Breakdown Pie Chart (High Resolution)</button>
+  `;
+  document.getElementById('pie-tco-chart').parentElement.insertBefore(
+    pieDownloadBtn,
+    document.getElementById('pie-tco-chart')
+  );
+
+  document.getElementById('download-pie-btn').addEventListener('click', () => {
+    Plotly.toImage('pie-tco-chart', {
+      format: 'png',
+      height: 600,  // smaller height for better fit
+      width: 900,   // wider for 3-column layout
+      scale: 2
+    }).then(url => {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tco_pie_chart.png';
+      link.click();
+    }).catch(err => {
+      console.error("Error generating pie chart image:", err);
+    });
+  });
 }
+
+
+
 
 
 // ---------- Parameter Sensitivities Analysis ----------
