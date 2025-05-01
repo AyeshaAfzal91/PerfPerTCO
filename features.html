@@ -62,15 +62,15 @@
   <li><strong>Improved Metrics</strong> "Performance per Watt per TCO" in addition to "Performance per TCO"</li>
 
   <li><strong>Benchmark/GPU Database Expansion:</strong> Support for more and mixed workloads. Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
-  
-  <li><strong>Preset Profiles:</strong> Top 10 clusters from the Top500 or Green500 list, etc. Currently, Alex (A40, A100) is a clear candidate, since benchmark data is already available.</li>
-  
+    
   <li><strong>Improved Visualisation, in priority order</strong>
     <ul>      
       
       <li><strong>Multi-Year TCO Projection with Depreciation Curves:</strong> Visualize how total cost accumulates over the system’s lifetime. GPU cluster loses value over time affects Accounting, TCO realism and ROI and resale value (X-axis: 0 to lifetime in years; Y-axis: Cumulative TCO as a line and Depreciated asset value as shaded area). comment: Not sure how to factor this in, but in a commercial setting, asset value or cost decline over time matters. Since hardware loses value over time but power costs stay constant, power might be more important than hardware cost over the cluster's lifetime. </li>
       
       <li><strong>Monte Carlo / Uncertainty Analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results. For example, one can tweak parameters like W prefactors in the power model or the node's baseline power to see how they affect performance per TCO.</li>
+
+      <li><strong>Preset Profiles:</strong> Add top 10 clusters from the Top500 or Green500 list and improve currently available Alex (A40, A100) and Helma (H100) profiles.</li>
 
   	  <li><strong>Price change history chart:</strong> Show Price change history chart by sourcing prices from deltacomputer.com when available; otherwise from alternate.de, sysgen.de, or internal records. VAT will be added if missing. One can always adjust the pricing (or take best option) if needed.</li>
     </ul>
