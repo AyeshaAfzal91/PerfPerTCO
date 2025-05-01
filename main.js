@@ -226,46 +226,50 @@ function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - End.");
 }
 
-/*
-Alex Assumptions for Capital Costs:
-* A100 node (same hardware spec): range from €53k–€78k. Let's take a mid-range value: €65k (node with 4x A100 → €16.25k per GPU).
-* A40 node: about €40k per node (if it's <50% of A100) → 4x A40 → €10k per GPU.
-* Server cost (C_node_server): Use €10,000 per GPU (split of full node cost).
-* Infrastructure and facility cost:
- ** For 100 nodes, CDU + piping = €1.5 million → €15k per node → €3,750 per GPU (assuming 4 GPUs per node).
- ** Facility: We'll separate infra vs. facility costs:
-* C_node_infrastructure: €3,750
-* C_node_facility: ~€1,000 per GPU (very rough split)
-* Software license per GPU: €2,000 (example estimate).
-* Maintenance (C_node_maintenance): Assume €400/year per GPU.
-* Electricity and energy cost: C_electricityperkWh: €0.30
-* PUE: 1.3
-* systemusage: 8760 (full usage)
-* W_node_baseline: 500 W
-* Lifetime: 5 years
-* Depreciation, subscription, efficiency: 0 unless otherwise noted
-* Heat reuse factors: Not used for Alex
-*/
 const presetProfiles = {
-  Alex: {
-    name: "Alex Cluster (A100, A40 realistic)",
+  Alex: { // (44 A40-40GB + 20 A100-40GB + 18 A100-80GB) nodes; 8 x (44 + 20 + 18) GPUs
+    name: "Alex Cluster (A100, A40)",
     sliders: {
-      total_budget: 10000000,
-      C_node_server: 10000,           // Approx. €10k per GPU
-      C_node_infrastructure: 3750,    // Cooling infra cost split
-      C_node_facility: 1000,          // Facility portion
-      C_software: 2000,               // Licenses or support per GPU
-      C_electricityperkWh: 0.30,      // €0.30 per kWh
-      PUE: 1.3,                       // Slightly higher than minimal PUE
-      C_node_maintenance: 400,        // Yearly cost per GPU
-      systemusage: 8760,              // Max usage
+      total_budget: 10000000,		  // (example estimate)
+      C_node_server: 60000,           // A100 node: (40k€ for <50% of A100) / 53k€ / 73k€ / 78k€ (depending on the time without tax, network costs and cooling infrastructure, etc.). Let's take a mid-range value: €60k per A100 node.
+      C_node_infrastructure: 15000,   // CDU + piping = €1.5 million per 100 nodes → €15k per node (significant infrastructure cost especially for warm water cooling)
+      C_node_facility: 10000,         // (example estimate) 
+      C_software: 5000,               // (example estimate) 
+      C_electricityperkWh: 0.21,      // Typical rate in German universities
+      PUE: 1.2,                       // Efficient cooling
+      C_node_maintenance: 400,        // (example estimate)
+      systemusage: 8760,              // Full utilization (24/7)
       lifetime: 5,                    // 5-year lifetime
-      W_node_baseline: 500,           // Baseline node power (W)
-      C_depreciation: 0,              // Not separately calculated here
+      W_node_baseline: 800,           // Estimated baseline power per node
+      C_depreciation: 0,              // Already included in infra estimates
       C_subscription: 0,              // No additional subscription
       C_uefficiency: 0,               // No unused efficiency cost
-      C_heatreuseperkWh: 0,
-      Factor_heatreuse: 0
+      C_heatreuseperkWh: 0,			  // No heat reuse
+      Factor_heatreuse: 0			  // No heat reuse 
+    },
+    checkboxes: {
+      sameGPUCount: false
+    }
+  },
+  Helma: { // 96 nodes; 4 x 96 GPUs
+    name: "Helma Cluster (H100)",
+    sliders: {
+      total_budget: 10000000,		  // (example estimate)
+      C_node_server: 140000,          // H100 node: range: <100k€ -- 200k€ (depending on the time without tax, network costs and cooling infrastructure, etc.). Let's take a mid-range value: €140k per Helma node. 
+      C_node_infrastructure: 15000,   // CDU + piping = €1.5 million per 100 nodes → €15k per node (significant infrastructure cost especially for warm water cooling)
+      C_node_facility: 10000,         // (example estimate) 
+      C_software: 5000,               // (example estimate) 
+      C_electricityperkWh: 0.21,      // Typical rate in German universities
+      PUE: 1.2,                       // Efficient cooling
+      C_node_maintenance: 400,        // (example estimate)
+      systemusage: 8760,              // Full utilization (24/7)
+      lifetime: 5,                    // 5-year lifetime
+      W_node_baseline: 800,           // Estimated baseline power per node
+      C_depreciation: 0,              // Already included in infra estimates
+      C_subscription: 0,              // No additional subscription
+      C_uefficiency: 0,               // No unused efficiency cost
+      C_heatreuseperkWh: 0,			  // No heat reuse
+      Factor_heatreuse: 0			  // No heat reuse 
     },
     checkboxes: {
       sameGPUCount: false
@@ -300,8 +304,8 @@ function applyPresetProfile() {
     if (checkbox) checkbox.checked = value;
   });
 
-  alert(`✅ '${profile.name}' profile applied.`);
-  calculate(); // Run calculation immediately after applying
+  alert(`✅ '${profile.name}' profile applied. Click on calculate now!`);
+  // calculate(); // Run calculation immediately after applying
 }
 
 
@@ -574,6 +578,10 @@ if (fileInput) {
   fileInput.value = "";
   document.getElementById("uploadStatusMain").innerText = ""; // Clear any status text
 }
+
+// Reset preset profile selection dropdown
+const presetSelect = document.getElementById("preset-profile");
+if (presetSelect) presetSelect.value = "";
 
   showUndoToast("Calculator has been reset. ", restorePreviousState);
 }

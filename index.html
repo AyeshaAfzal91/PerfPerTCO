@@ -95,7 +95,7 @@
 
       <label for="C_node_server" data-tooltip="Set the server cost per node.">
         Node Server (€):
-        <input type="range" id="C_node_server" min="0" max="50000" value="10000" step="5"
+        <input type="range" id="C_node_server" min="0" max="400000" value="10000" step="5"
                oninput="updateValue('v_node_server', this.value); updateAITip()">
         <span id="v_node_server">10000</span>
       </label>
@@ -246,7 +246,7 @@
   <select id="preset-profile" onchange="applyPresetProfile()" style="margin-top: 5px;">
     <option value="">-- Select a Profile --</option>
     <option value="Alex">Alex Cluster (A100, A40)</option>
-        <!-- Add more profiles here -->
+    <option value="Helma">Helma Cluster (H100)</option>
   </select>
 </div>
 
