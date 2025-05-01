@@ -282,7 +282,15 @@
   <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
 </div>
 
-<div id="output">
+<!-- In the input section -->
+<div id="input" style="text-align: center; margin-top: 20px;">
+  <h3>🔥 Benchmark × GPU Performance and Power</h3>
+  <button type="button" class="medium-button" onclick="renderPerfPowerHeatmaps()"> 🔘 Display Heatmaps</button>
+  <div id="gpuPerfPowerHeatmap"></div> <!-- changed ID -->
+</div>
+
+<!-- In the output section -->
+<div id="output" style="margin-top: 40px;">
   <h2>Results</h2>
   <div id="resultsTable"></div>
   <button id="download-csv" style="display: none;">Download CSV</button>
