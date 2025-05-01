@@ -241,6 +241,11 @@
     </p>
   </div>
 
+<div id="price-difference-panel" style="margin-top: 20px;">
+  <h3>📈 Price Change Summary</h3>
+  <ul id="price-difference-list" style="list-style-type: none; padding-left: 0;"></ul>
+</div>
+
 <div id="preset-profile-container" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
   <label for="preset-profile"><strong>🎛 Load Preset Cluster Profile:</strong></label>
   <select id="preset-profile" onchange="applyPresetProfile()" style="margin-top: 5px;">
@@ -251,11 +256,6 @@
 </div>
 
 </fieldset>
-
-<div id="price-difference-panel" style="margin-top: 20px;">
-  <h3>📈 Price Change Summary</h3>
-  <ul id="price-difference-list" style="list-style-type: none; padding-left: 0;"></ul>
-</div>
 
 <div style="text-align: center; margin-top: 20px;">
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()"> 🧮 Calculate</button>
