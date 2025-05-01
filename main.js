@@ -535,6 +535,7 @@ function resetForm() {
   document.getElementById("comparison-message-container").innerHTML = "";
   document.getElementById("gpu-chart").innerHTML = "";
   document.getElementById("stacked-tco-chart").innerHTML = "";
+  document.getElementById("pie-tco-chart").innerHTML = "";
   document.getElementById("gpuTornadoPlots").innerHTML = "";
   document.getElementById("sensitivityHeatmap").innerHTML = "";
   document.getElementById("elasticityTableContainer").innerHTML = "";
@@ -550,7 +551,8 @@ function resetForm() {
     "chart-title-tco-breakdown",
     "gpu-download-btn",
     "download-btn",
-    "heatmap-download-btn"
+    "heatmap-download-btn",
+    "download-pie-btn"
   ];
 
   elementsToRemove.forEach(id => {
