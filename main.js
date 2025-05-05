@@ -876,6 +876,7 @@ GPU_data.forEach((gpu, i) => {
   const perf_per_tco = total_perf / used_budget;
   const total_power = power * n_gpu;
   const power_per_tco = total_power / used_budget;
+  const perf_per_watt_per_tco = total_perf / total_power / used_budget;
 
   // Initialize baseline_perf_tco with the first valid perf_per_tco
   if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
@@ -887,6 +888,7 @@ GPU_data.forEach((gpu, i) => {
     total_cost: used_budget,
     perf_per_tco,
     power_per_tco,
+    perf_per_watt_per_tco,
     baseline_pct,
     capital,
     operational,
@@ -945,7 +947,7 @@ const minResult = nonzeroResults[nonzeroResults.length - 1]; // Worst GPU by Per
 // Compute performance and power ratios
 const performanceRatio = maxResult.perf_per_tco / minResult.perf_per_tco;
 const powerRatio = maxResult.power_per_tco / minResult.power_per_tco;
-
+const perfperpowerRatio = maxResult.perf_per_power_per_tco / minResult.perf_per_power_per_tco;
 
 // Now let's append the comparison message to the screen below the table.
 const comparisonMessageContainer = document.getElementById("comparison-message-container");
@@ -955,18 +957,16 @@ comparisonMessageContainer.classList.add('dark-message');
 const comparisonMessage = `
   <p><strong>With the fixed budget of €${total_budget.toLocaleString()},</strong></p>
   <p>The ${maxResult.n_gpu} ${maxResult.name} GPUs (the highest Performance per TCO)</p>
-  <p>deliver <strong>${performanceRatio.toFixed(1)}× more performance</strong> and <strong>${powerRatio.toFixed(1)}× more power</strong> over its ${lifetime}-year lifetime<</p>
+  <p>deliver <strong>${performanceRatio.toFixed(1)}× more performance per TCO</strong>, <strong>${powerRatio.toFixed(1)}× more power per TCO</strong> and <strong>${perfperpowerRatio.toFixed(1)}× more performance per watt per TCO (Perf/Watt/TCO)</strong> over its ${lifetime}-year lifetime<</p>   
   <p>compared to the ${minResult.n_gpu} ${minResult.name} GPUs (the lowest Performance per TCO).</p>
 `;
 
 
 comparisonMessageContainer.innerHTML = comparisonMessage;
 
-// CSV download
-
-document.getElementById('download-csv').style.display = 'block';
+/document.getElementById('download-csv').style.display = 'block';
 document.getElementById('download-elasticity-csv').style.display = 'block';
-  
+
 function downloadCSV2(data, filename = "gpu_tco_results.csv") {
   if (!Array.isArray(data) || data.length === 0) {
     console.error("Invalid data: must be a non-empty array.");
@@ -978,19 +978,21 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
     "#GPUs",
     "Total TCO (€)",
     "Perf/TCO (ns/day/€ * atoms)",
+    "Power/TCO (W/€)",
+    "Perf/Watt/TCO (ns/day/W/€)",
     "Baseline %"
   ];
 
-  // Map over the data to format rows correctly
   const rows = data.map(r => [
     r.name,
     r.n_gpu,
-    Math.round(r.total_cost),                // Ensure it's an integer
-    r.perf_per_tco.toFixed(1),               // Format as a 1-decimal number
-    r.baseline_pct.toFixed(2)                // Format as a 2-decimal percentage
+    Math.round(r.total_cost),
+    r.perf_per_tco.toFixed(1),
+    r.power_per_tco.toFixed(1),
+    r.perf_per_watt_per_tco.toFixed(3),
+    r.baseline_pct.toFixed(2)
   ]);
 
-  // Join headers and rows into CSV content
   const csvContent = [
     headers.join(","),
     ...rows.map(row => row.join(","))
@@ -999,7 +1001,6 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
   downloadCSV(csvContent, filename);
 }
 
-// Attach the download to a button
 document.getElementById("download-csv").addEventListener("click", () => {
   downloadCSV2(window.results);
 });
@@ -1009,8 +1010,9 @@ console.table(window.results.map(r => ({
   GPU: r.name,
   '#GPUs': r.n_gpu,
   'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
-  'Perf/TCO (ns/day/€ * atoms)': r.perf_per_tco.toFixed(1),
+  'Perf/TCO (ns/day*atoms/€)': r.perf_per_tco.toFixed(1),
   'Power/TCO (W/€)': r.power_per_tco.toFixed(1), 
+  'Perf/Power/TCO (ns/day*atoms/W/€)': r.power_per_tco.toFixed(1), 
   'Baseline %': r.baseline_pct.toFixed(2)
 })));
 
@@ -1018,6 +1020,7 @@ console.table(window.results.map(r => ({
 const maxTotalCost = Math.max(...window.results.map(r => r.total_cost));
 const maxPerfPerTCO = Math.max(...window.results.map(r => r.perf_per_tco));
 const maxPowerPerTCO = Math.max(...window.results.map(r => r.power_per_tco));
+const maxPerfPerWattPerTCO = Math.max(...window.results.map(r => r.perf_per_watt_per_tco));
 const maxBaselinePct = Math.max(...window.results.map(r => r.baseline_pct));
 const maxGPUs = Math.max(...window.results.map(r => r.n_gpu)); // Find the max number of GPUs
 
@@ -1030,8 +1033,9 @@ const tableHTML = `
         <th>GPU</th>
         <th>#GPUs</th>
         <th>Total TCO (€)</th>
-        <th>Perf/TCO (ns/day/€ * atoms)</th>
+        <th>Perf/TCO (ns/day*atoms/€)</th>
 		<th>Power/TCO (W/€)</th>
+        <th>Perf/Power/TCO (ns/day*atoms/W/€)</th>
         <th>Baseline %</th>
       </tr>
     </thead>
@@ -1043,6 +1047,7 @@ const tableHTML = `
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco.toFixed(5)}</td>
+          <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(5)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
         </tr>`).join('')}
     </tbody>
