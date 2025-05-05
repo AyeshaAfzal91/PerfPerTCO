@@ -226,8 +226,14 @@ function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - End.");
 }
 
-const response = await fetch('/.netlify/functions/price-history');
-const data = await response.json();
+async function loadPriceHistory() {
+  const response = await fetch('/.netlify/functions/price-history');
+  const data = await response.json();
+  console.log(data);
+}
+
+loadPriceHistory();
+
 
 const h100Data = data.filter(item => item.gpu === 'H100');
 const labels = h100Data.map(item => item.date);
