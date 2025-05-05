@@ -315,7 +315,7 @@ const presetProfiles = {
       total_budget: 10000000,		  // (example estimate)
       C_node_server: 60000,           // A100 node: (40k€ for <50% of A100) / 53k€ / 73k€ / 78k€ (depending on the time without tax, network costs and cooling infrastructure, etc.). Let's take a mid-range value: €60k per A100 node.
       C_node_infrastructure: 15000,   // CDU + piping = €1.5 million per 100 nodes → €15k per node (significant infrastructure cost especially for warm water cooling)
-      C_node_facility: 10000,         // (example estimate) 
+      C_node_facility: 0,             // Housing/floor space costs nothing for us as its a very old building
       C_software: 5000,               // (example estimate) 
       C_electricityperkWh: 0.21,      // Typical rate in German universities
       PUE: 1.2,                       // Efficient cooling
@@ -339,7 +339,7 @@ const presetProfiles = {
       total_budget: 10000000,		  // (example estimate)
       C_node_server: 140000,          // H100 node: range: <100k€ -- 200k€ (depending on the time without tax, network costs and cooling infrastructure, etc.). Let's take a mid-range value: €140k per Helma node. 
       C_node_infrastructure: 15000,   // CDU + piping = €1.5 million per 100 nodes → €15k per node (significant infrastructure cost especially for warm water cooling)
-      C_node_facility: 10000,         // (example estimate) 
+      C_node_facility: 0,             // Housing/floor space costs nothing for us as its a very old building
       C_software: 5000,               // (example estimate) 
       C_electricityperkWh: 0.21,      // Typical rate in German universities
       PUE: 1.2,                       // Efficient cooling
