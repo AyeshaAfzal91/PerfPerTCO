@@ -226,6 +226,38 @@ function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - End.");
 }
 
+const response = await fetch('/.netlify/functions/price-history');
+const data = await response.json();
+
+const h100Data = data.filter(item => item.gpu === 'H100');
+const labels = h100Data.map(item => item.date);
+const values = h100Data.map(item => item.percentDiff);
+
+new Chart(document.getElementById("priceChart"), {
+  type: "line",
+  data: {
+    labels: labels,
+    datasets: [{
+      label: "% Price Difference (Live vs Static)",
+      data: values,
+      borderColor: "orange",
+      fill: false,
+      tension: 0.1
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        title: { display: true, text: "% Difference" }
+      },
+      x: {
+        title: { display: true, text: "Date" }
+      }
+    }
+  }
+});
+
+
 const presetProfiles = {
   Alex: { // (44 A40-40GB + 20 A100-40GB + 18 A100-80GB) nodes; 8 x (44 + 20 + 18) GPUs
     name: "NHR@FAU Alex Cluster (A100, A40)",
