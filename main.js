@@ -874,9 +874,9 @@ GPU_data.forEach((gpu, i) => {
   const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
   const total_perf = perf * n_gpu;
   const perf_per_tco = total_perf / used_budget;
-  const total_power = power * n_gpu  / 1000;
+  const total_power = power * n_gpu;
   const power_per_tco = total_power / used_budget;
-  const perf_per_watt_per_tco = total_perf / total_power / used_budget;
+  const perf_per_watt_per_tco = total_perf / (total_power / 1000) / used_budget;
 
   // Initialize baseline_perf_tco with the first valid perf_per_tco
   if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
@@ -979,7 +979,7 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
     "#GPUs",
     "Total TCO (€)",
     "Perf/TCO (ns/day/€ * atoms)",
-    "Power/TCO (kW/€)",
+    "Power/TCO (W/€)",
     "Perf/Watt/TCO (ns/day/kW/€)",
     "Baseline %"
   ];
@@ -1012,7 +1012,7 @@ console.table(window.results.map(r => ({
   '#GPUs': r.n_gpu,
   'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
   'Perf/TCO (ns/day*atoms/€)': r.perf_per_tco.toFixed(1),
-  'Power/TCO (kW/€)': r.power_per_tco.toFixed(1), 
+  'Power/TCO (W/€)': r.power_per_tco.toFixed(1), 
   'Perf/Power/TCO (ns/day*atoms/kW/€)': r.power_per_tco.toFixed(1), 
   'Baseline %': r.baseline_pct.toFixed(2)
 })));
@@ -1035,7 +1035,7 @@ const tableHTML = `
         <th>#GPUs</th>
         <th>Total TCO (€)</th>
         <th>Perf/TCO (ns/day*atoms/€)</th>
-		<th>Power/TCO (kW/€)</th>
+		<th>Power/TCO (W/€)</th>
         <th>Perf/Power/TCO (ns/day*atoms/kW/€)</th>
         <th>Baseline %</th>
       </tr>
@@ -1048,7 +1048,7 @@ const tableHTML = `
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco.toFixed(4)}</td>
-          <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(1)}</td>
+          <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(1}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
         </tr>`).join('')}
     </tbody>
