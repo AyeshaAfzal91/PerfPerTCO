@@ -53,19 +53,24 @@
     <p> 
       <strong>Future Use-case</strong>: With the new additions, it will help determine how performance and energy consumption are impacted, for example, when running GROMACS/AMBER on an A100 at 100 MHz instead of 1.5 GHz. Users can then decide what's more important to them: maximizing performance or finding the sweet spot for maximum performance per watt.
     </p>
+    <p> 
+      <strong>Tool Focus</strong>: A tool for exploring the parameter space to analyze sensitivity, rather than for directly planning procurement, since procurement involves many dynamic factors that cannot be captured by a single tool.
+    </p>
       <p>Here's a preview of the upcoming features I'm working on to make PerfPerTCO even more powerful and user-friendly:</p>
     </section>
 
     <section id="roadmap">
 <h2>Planned Features</h2>
 <ul>
-  <li><strong>Heterogeneous cluster of N different architectures</strong> For example Helma cluster has three parts: Helma 1, Helma 2 and CPU</li>
 
   <li><strong>Benchmark/GPU Database Expansion:</strong> Support for more and mixed workloads. Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
-    
+
+  <li><strong>Heterogeneous cluster of N different architectures</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU</li>
+
   <li><strong>Improved Visualisation, in priority order</strong>
     <ul>      
-      
+      <li><strong>Fixed energy approach than a fixed budget</strong> Particularly relevant for larger insulations having power plants (LANL) and to a lesser extent for FAU power supplies at NHR@FAU. For example, given an X MW infrastructure, a cluster exceeding X MW within the allowed budget won’t work. How far can you optimize power (by reducing power cap or adjusting CPU/GPU clocks) before it forces you to switch to a different GPU? Given a power limit, how large can the system be while staying within the allowed budget?</li>
+
       <li><strong>Multi-Year TCO Projection with Depreciation Curves:</strong> Visualize how total cost accumulates over the system’s lifetime. GPU cluster loses value over time affects Accounting, TCO realism and ROI and resale value (X-axis: 0 to lifetime in years; Y-axis: Cumulative TCO as a line and Depreciated asset value as shaded area). comment: Not sure how to factor this in, but in a commercial setting, asset value or cost decline over time matters. Since hardware loses value over time but power costs stay constant, power might be more important than hardware cost over the cluster's lifetime. </li>
       
       <li><strong>Monte Carlo / Uncertainty Analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results. For example, one can tweak parameters like W prefactors in the power model or the node's baseline power to see how they affect performance per TCO.</li>
