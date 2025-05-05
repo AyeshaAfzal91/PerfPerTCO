@@ -947,10 +947,8 @@ const minResult = nonzeroResults[nonzeroResults.length - 1]; // Worst GPU by Per
 // Compute performance and power ratios
 const performanceRatio = maxResult.perf_per_tco / minResult.perf_per_tco;
 const powerRatio = maxResult.power_per_tco / minResult.power_per_tco;
-const perfperpowerRatio = maxResult.perf_per_power_per_tco / minResult.perf_per_power_per_tco;
-console.log("numerator:", maxResult.perf_per_power_per_tco );
-console.log("denominator:", minResult.perf_per_power_per_tco);
-console.log("perfperpowerRatio:", perfperpowerRatio);
+const perfperpowerRatio = maxResult.perf_per_watt_per_tco / minResult.perf_per_watt_per_tco;
+
 // Now let's append the comparison message to the screen below the table.
 const comparisonMessageContainer = document.getElementById("comparison-message-container");
 
