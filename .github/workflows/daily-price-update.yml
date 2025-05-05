@@ -1,0 +1,21 @@
+name: Daily GPU Price Logger
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Every day at 07:00 UTC
+  workflow_dispatch:      # Allows manual triggering from GitHub
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Netlify fetch-price for each GPU
+        env:
+          SITE_URL: https://your-netlify-site.netlify.app
+        run: |
+          declare -a GPUS=("H100" "GH200" "L4" "L40" "L40S")
+
+          for GPU in "${GPUS[@]}"; do
+            echo "Fetching and logging $GPU price..."
+            curl --silent --show-error "${SITE_URL}/.netlify/functions/fetch-price?gpu=${GPU}"
+          done
