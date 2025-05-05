@@ -1,1 +1,5 @@
-
+{
+  "dependencies": {
+    "@octokit/rest": "^21.1.1"
+  }
+}
