@@ -1011,12 +1011,14 @@ console.table(window.results.map(r => ({
   '#GPUs': r.n_gpu,
   'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
   'Perf/TCO (ns/day/€ * atoms)': r.perf_per_tco.toFixed(1),
+  'Power/TCO (W/€)': r.power_per_tco.toFixed(1), 
   'Baseline %': r.baseline_pct.toFixed(2)
 })));
 
 // Find the maximum values for each column to use in heatmap color calculation
 const maxTotalCost = Math.max(...window.results.map(r => r.total_cost));
 const maxPerfPerTCO = Math.max(...window.results.map(r => r.perf_per_tco));
+const maxPowerPerTCO = Math.max(...window.results.map(r => r.power_per_tco));
 const maxBaselinePct = Math.max(...window.results.map(r => r.baseline_pct));
 const maxGPUs = Math.max(...window.results.map(r => r.n_gpu)); // Find the max number of GPUs
 
@@ -1030,7 +1032,7 @@ const tableHTML = `
         <th>#GPUs</th>
         <th>Total TCO (€)</th>
         <th>Perf/TCO (ns/day/€ * atoms)</th>
-        <th>Power/TCO (Watts/€)</th>
+		<th>Power/TCO (W/€)</th>
         <th>Baseline %</th>
       </tr>
     </thead>
@@ -1039,7 +1041,7 @@ const tableHTML = `
         <tr>
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
-          <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toFixed(0)}</td>
+		  <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toLocaleString()}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
