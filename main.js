@@ -957,7 +957,7 @@ comparisonMessageContainer.classList.add('dark-message');
 const comparisonMessage = `
   <p><strong>With the fixed budget of €${total_budget.toLocaleString()},</strong></p>
   <p>The ${maxResult.n_gpu} ${maxResult.name} GPUs (the highest Performance per TCO)</p>
-  <p>deliver <strong>${performanceRatio.toFixed(1)}× more performance per TCO</strong>, <strong>${powerRatio.toFixed(1)}× more power per TCO</strong> and <strong>${perfperpowerRatio.toFixed(1)}× more performance per watt per TCO</strong> over its ${lifetime}-year lifetime<</p>   
+  <p>deliver <strong>${performanceRatio.toFixed(1)}× more performance per TCO</strong>, <strong>${powerRatio.toFixed(1)}× more power per TCO</strong> and <strong>${perfperpowerRatio.toFixed(1)}× more performance per watt per TCO</strong> over its ${lifetime}-year lifetime</p>   
   <p>compared to the ${minResult.n_gpu} ${minResult.name} GPUs (the lowest Performance per TCO).</p>
 `;
 
