@@ -244,12 +244,12 @@
 <div id="price-difference-panel" style="margin-top: 20px;">
   <h3>📈 Price Change Summary</h3>
   
-  <div style="display: flex; gap: 20px; align-items: flex-start;">
+  <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
     <!-- Price Difference List -->
-    <ul id="price-difference-list" style="list-style-type: none; padding-left: 0; flex: 1;"></ul>
+    <ul id="price-difference-list" style="list-style-type: none; padding-left: 0; flex: 1; min-width: 250px;"></ul>
     
     <!-- Chart -->
-    <div style="flex: 1;">
+    <div style="flex: 1; min-width: 250px;">
       <canvas id="priceChart"></canvas>
     </div>
   </div>
