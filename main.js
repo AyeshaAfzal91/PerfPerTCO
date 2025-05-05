@@ -277,7 +277,7 @@ async function loadPriceHistory() {
 loadPriceHistory();
 
 
-new Chart(document.getElementById("priceChart"), {
+/*new Chart(document.getElementById("priceChart"), {
   type: "line",
   data: {
     labels: labels,
@@ -299,7 +299,7 @@ new Chart(document.getElementById("priceChart"), {
       }
     }
   }
-});
+});*/
 
 
 const presetProfiles = {
