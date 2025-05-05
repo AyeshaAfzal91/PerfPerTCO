@@ -874,6 +874,9 @@ GPU_data.forEach((gpu, i) => {
   const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
   const total_perf = perf * n_gpu;
   const perf_per_tco = total_perf / used_budget;
+  const total_power = power * n_gpu;
+  const power_per_tco = total_power / used_budget;
+
 
   // Initialize baseline_perf_tco with the first valid perf_per_tco
   if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
@@ -884,6 +887,7 @@ GPU_data.forEach((gpu, i) => {
     n_gpu,
     total_cost: used_budget,
     perf_per_tco,
+    power_per_tco,
     baseline_pct,
     capital,
     operational,
@@ -939,8 +943,10 @@ window.bestResult = sortedResults[0];
 const maxResult = nonzeroResults[0]; // Best GPU by Performance per TCO
 const minResult = nonzeroResults[nonzeroResults.length - 1]; // Worst GPU by Performance per TCO
 
-// Compute performance ratio
+// Compute performance and power ratios
 const performanceRatio = maxResult.perf_per_tco / minResult.perf_per_tco;
+const powerRatio = maxResult.power_per_tco / minResult.power_per_tco;
+
 
 // Now let's append the comparison message to the screen below the table.
 const comparisonMessageContainer = document.getElementById("comparison-message-container");
@@ -950,9 +956,10 @@ comparisonMessageContainer.classList.add('dark-message');
 const comparisonMessage = `
   <p><strong>With the fixed budget of €${total_budget.toLocaleString()},</strong></p>
   <p>The ${maxResult.n_gpu} ${maxResult.name} GPUs (the highest Performance per TCO)</p>
-  <p>delivers <strong>${performanceRatio.toFixed(1)} times more performance</strong> over its ${lifetime}-year lifetime</p>
+  <p>deliver <strong>${performanceRatio.toFixed(1)}× more performance</strong> and <strong>${powerRatio.toFixed(1)}× more power</strong> over its ${lifetime}-year lifetime<</p>
   <p>compared to the ${minResult.n_gpu} ${minResult.name} GPUs (the lowest Performance per TCO).</p>
 `;
+
 
 comparisonMessageContainer.innerHTML = comparisonMessage;
 
@@ -1023,6 +1030,7 @@ const tableHTML = `
         <th>#GPUs</th>
         <th>Total TCO (€)</th>
         <th>Perf/TCO (ns/day/€ * atoms)</th>
+        <th>Power/TCO (Watts/€)</th>
         <th>Baseline %</th>
       </tr>
     </thead>
@@ -1033,6 +1041,7 @@ const tableHTML = `
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
+          <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
         </tr>`).join('')}
     </tbody>
