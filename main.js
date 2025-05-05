@@ -241,23 +241,49 @@ async function loadPriceHistory() {
       throw new Error("Expected array from price-history, got: " + JSON.stringify(data));
     }
 
-    const h100Data = data.filter(item => item.gpu === 'H100');
-    const labels = h100Data.map(item => item.date);
-    const values = h100Data.map(item => item.percentDiff);
+    // List of GPUs to chart
+    const gpuList = ['H100', 'GH200', 'A100', 'A40', 'L4', 'L40', 'L40S'];
+
+    // Group data by GPU
+    const grouped = {};
+    gpuList.forEach(gpu => {
+      grouped[gpu] = data
+        .filter(item => item.gpu === gpu)
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
+    });
+
+    // Use the date labels from the longest dataset
+    const labels = [...new Set(data.map(item => item.date))].sort();
+
+    const datasets = gpuList.map((gpu, index) => ({
+      label: gpu,
+      data: labels.map(date => {
+        const entry = grouped[gpu].find(e => e.date === date);
+        return entry ? entry.percentDiff : null; // Use null for missing data
+      }),
+      borderColor: getColor(index),
+      fill: false,
+      tension: 0.1
+    }));
 
     new Chart(document.getElementById("priceChart"), {
       type: "line",
       data: {
         labels: labels,
-        datasets: [{
-          label: "% Price Difference (Live vs Static)",
-          data: values,
-          borderColor: "orange",
-          fill: false,
-          tension: 0.1
-        }]
+        datasets: datasets
       },
       options: {
+        responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: '% Price Difference (Live vs Static) by GPU'
+          }
+        },
         scales: {
           y: {
             title: { display: true, text: "% Difference" }
@@ -272,6 +298,12 @@ async function loadPriceHistory() {
   } catch (error) {
     console.error("---ERROR--- Failed to load price history:", error);
   }
+}
+
+// Utility: assign each GPU a color
+function getColor(index) {
+  const colors = ['orange', 'blue', 'green', 'red', 'purple', 'teal', 'brown'];
+  return colors[index % colors.length];
 }
 
 loadPriceHistory();
