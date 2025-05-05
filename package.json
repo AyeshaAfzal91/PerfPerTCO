@@ -3,3 +3,6 @@
     "@octokit/rest": "^21.1.1"
   }
 }
+{
+  "type": "module"
+}

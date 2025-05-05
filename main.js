@@ -229,8 +229,17 @@ function compareOldAndNewPrices() {
 async function loadPriceHistory() {
   try {
     const response = await fetch('/.netlify/functions/price-history');
+    
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Error fetching price history: ${response.statusText} - ${text}`);
+    }
+
     const data = await response.json();
-    console.log("---LOG--- Loaded price history:", data);
+
+    if (!Array.isArray(data)) {
+      throw new Error("Expected array from price-history, got: " + JSON.stringify(data));
+    }
 
     const h100Data = data.filter(item => item.gpu === 'H100');
     const labels = h100Data.map(item => item.date);
@@ -267,11 +276,6 @@ async function loadPriceHistory() {
 
 loadPriceHistory();
 
-
-
-const h100Data = data.filter(item => item.gpu === 'H100');
-const labels = h100Data.map(item => item.date);
-const values = h100Data.map(item => item.percentDiff);
 
 new Chart(document.getElementById("priceChart"), {
   type: "line",
