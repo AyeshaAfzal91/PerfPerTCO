@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Call Netlify fetch-price for each GPU
         env:
-          SITE_URL: https://your-netlify-site.netlify.app
+          SITE_URL: https://perfpertco.netlify.app
         run: |
           declare -a GPUS=("H100" "GH200" "L4" "L40" "L40S")
 
