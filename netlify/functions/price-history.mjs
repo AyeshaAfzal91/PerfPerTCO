@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 export async function handler() {
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-  const owner = "Ayesha";  
+  const owner = "AyeshaAfzal91";  
   const repo = "PerfPerTCO";     
   const path = "data/prices.json";
 

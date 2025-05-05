@@ -12,7 +12,7 @@ export async function handler(event) {
     auth: process.env.GITHUB_TOKEN,
   });
 
-  const owner = "Ayesha";
+  const owner = "AyeshaAfzal91";
   const repo = "PerfPerTCO";
   const path = "data/prices.json";
 
