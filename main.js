@@ -964,7 +964,8 @@ const comparisonMessage = `
 
 comparisonMessageContainer.innerHTML = comparisonMessage;
 
-/document.getElementById('download-csv').style.display = 'block';
+// Download CSV
+document.getElementById('download-csv').style.display = 'block';
 document.getElementById('download-elasticity-csv').style.display = 'block';
 
 function downloadCSV2(data, filename = "gpu_tco_results.csv") {
@@ -1046,7 +1047,7 @@ const tableHTML = `
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
-          <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco.toFixed(5)}</td>
+          <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco.toFixed(4)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(5)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
         </tr>`).join('')}
