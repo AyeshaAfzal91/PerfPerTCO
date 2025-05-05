@@ -64,9 +64,20 @@ exports.handler = async function (event, context) {
     };
   } catch (err) {
     console.error("---LOG--- fetch-price.js - Error fetching from Delta site:", err.message);
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
-    };
+    await fetch(`${process.env.URL}/.netlify/functions/log-price`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    gpu: gpuName,
+    livePrice: normalized,
+    staticPrice: staticPrices[gpuName]
+  })
+});
+
+return {
+  statusCode: 200,
+  body: JSON.stringify({ gpu: gpuName, price: normalized, source: "live" })
+};
+
   }
 };
