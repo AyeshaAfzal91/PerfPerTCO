@@ -1049,8 +1049,8 @@ const tableHTML = `
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
 <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">
   ${r.power_per_tco < 1 
-    ? r.power_per_tco.toExponential(1).replace('e-', ' × 10⁻') 
-    : r.power_per_tco.toFixed(2)}
+    ? r.power_per_tco.toExponential(2).replace('e-', ' × 10⁻') 
+    : r.power_per_tco.toFixed(1)}
 </td>
           <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
