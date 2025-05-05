@@ -1037,7 +1037,7 @@ const tableHTML = `
         <th>Perf/TCO (ns/day*atoms/€)</th>
 		<th>Power/TCO (W/€)</th>
         <th>Perf/Power/TCO (ns/day*atoms/kW/€)</th>
-        <th>Baseline %</th>
+        <th>Baseline (%)</th>
       </tr>
     </thead>
     <tbody>
@@ -1045,11 +1045,11 @@ const tableHTML = `
         <tr>
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
-          <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">€${r.total_cost.toFixed(0)}</td>
+          <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
 		  <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco < 1 ? r.power_per_tco.toExponential(2) : r.power_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(1)}</td>
-          <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}%</td>
+          <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}</td>
         </tr>`).join('')}
     </tbody>
   </table>`;
