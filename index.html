@@ -243,9 +243,18 @@
 
 <div id="price-difference-panel" style="margin-top: 20px;">
   <h3>📈 Price Change Summary</h3>
-  <ul id="price-difference-list" style="list-style-type: none; padding-left: 0;"></ul>
-  <canvas id="priceChart" width="600" height="300"></canvas>
+  
+  <div style="display: flex; gap: 20px; align-items: flex-start;">
+    <!-- Price Difference List -->
+    <ul id="price-difference-list" style="list-style-type: none; padding-left: 0; flex: 1;"></ul>
+    
+    <!-- Chart -->
+    <div style="flex: 1;">
+      <canvas id="priceChart"></canvas>
+    </div>
+  </div>
 </div>
+
 
 <div id="preset-profile-container" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
   <label for="preset-profile"><strong>🎛 Load Preset Cluster Profile:</strong></label>
