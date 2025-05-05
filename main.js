@@ -227,12 +227,46 @@ function compareOldAndNewPrices() {
 }
 
 async function loadPriceHistory() {
-  const response = await fetch('/.netlify/functions/price-history');
-  const data = await response.json();
-  console.log(data);
+  try {
+    const response = await fetch('/.netlify/functions/price-history');
+    const data = await response.json();
+    console.log("---LOG--- Loaded price history:", data);
+
+    const h100Data = data.filter(item => item.gpu === 'H100');
+    const labels = h100Data.map(item => item.date);
+    const values = h100Data.map(item => item.percentDiff);
+
+    new Chart(document.getElementById("priceChart"), {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "% Price Difference (Live vs Static)",
+          data: values,
+          borderColor: "orange",
+          fill: false,
+          tension: 0.1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            title: { display: true, text: "% Difference" }
+          },
+          x: {
+            title: { display: true, text: "Date" }
+          }
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error("---ERROR--- Failed to load price history:", error);
+  }
 }
 
 loadPriceHistory();
+
 
 
 const h100Data = data.filter(item => item.gpu === 'H100');
