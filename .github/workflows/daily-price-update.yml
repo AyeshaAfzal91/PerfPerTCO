@@ -2,7 +2,7 @@ name: Update Prices
 
 on:
   schedule:
-    - cron: '0 * * * *' # Run every hour
+    - cron: '0 3 * * *' # Run once daily at 03:00 UTC
   workflow_dispatch: # Manual trigger option
 
 permissions:
