@@ -8,7 +8,7 @@ export async function handler(event) {
   const { gpu, livePrice, staticPrice } = JSON.parse(event.body);
   const date = new Date().toISOString().split('T')[0];
 
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const octokit = new Octokit({ auth: process.env.MY_GITHUB_TOKEN });
 
   const owner = "AyeshaAfzal91";
   const repo = "PerfPerTCO";
