@@ -73,22 +73,18 @@ async function handlePriceSourceChange() {
         await loadStaticGPUPrices();
     }
 
-    // Step 1: Get the newly selected price source
-const radios = document.getElementsByName('priceSource');
-for (const radio of radios) {
-    if (radio.checked) {
-        selectedPriceSource = radio.value;
-        break;
+    const radios = document.getElementsByName('priceSource');
+    for (const radio of radios) {
+        if (radio.checked) {
+            selectedPriceSource = radio.value;
+            break;
+        }
     }
-}
 
-console.log("---LOG--- handlePriceSourceChange - New selectedPriceSource:", selectedPriceSource);
-
-// 🔄 Step 2: Save current prices before updating
-saveOldGPUPrices(); // ⬅️ Move this here
-
-// 🔄 Step 3: Load the new prices
-await updatePricesAccordingToSelection();
+    console.log("---LOG--- handlePriceSourceChange - Start. selectedPriceSource:", selectedPriceSource);
+    saveOldGPUPrices(); // Save *before* switching
+    await updatePricesAccordingToSelection();
+    compareOldAndNewPrices();
 }
 
 
