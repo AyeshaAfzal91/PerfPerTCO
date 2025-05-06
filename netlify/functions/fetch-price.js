@@ -1,5 +1,11 @@
-exports.handler = async function (event, context) {
-  const gpuName = event.queryStringParameters.gpu || 'H100';
+/*
+fetch-price.js — scrapes the live GPU price from Delta’s website.
+log-price.js (invoked at the end of fetch-price.js) — presumably logs the result to a file (should be data/prices.json).
+price-history.mjs — reads from prices.json and computes percentage difference.
+*/
+
+export async function handler(event) {
+  const gpuName = event.queryStringParameters?.gpu || 'H100';
   console.log("---LOG--- fetch-price.js - Received gpuName:", gpuName);
 
   const deltaPages = {
@@ -23,7 +29,7 @@ exports.handler = async function (event, context) {
   };
 
   const targetURL = deltaPages[gpuName];
-  console.log("---LOG--- fetch-price.js - Target URL:", targetURL);
+  const staticPrice = staticPrices[gpuName];
 
   if (!targetURL) {
     return {
@@ -35,49 +41,51 @@ exports.handler = async function (event, context) {
   if (targetURL === "Not Available") {
     return {
       statusCode: 200,
-      body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+      body: JSON.stringify({ gpu: gpuName, price: staticPrice, source: "static" })
     };
   }
 
   try {
     const res = await fetch(targetURL);
-    console.log("---LOG--- fetch-price.js - Response Status:", res.status);
-
     const html = await res.text();
-    console.log("---LOG--- fetch-price.js - HTML snippet:", html.substring(0, 300));
-
     const match = html.match(/(\d{1,3}(?:\.\d{3})*,\d{2})\s*€/);
-    if (!match) {
-      console.warn("---LOG--- fetch-price.js - No price match found. Using static fallback.");
+
+    let normalized;
+
+    if (match) {
+      const priceRaw = match[1];
+      normalized = parseFloat(priceRaw.replace(/\./g, '').replace(',', '.'));
+    } else {
+      console.warn("---LOG--- No price match found. Using static fallback.");
       return {
         statusCode: 200,
-        body: JSON.stringify({ gpu: gpuName, price: staticPrices[gpuName], source: "static" })
+        body: JSON.stringify({ gpu: gpuName, price: staticPrice, source: "static" })
       };
     }
 
-    const priceRaw = match[1];
-    const normalized = parseFloat(priceRaw.replace(/\./g, '').replace(',', '.'));
+    // Log to GitHub
+    const logRes = await fetch(`${process.env.URL}/.netlify/functions/log-price`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gpu: gpuName,
+        livePrice: normalized,
+        staticPrice: staticPrice
+      })
+    });
+
+    if (!logRes.ok) console.warn("Logging failed:", await logRes.text());
 
     return {
       statusCode: 200,
       body: JSON.stringify({ gpu: gpuName, price: normalized, source: "live" })
     };
   } catch (err) {
-    console.error("---LOG--- fetch-price.js - Error fetching from Delta site:", err.message);
-    await fetch(`${process.env.URL}/.netlify/functions/log-price`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    gpu: gpuName,
-    livePrice: normalized,
-    staticPrice: staticPrices[gpuName]
-  })
-});
-
-return {
-  statusCode: 200,
-  body: JSON.stringify({ gpu: gpuName, price: normalized, source: "live" })
-};
-
+    console.error("---LOG--- Error:", err.message);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
-};
+}
+
