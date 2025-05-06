@@ -5,6 +5,9 @@ on:
     - cron: '0 * * * *' # Run every hour
   workflow_dispatch: # Manual trigger option
 
+permissions:
+  contents: write
+
 jobs:
   update-prices:
     runs-on: ubuntu-latest
@@ -47,9 +50,9 @@ jobs:
           l4_price=$(cat l4-price.json | jq -r '.price // "null"')
           l40_price=$(cat l40-price.json | jq -r '.price // "null"')
           l40s_price=$(cat l40s-price.json | jq -r '.price // "null"')
-          
+
           current_date=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-          
+
           jq ". += [{\"gpu\": \"H100\", \"staticPrice\": 28169.14, \"livePrice\": $h100_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-h100-80gb.html\"},
                     {\"gpu\": \"GH200\", \"staticPrice\": 9999.99, \"livePrice\": $gh200_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/d14n-m2-gh-edu.html\"},
                     {\"gpu\": \"A100\", \"staticPrice\": 7264, \"livePrice\": $a100_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
@@ -59,10 +62,10 @@ jobs:
                     {\"gpu\": \"L40S\", \"staticPrice\": 14000, \"livePrice\": $l40s_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"}]" data/prices.json > data/temp-prices.json && mv data/temp-prices.json data/prices.json
 
       - name: Print debug info
-  run: |
-    git status
-    ls -la data/
-    cat data/prices.json
+        run: |
+          git status
+          ls -la data/
+          cat data/prices.json
 
       - name: Commit and push updated prices.json
         run: |
