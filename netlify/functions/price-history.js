@@ -1,10 +1,10 @@
-import { Octokit } from "@octokit/rest";
-
 export async function handler() {
+  const { Octokit } = await import("@octokit/rest");
+
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-  const owner = "AyeshaAfzal91";  
-  const repo = "PerfPerTCO";     
+  const owner = "AyeshaAfzal91";
+  const repo = "PerfPerTCO";
   const path = "data/prices.json";
 
   try {
@@ -25,7 +25,7 @@ export async function handler() {
       body: JSON.stringify(enriched)
     };
   } catch (error) {
-    console.error("Error in price-history.mjs:", error);
+    console.error("Error in price-history.js:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
