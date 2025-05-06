@@ -62,11 +62,9 @@ jobs:
                    {\"gpu\": \"L40S\", \"staticPrice\": 14000, \"livePrice\": $l40s_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"}]" data/prices.json > data/temp-prices.json && mv data/temp-prices.json data/prices.json
 
       - name: Commit and push updated prices.json
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add data/prices.json
-          git commit -m "Update GPU prices"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+  run: |
+    git config --global user.name "GitHub Action"
+    git config --global user.email "action@github.com"
+    git add data/prices.json
+    git commit -m "Update GPU prices"
+    git push https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:PerfPerTCO
