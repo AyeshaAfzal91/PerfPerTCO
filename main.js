@@ -66,8 +66,6 @@ let selectedPriceSource = "static"; // default
 let oldGPUPrices = {}; // Old prices snapshot before switching
 
 async function handlePriceSourceChange() {
-    console.log("---LOG--- handlePriceSourceChange - Start. selectedPriceSource:", selectedPriceSource);
-    console.log("---LOG--- handlePriceSourceChange - activeGPUData before loading:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
 
     if (selectedPriceSource === "live") {
         await loadCachedGPUPrices();
@@ -75,27 +73,22 @@ async function handlePriceSourceChange() {
         await loadStaticGPUPrices();
     }
 
-    console.log("---LOG--- handlePriceSourceChange - Before saveOldGPUPrices - selectedPriceSource:", selectedPriceSource, "activeGPUData:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
-    saveOldGPUPrices();
-    console.log("---LOG--- handlePriceSourceChange - After saveOldGPUPrices - oldGPUPrices:", JSON.stringify(oldGPUPrices));
-
-    // 🧭 Step 1: Get the newly selected price source
-    const radios = document.getElementsByName('priceSource');
-    for (const radio of radios) {
-        if (radio.checked) {
-            selectedPriceSource = radio.value;
-            break;
-        }
+    // Step 1: Get the newly selected price source
+const radios = document.getElementsByName('priceSource');
+for (const radio of radios) {
+    if (radio.checked) {
+        selectedPriceSource = radio.value;
+        break;
     }
-    console.log("---LOG--- handlePriceSourceChange - New selectedPriceSource:", selectedPriceSource);
+}
 
-    // 🔄 Step 2: Load the new prices
-    await updatePricesAccordingToSelection();
-    console.log("---LOG--- handlePriceSourceChange - activeGPUData after update according to selection:", JSON.stringify(activeGPUData.map(g => ({ name: g.name, cost: g.cost, priceSource: g.priceSource }))));
+console.log("---LOG--- handlePriceSourceChange - New selectedPriceSource:", selectedPriceSource);
 
-    // 📊 Step 3: Compare old vs new
-    compareOldAndNewPrices();
-    console.log("---LOG--- handlePriceSourceChange - End.");
+// 🔄 Step 2: Save current prices before updating
+saveOldGPUPrices(); // ⬅️ Move this here
+
+// 🔄 Step 3: Load the new prices
+await updatePricesAccordingToSelection();
 }
 
 
