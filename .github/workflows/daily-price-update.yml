@@ -1,21 +1,69 @@
-name: Daily GPU Price Logger
+name: Update Prices
 
 on:
   schedule:
-    - cron: '0 7 * * *'  # Every day at 07:00 UTC
-  workflow_dispatch:      # Allows manual triggering from GitHub
+    - cron: '0 * * * *' # Run every hour (adjust cron syntax as needed)
+  workflow_dispatch: # Manual trigger option
 
 jobs:
   update-prices:
     runs-on: ubuntu-latest
     steps:
-      - name: Call Netlify fetch-price for each GPU
-        env:
-          SITE_URL: https://perfpertco.netlify.app
-        run: |
-          declare -a GPUS=("H100" "GH200" "L4" "L40" "L40S")
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
-          for GPU in "${GPUS[@]}"; do
-            echo "Fetching and logging $GPU price..."
-            curl --silent --show-error "${SITE_URL}/.netlify/functions/fetch-price?gpu=${GPU}"
-          done
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Fetch live prices from Netlify Function
+        run: |
+          # Fetch prices for each GPU
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=H100" > h100-price.json
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=GH200" > gh200-price.json
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=A100" > a100-price.json
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=A40" > a40-price.json
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=L4" > l4-price.json
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=L40" > l40-price.json
+          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=L40S" > l40s-price.json
+
+      - name: Read current prices and update JSON
+        run: |
+          # Initialize the new price data with existing prices.json file or a blank array if not exists
+          if [ ! -f data/prices.json ]; then
+            echo "[]" > data/prices.json
+          fi
+          
+          # Extract live prices or handle 'Not Available'
+          h100_price=$(cat h100-price.json | jq -r '.price // "null"')
+          gh200_price=$(cat gh200-price.json | jq -r '.price // "null"')
+          a100_price=$(cat a100-price.json | jq -r '.price // "null"')
+          a40_price=$(cat a40-price.json | jq -r '.price // "null"')
+          l4_price=$(cat l4-price.json | jq -r '.price // "null"')
+          l40_price=$(cat l40-price.json | jq -r '.price // "null"')
+          l40s_price=$(cat l40s-price.json | jq -r '.price // "null"')
+          
+          current_date=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          
+          # Update prices.json
+          jq ". += [{\"gpu\": \"H100\", \"staticPrice\": 28169.14, \"livePrice\": $h100_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-h100-80gb.html\"},
+                   {\"gpu\": \"GH200\", \"staticPrice\": 9999.99, \"livePrice\": $gh200_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/d14n-m2-gh-edu.html\"},
+                   {\"gpu\": \"A100\", \"staticPrice\": 7264, \"livePrice\": $a100_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
+                   {\"gpu\": \"A40\", \"staticPrice\": 12000, \"livePrice\": $a40_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
+                   {\"gpu\": \"L4\", \"staticPrice\": 5000, \"livePrice\": $l4_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l4.html\"},
+                   {\"gpu\": \"L40\", \"staticPrice\": 13500, \"livePrice\": $l40_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"},
+                   {\"gpu\": \"L40S\", \"staticPrice\": 14000, \"livePrice\": $l40s_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"}]" data/prices.json > data/temp-prices.json && mv data/temp-prices.json data/prices.json
+
+      - name: Commit and push updated prices.json
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add data/prices.json
+          git commit -m "Update GPU prices"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
