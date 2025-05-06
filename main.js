@@ -6,18 +6,6 @@
 // ✅ FIXED VERSION WITH ALL 4 FIXES APPLIED
 
 async function updateGPUPrices() {
-    const lastFetch = localStorage.getItem('cacheTimestamp');
-    const now = Date.now();
-
-    // Skip fetch if data is less than 24 hours old
-    if (lastFetch && now - parseInt(lastFetch) < 24 * 60 * 60 * 1000) {
-        console.log("---LOG--- updateGPUPrices - Prices were already fetched today.");
-        loadCachedGPUPrices(); // Load from cache instead
-        document.getElementById('last-updated').innerText = "Last Updated: " + new Date(parseInt(lastFetch)).toLocaleString();
-        document.getElementById('loading-spinner').style.display = 'none';
-        return;
-    }
-
     document.getElementById('loading-spinner').style.display = 'block';
     const gpuNames = ["H100", "GH200", "A100", "A40", "L4", "L40", "L40S"];
     const updatedPrices = {};
@@ -42,9 +30,10 @@ async function updateGPUPrices() {
 
         console.log("---LOG--- updateGPUPrices - Updated GPU prices:", updatedPrices);
         localStorage.setItem('cachedGPUPrices', JSON.stringify(updatedPrices));
-        localStorage.setItem('cacheTimestamp', now);
+        localStorage.setItem('cacheTimestamp', Date.now());
 
-        document.getElementById('last-updated').innerText = "Last Updated: " + new Date(now).toLocaleString();
+        const now = new Date();
+        document.getElementById('last-updated').innerText = "Last Updated: " + now.toLocaleString();
 
     } catch (error) {
         console.error("---LOG--- updateGPUPrices - Failed to fetch live GPU prices:", error);
