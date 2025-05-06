@@ -2,7 +2,7 @@ name: Update Prices
 
 on:
   schedule:
-    - cron: '0 * * * *' # Run every hour (adjust cron syntax as needed)
+    - cron: '0 * * * *' # Run every hour
   workflow_dispatch: # Manual trigger option
 
 jobs:
@@ -18,14 +18,13 @@ jobs:
           node-version: '16'
 
       - name: Install jq
-        run: sudo apt-get install jq
+        run: sudo apt-get install -y jq
 
       - name: Install dependencies
         run: npm install
 
       - name: Fetch live prices from Netlify Function
         run: |
-          # Fetch prices for each GPU
           curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=H100" > h100-price.json
           curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=GH200" > gh200-price.json
           curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=A100" > a100-price.json
@@ -36,12 +35,11 @@ jobs:
 
       - name: Read current prices and update JSON
         run: |
-          # Initialize the new price data with existing prices.json file or a blank array if not exists
+          mkdir -p data
           if [ ! -f data/prices.json ]; then
             echo "[]" > data/prices.json
           fi
-          
-          # Extract live prices or handle 'Not Available'
+
           h100_price=$(cat h100-price.json | jq -r '.price // "null"')
           gh200_price=$(cat gh200-price.json | jq -r '.price // "null"')
           a100_price=$(cat a100-price.json | jq -r '.price // "null"')
@@ -52,19 +50,18 @@ jobs:
           
           current_date=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
           
-          # Update prices.json
           jq ". += [{\"gpu\": \"H100\", \"staticPrice\": 28169.14, \"livePrice\": $h100_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-h100-80gb.html\"},
-                   {\"gpu\": \"GH200\", \"staticPrice\": 9999.99, \"livePrice\": $gh200_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/d14n-m2-gh-edu.html\"},
-                   {\"gpu\": \"A100\", \"staticPrice\": 7264, \"livePrice\": $a100_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
-                   {\"gpu\": \"A40\", \"staticPrice\": 12000, \"livePrice\": $a40_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
-                   {\"gpu\": \"L4\", \"staticPrice\": 5000, \"livePrice\": $l4_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l4.html\"},
-                   {\"gpu\": \"L40\", \"staticPrice\": 13500, \"livePrice\": $l40_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"},
-                   {\"gpu\": \"L40S\", \"staticPrice\": 14000, \"livePrice\": $l40s_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"}]" data/prices.json > data/temp-prices.json && mv data/temp-prices.json data/prices.json
+                    {\"gpu\": \"GH200\", \"staticPrice\": 9999.99, \"livePrice\": $gh200_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/d14n-m2-gh-edu.html\"},
+                    {\"gpu\": \"A100\", \"staticPrice\": 7264, \"livePrice\": $a100_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
+                    {\"gpu\": \"A40\", \"staticPrice\": 12000, \"livePrice\": $a40_price, \"date\": \"$current_date\", \"url\": \"Not Available\"},
+                    {\"gpu\": \"L4\", \"staticPrice\": 5000, \"livePrice\": $l4_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l4.html\"},
+                    {\"gpu\": \"L40\", \"staticPrice\": 13500, \"livePrice\": $l40_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"},
+                    {\"gpu\": \"L40S\", \"staticPrice\": 14000, \"livePrice\": $l40s_price, \"date\": \"$current_date\", \"url\": \"https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html\"}]" data/prices.json > data/temp-prices.json && mv data/temp-prices.json data/prices.json
 
       - name: Commit and push updated prices.json
-  run: |
-    git config --global user.name "GitHub Action"
-    git config --global user.email "action@github.com"
-    git add data/prices.json
-    git commit -m "Update GPU prices"
-    git push https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:PerfPerTCO
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add data/prices.json
+          git commit -m "Update GPU prices" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
