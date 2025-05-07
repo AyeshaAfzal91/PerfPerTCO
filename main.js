@@ -2447,7 +2447,7 @@ footer.innerHTML = `
   This website and its content are licensed under 
   <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br>
   Requires citation when used in academic or research work.<br><br>
-  <strong>Please cite as</strong><br>
+  <strong>Please cite this tool as</strong><br>
   <em>Ayesha Afzal (2025). Performance Per TCO Calculator. 
   <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a> 
   Accessed: ${todaysDate}. Licensed under CC BY 4.0.</em><br><br>
