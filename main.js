@@ -2450,7 +2450,7 @@ footer.innerHTML = `
   <strong>Please cite this tool as</strong><br>
   <em>Ayesha Afzal (2025). Performance Per TCO Calculator. 
   <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a> 
-  Accessed: ${todaysDate}. Licensed under CC BY 4.0.</em><br><br>
+  Accessed: ${todaysDate}. Licensed under CC BY 4.0.</em><br>
 `;
 
 footer.appendChild(bibLink);
