@@ -565,6 +565,77 @@ thead {
   }
 }
 
+/* Citation Page Styling */
+.cite-section {
+  background-color: #ffffff;
+  padding: 40px 30px;
+  margin: 40px auto;
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: left;
+  line-height: 1.8;
+}
 
+.cite-section h1 {
+  text-align: center;
+  font-size: 2em;
+  color: #003366;
+  margin-bottom: 30px;
+}
+
+.citation-block h3 {
+  color: #005599;
+  margin-top: 25px;
+}
+
+.bibtex-block {
+  background-color: #f8f8f8;
+  padding: 20px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  overflow-x: auto;
+  border-left: 5px solid #007acc;
+  white-space: pre;
+  border-radius: 6px;
+  margin-top: 10px;
+  color: #333;
+  text-align: left;
+}
+
+.download-bib-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #3366cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.download-bib-button:hover {
+  background-color: #254a99;
+}
+
+/* Dark mode for citation section */
+body.dark .cite-section {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+}
+
+body.dark .bibtex-block {
+  background-color: #1e1e1e;
+  color: #ddd;
+  border-left-color: #77aaff;
+}
+
+body.dark .download-bib-button {
+  background-color: #555;
+}
+
+body.dark .download-bib-button:hover {
+  background-color: #777;
+}
 
 
