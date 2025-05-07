@@ -43,8 +43,7 @@ footer.innerHTML = `
   &copy; 2025, Author: Ayesha Afzal &lt;<a href="mailto:ayesha.afzal@fau.de">ayesha.afzal@fau.de</a>&gt;, 
   NHR@HPC, FAU Erlangen-Nürnberg.<br><br>
   This website and its content are licensed under 
-  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br>
-  Requires citation when used in academic or research work.<br><br>
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> and require citation when used.<br><br>
   <strong>Please cite this tool as</strong><br>
   <em>Ayesha Afzal (2025). Performance Per TCO Calculator. 
   <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a> 
