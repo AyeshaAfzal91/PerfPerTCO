@@ -4,8 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Feedback</title>
+    <link rel="stylesheet" href="style.css" />
   <style>
-
+    body {
+      max-width: 800px;
+    }
+    
     form {
       margin-top: 30px;
     }
@@ -26,19 +30,6 @@
       border-radius: 5px;
     }
 
-    button[type="submit"] {
-      margin-top: 20px;
-      background-color: #4a90e2;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button[type="submit"]:hover {
-      background-color: #3a7bd5;
-    }
   </style>
 </head>
 <body>
@@ -71,10 +62,10 @@
     <label for="message">Your Feedback:</label>
     <textarea name="message" id="message" rows="6" required></textarea>
 
-    <button type="submit">Submit Feedback</button>
+    <button type="submit" class="medium-button">Submit Feedback</button>
   </form>
 
-<script src="footer.js" defer></script>
+    <script src="footer.js" defer></script>
 
 </body>
 </html>
