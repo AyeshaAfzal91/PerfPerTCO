@@ -603,21 +603,6 @@ thead {
   text-align: left;
 }
 
-.download-bib-button {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #3366cc;
-  color: white;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
-}
-
-.download-bib-button:hover {
-  background-color: #254a99;
-}
-
 /* Dark mode for citation section */
 body.dark .cite-section {
   background-color: #2a2a2a;
@@ -630,12 +615,5 @@ body.dark .bibtex-block {
   border-left-color: #77aaff;
 }
 
-body.dark .download-bib-button {
-  background-color: #555;
-}
-
-body.dark .download-bib-button:hover {
-  background-color: #777;
-}
 
 
