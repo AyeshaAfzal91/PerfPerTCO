@@ -2441,19 +2441,9 @@ footer.innerHTML = `
   This website and its content are licensed under 
   <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br>
   Requires citation when used in academic or research work.<br><br>
-  Please cite as:<br>
+  <strong>Please cite as</strong><br>
   <em>Ayesha Afzal (2025). Performance Per TCO Calculator. 
   <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a></em><br><br>
-  <strong>BibTeX:</strong><br>
-  <code style="font-size: 11px; display: inline-block; text-align: left; max-width: 90%; white-space: pre-wrap;">
-@misc{Afzal2025PerformancePerTCO,
-  author       = {Ayesha Afzal},
-  title        = {Performance Per TCO Calculator},
-  year         = {2025},
-  howpublished = {\\url{https://perfpertco.netlify.app}},
-  note         = {Accessed: 2025-05. Licensed under CC BY 4.0.}
-}
-  </code><br>
 `;
 
 footer.appendChild(bibLink);
