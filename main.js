@@ -2405,14 +2405,57 @@ function downloadComparisonPDF() {
 }
 
 
+const bibtexContent = `
+@misc{Afzal2025PerformancePerTCO,
+  author       = {Ayesha Afzal},
+  title        = {Performance Per TCO Calculator},
+  year         = {2025},
+  howpublished = {\\url{https://perfpertco.netlify.app}},
+  note         = {Accessed: 2025-05. Licensed under CC BY 4.0.}
+}
+`;
+
 const footer = document.createElement('div');
 footer.style.marginTop = "40px";
-footer.style.padding = "12px 0";
+footer.style.padding = "12px 20px";
 footer.style.fontSize = "13px";
 footer.style.textAlign = "center";
 footer.style.color = "#666";
-footer.innerHTML = `&copy; 2025, Author: Ayesha Afzal &lt;<a href="mailto:ayesha.afzal@fau.de">ayesha.afzal@fau.de</a>&gt;, NHR@HPC, FAU Erlangen-Nürnberg.`;
+footer.style.backgroundColor = "#f9f9f9";
+footer.style.borderTop = "1px solid #ddd";
 
+// Create blob and download link for the .bib file
+const blob = new Blob([bibtexContent.trim()], { type: 'text/plain' });
+const bibLink = document.createElement('a');
+bibLink.href = URL.createObjectURL(blob);
+bibLink.download = 'PerformancePerTCO.bib';
+bibLink.textContent = 'Download BibTeX';
+bibLink.style.display = 'inline-block';
+bibLink.style.marginTop = '5px';
+bibLink.style.color = '#3366cc';
+bibLink.style.textDecoration = 'none';
+
+footer.innerHTML = `
+  &copy; 2025, Author: Ayesha Afzal &lt;<a href="mailto:ayesha.afzal@fau.de">ayesha.afzal@fau.de</a>&gt;, 
+  NHR@HPC, FAU Erlangen-Nürnberg.<br><br>
+  This website and its content are licensed under 
+  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br>
+  Requires citation when used in academic or research work.<br><br>
+  Please cite as:<br>
+  <em>Ayesha Afzal (2025). Performance Per TCO Calculator. 
+  <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a></em><br><br>
+  <strong>BibTeX:</strong><br>
+  <code style="font-size: 11px; display: inline-block; text-align: left; max-width: 90%; white-space: pre-wrap;">
+@misc{Afzal2025PerformancePerTCO,
+  author       = {Ayesha Afzal},
+  title        = {Performance Per TCO Calculator},
+  year         = {2025},
+  howpublished = {\\url{https://perfpertco.netlify.app}},
+  note         = {Accessed: 2025-05. Licensed under CC BY 4.0.}
+}
+  </code><br>
+`;
+
+footer.appendChild(bibLink);
 document.body.appendChild(footer);
-
 
