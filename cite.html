@@ -28,17 +28,19 @@
     });
 
     const citePageContent = `
-      <div style="text-align: center; margin: 40px auto; width: 80%; max-width: 800px;">
+  <section class="cite-section">
         <h1>Cite Us</h1>
-        <p>Please cite the following when using the "Performance Per TCO Calculator" in your research:</p>
+        <p>Please cite the following when using the "Performance Per TCO Calculator":</p>
         <div style="margin-top: 20px; font-size: 16px; line-height: 1.6;">
           <strong>APA Citation:</strong><br>
           Afzal, A. (2025). <i>Performance Per TCO Calculator</i>. Retrieved from 
           <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a> 
           Accessed: ${todaysDate}.<br><br>
 
-          <strong>BibTeX Citation:</strong><br>
-          <pre style="font-size: 14px; font-family: monospace; background-color: #f0f0f0; padding: 10px;">
+          <div style="text-align: left;">
+  <strong>BibTeX Citation:</strong><br>
+</div>
+<pre style="font-size: 14px; font-family: monospace; background-color: #f0f0f0; padding: 10px; text-align: left;">
 @misc{Afzal2025PerformancePerTCO,
   author       = {Ayesha Afzal},
   title        = {Performance Per TCO Calculator},
@@ -52,7 +54,7 @@
              style="padding: 8px 16px; background-color: #3366cc; color: white; text-decoration: none; border-radius: 5px;">
              Download BibTeX</a>
         </div>
-      </div>
+  </section>
     `;
 
     // Add content to main container
