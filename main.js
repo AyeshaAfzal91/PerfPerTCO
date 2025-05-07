@@ -2405,15 +2405,10 @@ function downloadComparisonPDF() {
 }
 
 
-const bibtexContent = `
-@misc{Afzal2025PerformancePerTCO,
-  author       = {Ayesha Afzal},
-  title        = {Performance Per TCO Calculator},
-  year         = {2025},
-  howpublished = {\\url{https://perfpertco.netlify.app}},
-  note         = {Accessed: 2025-05. Licensed under CC BY 4.0.}
-}
-`;
+// Get today's date in the format "Month Day, Year"
+const todaysDate = new Date().toLocaleDateString('en-US', { 
+  year: 'numeric', month: 'long', day: 'numeric' 
+});
 
 const footer = document.createElement('div');
 footer.style.marginTop = "40px";
@@ -2424,7 +2419,17 @@ footer.style.color = "#666";
 footer.style.backgroundColor = "#f9f9f9";
 footer.style.borderTop = "1px solid #ddd";
 
-// Create blob and download link for the .bib file
+// Create BibTeX download link (if needed)
+const bibtexContent = `
+@misc{Afzal2025PerformancePerTCO,
+  author       = {Ayesha Afzal},
+  title        = {Performance Per TCO Calculator},
+  year         = {2025},
+  howpublished = {\\url{https://perfpertco.netlify.app}},
+  note         = {Accessed: ${todaysDate}. Licensed under CC BY 4.0.}
+}
+`;
+
 const blob = new Blob([bibtexContent.trim()], { type: 'text/plain' });
 const bibLink = document.createElement('a');
 bibLink.href = URL.createObjectURL(blob);
@@ -2435,6 +2440,7 @@ bibLink.style.marginTop = '5px';
 bibLink.style.color = '#3366cc';
 bibLink.style.textDecoration = 'none';
 
+// Update footer content
 footer.innerHTML = `
   &copy; 2025, Author: Ayesha Afzal &lt;<a href="mailto:ayesha.afzal@fau.de">ayesha.afzal@fau.de</a>&gt;, 
   NHR@HPC, FAU Erlangen-Nürnberg.<br><br>
@@ -2443,7 +2449,8 @@ footer.innerHTML = `
   Requires citation when used in academic or research work.<br><br>
   <strong>Please cite as</strong><br>
   <em>Ayesha Afzal (2025). Performance Per TCO Calculator. 
-  <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a></em><br><br>
+  <a href="https://perfpertco.netlify.app" target="_blank">https://perfpertco.netlify.app</a> 
+  Accessed: ${todaysDate}. Licensed under CC BY 4.0.</em><br><br>
 `;
 
 footer.appendChild(bibLink);
