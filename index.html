@@ -27,13 +27,27 @@
     </label>
   </div>
 
-  <section id="about">
-    <p>
-      This calculator estimates the performance per Total Cost of Ownership (TCO) for GPU-based compute systems.
-      It allows you to configure capital and operational cost parameters, choose benchmarks (GROMACS/AMBER),
-      and compare GPUs based on their performance per TCO.
-     </p>
-  </section>
+<section id="about">
+  <p>
+    This calculator estimates the performance per Total Cost of Ownership (TCO) for GPU-based compute systems.
+    It allows you to configure capital and operational cost parameters, choose benchmarks (GROMACS/AMBER),
+    and compare GPUs based on their performance per TCO.
+  </p>
+
+  <h3>🔍 Use Cases</h3>
+  <ul>
+    <li>
+      <strong>Current:</strong> Evaluate how various parameters affect different metrics of performance, power, and cost. For example, compare scenarios where 
+      a slower but more power-efficient GPU (Type 1) could outperform a faster GPU (Type 2) by deploying more units 
+      within the same budget and system lifetime.
+    </li>
+    <li>
+      <strong>Future:</strong> Analyze the impact of adjusting GPU and (un-)core CPU clock frequencies (e.g., running GROMACS/AMBER benchmarks on an A100 at 100 MHz vs. 1.5 GHz) 
+      to help users decide whether to prioritize raw performance or optimize for performance per watt.
+    </li>
+  </ul>
+</section>
+
 
 <form id="controls">
 <div id="parametersContainer">
