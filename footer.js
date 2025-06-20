@@ -46,7 +46,7 @@ footer.innerHTML = `
   <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> and require citation when used.<br><br>
   <strong>Please cite this tool as</strong><br>
   <em>Ayesha Afzal (2025). Wattlytics: Analytics for Smarter Energy Decisions. 
-  <a href="https://perfpertco.netlify.app" target="_blank">https://wattlytics.netlify.app</a> 
+  <a href="https://wattlytics.netlify.app" target="_blank">https://wattlytics.netlify.app</a> 
   Accessed: ${todaysDate}. Licensed under CC BY 4.0.</em><br>
 `;
 
