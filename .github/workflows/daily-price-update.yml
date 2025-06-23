@@ -28,13 +28,13 @@ jobs:
 
       - name: Fetch live prices from Netlify Function
         run: |
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=H100" > h100-price.json
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=GH200" > gh200-price.json
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=A100" > a100-price.json
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=A40" > a40-price.json
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=L4" > l4-price.json
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=L40" > l40-price.json
-          curl -s "https://perfpertco.netlify.app/.netlify/functions/fetch-price?gpu=L40S" > l40s-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=H100" > h100-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=GH200" > gh200-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=A100" > a100-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=A40" > a40-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=L4" > l4-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=L40" > l40-price.json
+          curl -s "https://wattlytics.netlify.app/.netlify/functions/fetch-price?gpu=L40S" > l40s-price.json
 
       - name: Read current prices and update JSON
         run: |
