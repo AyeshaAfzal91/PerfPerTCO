@@ -4,7 +4,7 @@ export async function handler() {
   const octokit = new Octokit({ auth: process.env.MY_GITHUB_TOKEN });
 
   const owner = "AyeshaAfzal91";
-  const repo = "PerfPerTCO";
+  const repo = "Wattlytics";
   const path = "data/prices.json";
 
   try {
