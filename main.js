@@ -2130,10 +2130,10 @@ async function generatePDFReport() {
   // --- Footer
   y += 10;
   doc.setFontSize(8);
-  doc.text("Generated using PerfPerTCO Calculator – © 2025 Ayesha Afzal <mailto:ayesha.afzal@fau.de>, NHR@HPC, FAU Erlangen-Nürnberg", 15, 285);
+  doc.text("Generated using Wattlytics Calculator – © 2025 Ayesha Afzal <mailto:ayesha.afzal@fau.de>, NHR@HPC, FAU Erlangen-Nürnberg", 15, 285);
 
   // --- Save
-  doc.save(`PerfPerTCO_Report_${now.replace(/[^\d]/g, "_")}.pdf`);
+  doc.save(`Wattlytics_Report_${now.replace(/[^\d]/g, "_")}.pdf`);
 }
 
 function saveScenario(keyName) {
