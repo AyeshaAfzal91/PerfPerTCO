@@ -1888,7 +1888,7 @@ ${tipText}
 
 ---
 
-This result can help inform purchasing and planning decisions for upcoming system acquisitions. You can explore further by adjusting budget, node costs, or energy parameters at [perfpertco.netlify.app](https://perfpertco.netlify.app).
+This result can help inform purchasing and planning decisions for upcoming system acquisitions. You can explore further by adjusting budget, node costs, or energy parameters at [wattlytics.netlify.app](https://wattlytics.netlify.app).
 `;
 
   document.getElementById("blogOutput").value = blog;
