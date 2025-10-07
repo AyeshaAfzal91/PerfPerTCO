@@ -1,6 +1,10 @@
 export async function handler() {
   const { Octokit } = await import("@octokit/rest");
 
+  // Debugging: Check if the token is being picked up
+  const tokenAvailable = process.env.MY_GITHUB_TOKEN ? "set ✅" : "NOT set ❌";
+  console.log("Debug >> MY_GITHUB_TOKEN is", tokenAvailable);
+
   const octokit = new Octokit({ auth: process.env.MY_GITHUB_TOKEN });
 
   const owner = "AyeshaAfzal91";
