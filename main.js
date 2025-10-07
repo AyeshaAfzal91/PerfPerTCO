@@ -3,8 +3,6 @@
  * © 2025 NHR@HPC, FAU Erlangen-Nuremberg. All rights reserved.
  */
 
-// ✅ FIXED VERSION WITH ALL 4 FIXES APPLIED
-
 async function updateGPUPrices() {
     document.getElementById('loading-spinner').style.display = 'block';
     const gpuNames = ["H100", "GH200", "A100", "A40", "L4", "L40", "L40S"];
