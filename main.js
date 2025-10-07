@@ -192,10 +192,11 @@ function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - End.");
 }
 
-async function loadPriceHistory() {
+let chartInstance = null;
+
+async function loadPriceHistory(metric = 'percentDiff') {
   try {
     const response = await fetch('/.netlify/functions/price-history');
-    
     if (!response.ok) {
       const text = await response.text();
       throw new Error(`Error fetching price history: ${response.statusText} - ${text}`);
@@ -203,36 +204,36 @@ async function loadPriceHistory() {
 
     const data = await response.json();
 
-    if (!Array.isArray(data)) {
-      throw new Error("Expected array from price-history, got: " + JSON.stringify(data));
-    }
-
-    // List of GPUs to chart
     const gpuList = ['H100', 'GH200', 'A100', 'A40', 'L4', 'L40', 'L40S'];
 
-    // Group data by GPU
     const grouped = {};
     gpuList.forEach(gpu => {
       grouped[gpu] = data
         .filter(item => item.gpu === gpu)
-        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
     });
 
-    // Use the date labels from the longest dataset
     const labels = [...new Set(data.map(item => item.date))].sort();
 
     const datasets = gpuList.map((gpu, index) => ({
       label: gpu,
       data: labels.map(date => {
-		  const entry = grouped[gpu].find(e => e.date === date);
-		  return entry ? entry.livePrice : null;
-	  }),
+        const entry = grouped[gpu].find(e => e.date === date);
+        return entry ? (metric === 'percentDiff' ? entry.percentDiff : entry.livePrice) : null;
+      }),
       borderColor: getColor(index),
-      fill: false,
-      tension: 0.1
+      backgroundColor: getColor(index, 0.2),
+      fill: metric === 'livePrice' ? true : false,
+      tension: 0.3,
+      pointRadius: 4
     }));
 
-    new Chart(document.getElementById("priceChart"), {
+    // Destroy existing chart before creating new one
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(document.getElementById("priceChart"), {
       type: "line",
       data: {
         labels: labels,
@@ -241,21 +242,55 @@ async function loadPriceHistory() {
       options: {
         responsive: true,
         interaction: {
-          mode: 'index',
+          mode: 'nearest',
           intersect: false
         },
         plugins: {
           title: {
             display: true,
-            text: 'Live GPU Prices Over Time (€)'
+            text: metric === 'percentDiff' 
+              ? '% Price Difference (Live vs Static) by GPU' 
+              : 'Live GPU Price Over Time (€)'
+          },
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              usePointStyle: true
+            },
+            onClick: (e, legendItem, legend) => {
+              const index = legendItem.datasetIndex;
+              const chart = legend.chart;
+              const meta = chart.getDatasetMeta(index);
+              meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+              chart.update();
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: context => {
+                if (metric === 'percentDiff') {
+                  return `${context.dataset.label}: ${context.parsed.y?.toFixed(2)}%`;
+                } else {
+                  return `${context.dataset.label}: €${context.parsed.y?.toFixed(2)}`;
+                }
+              }
+            }
           }
         },
         scales: {
           y: {
-            title: { display: true, text: "Live GPU Price (€)" }
+            title: {
+              display: true,
+              text: metric === 'percentDiff' ? "% Difference" : "Price (€)"
+            },
+            beginAtZero: metric === 'percentDiff'
           },
           x: {
-            title: { display: true, text: "Date" }
+            title: {
+              display: true,
+              text: "Date"
+            }
           }
         }
       }
@@ -264,12 +299,6 @@ async function loadPriceHistory() {
   } catch (error) {
     console.error("---ERROR--- Failed to load price history:", error);
   }
-}
-
-// Utility: assign each GPU a color
-function getColor(index) {
-  const colors = ['orange', 'blue', 'green', 'red', 'purple', 'teal', 'brown'];
-  return colors[index % colors.length];
 }
 
 loadPriceHistory();
