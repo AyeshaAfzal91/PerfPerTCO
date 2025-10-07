@@ -8,8 +8,8 @@ export async function handler() {
   const octokit = new Octokit({ auth: process.env.MY_GITHUB_TOKEN });
 
   const owner = "AyeshaAfzal91";
-  const repo = "Wattlytics";
-  const path = "data/prices.json";
+  const repo = "PerfPerTCO";  
+  const path = "PerfPerTCO/data/prices.json";  
 
   try {
     const { data: file } = await octokit.repos.getContent({ owner, repo, path });
