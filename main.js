@@ -430,7 +430,7 @@ document.getElementById("priceMetric").addEventListener("change", (e) => {
   loadPriceHistory(e.target.value);
 });
 
-loadPriceHistory();
+loadPriceHistory('livePrice');
 
 
 const presetProfiles = {
