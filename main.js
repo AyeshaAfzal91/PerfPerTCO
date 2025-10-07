@@ -192,7 +192,7 @@ function compareOldAndNewPrices() {
     console.log("---LOG--- compareOldAndNewPrices - End.");
 }
 
-let chartInstance = null;
+let chartInstance;  // Global to allow destroy and reset zoom
 
 async function loadPriceHistory(metric = 'percentDiff') {
   try {
@@ -206,6 +206,7 @@ async function loadPriceHistory(metric = 'percentDiff') {
 
     const gpuList = ['H100', 'GH200', 'A100', 'A40', 'L4', 'L40', 'L40S'];
 
+    // Group data by GPU
     const grouped = {};
     gpuList.forEach(gpu => {
       grouped[gpu] = data
@@ -213,12 +214,14 @@ async function loadPriceHistory(metric = 'percentDiff') {
         .sort((a, b) => new Date(a.date) - new Date(b.date));
     });
 
-    const labels = [...new Set(data.map(item => item.date))].sort();
+    // Use Date objects for labels (for time scale)
+    const labels = [...new Set(data.map(item => new Date(item.date)))].sort((a, b) => a - b);
 
+    // Main datasets (one line per GPU)
     const datasets = gpuList.map((gpu, index) => ({
       label: gpu,
       data: labels.map(date => {
-        const entry = grouped[gpu].find(e => e.date === date);
+        const entry = grouped[gpu].find(e => new Date(e.date).getTime() === date.getTime());
         return entry ? (metric === 'percentDiff' ? entry.percentDiff : entry.livePrice) : null;
       }),
       borderColor: getColor(index),
@@ -227,6 +230,40 @@ async function loadPriceHistory(metric = 'percentDiff') {
       tension: 0.3,
       pointRadius: 4
     }));
+
+    // Highlight biggest price jump per GPU with a point
+    const highlightPoints = gpuList.map((gpu, index) => {
+      const gpuData = grouped[gpu];
+      if (gpuData.length < 2) return null;
+
+      let maxJump = { diff: 0, entry: null };
+      for (let i = 1; i < gpuData.length; i++) {
+        const prevVal = metric === 'percentDiff' ? gpuData[i-1].percentDiff : gpuData[i-1].livePrice;
+        const currVal = metric === 'percentDiff' ? gpuData[i].percentDiff : gpuData[i].livePrice;
+        const jump = Math.abs(currVal - prevVal);
+        if (jump > maxJump.diff) {
+          maxJump = { diff: jump, entry: gpuData[i] };
+        }
+      }
+      if (!maxJump.entry) return null;
+
+      return {
+        label: `${gpu} Peak Jump`,
+        data: [{
+          x: new Date(maxJump.entry.date),
+          y: metric === 'percentDiff' ? maxJump.entry.percentDiff : maxJump.entry.livePrice
+        }],
+        borderColor: 'black',
+        backgroundColor: 'yellow',
+        pointRadius: 7,
+        type: 'scatter',
+        showLine: false,
+        fill: false,
+        hoverRadius: 10,
+      };
+    }).filter(Boolean);
+
+    datasets.push(...highlightPoints);
 
     // Destroy existing chart before creating new one
     if (chartInstance) {
@@ -276,6 +313,21 @@ async function loadPriceHistory(metric = 'percentDiff') {
                 }
               }
             }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x',
+            },
+            zoom: {
+              wheel: {
+                enabled: true
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x',
+            }
           }
         },
         scales: {
@@ -290,6 +342,11 @@ async function loadPriceHistory(metric = 'percentDiff') {
             title: {
               display: true,
               text: "Date"
+            },
+            type: 'time',
+            time: {
+              unit: 'day',
+              tooltipFormat: 'MMM dd, yyyy'
             }
           }
         }
@@ -303,23 +360,65 @@ async function loadPriceHistory(metric = 'percentDiff') {
 
 function getColor(index, alpha = 1) {
   const colors = [
-    'rgba(255, 159, 64, ALPHA)',   // orange
-    'rgba(54, 162, 235, ALPHA)',   // blue
-    'rgba(75, 192, 192, ALPHA)',   // green
-    'rgba(255, 99, 132, ALPHA)',   // red
-    'rgba(153, 102, 255, ALPHA)',  // purple
-    'rgba(100, 181, 246, ALPHA)',  // teal
-    'rgba(160, 120, 90, ALPHA)'    // brown
+    `rgba(255, 159, 64, ${alpha})`,   // orange
+    `rgba(54, 162, 235, ${alpha})`,   // blue
+    `rgba(75, 192, 192, ${alpha})`,   // green
+    `rgba(255, 99, 132, ${alpha})`,   // red
+    `rgba(153, 102, 255, ${alpha})`,  // purple
+    `rgba(100, 181, 246, ${alpha})`,  // teal
+    `rgba(160, 120, 90, ${alpha})`    // brown
   ];
-  return colors[index % colors.length].replace('ALPHA', alpha.toString());
+  return colors[index % colors.length];
 }
 
+// Export buttons functionality
+function exportChartImage() {
+  if (!chartInstance) return;
+  const canvas = document.getElementById("priceChart");
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = "gpu-price-chart.png";
+  link.click();
+}
+
+function exportChartCSV() {
+  if (!chartInstance) return;
+  const gpuList = chartInstance.data.datasets
+    .filter(ds => ds.type !== 'scatter')  // Exclude highlight scatter datasets
+    .map(ds => ds.label);
+
+  // Collect unique dates from labels
+  const labels = chartInstance.data.labels;
+
+  const csvRows = [];
+  csvRows.push(['Date', ...gpuList]);
+
+  labels.forEach(label => {
+    const row = [label.toISOString().split('T')[0]];
+    gpuList.forEach(gpu => {
+      const dataset = chartInstance.data.datasets.find(ds => ds.label === gpu);
+      const idx = labels.indexOf(label);
+      const value = dataset.data[idx];
+      row.push(value !== null && value !== undefined ? value.toFixed(2) : '');
+    });
+    csvRows.push(row);
+  });
+
+  const csvString = csvRows.map(row => row.join(',')).join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'gpu_price_history.csv';
+  link.click();
+}
+
+// Attach event listener for metric dropdown (if exists)
 document.getElementById("priceMetric").addEventListener("change", (e) => {
   loadPriceHistory(e.target.value);
 });
 
-
 loadPriceHistory();
+
 
 const presetProfiles = {
   Alex: { // (44 A40-40GB + 20 A100-40GB + 18 A100-80GB) nodes; 8 x (44 + 20 + 18) GPUs
