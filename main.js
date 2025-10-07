@@ -325,7 +325,8 @@ if (peakJumpPoints.length > 0) {
             },
             zoom: {
               wheel: {
-                enabled: true
+                enabled: true, 
+				modifierKey: 'ctrl'   
               },
               pinch: {
                 enabled: true
