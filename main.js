@@ -301,6 +301,24 @@ async function loadPriceHistory(metric = 'percentDiff') {
   }
 }
 
+function getColor(index, alpha = 1) {
+  const colors = [
+    'rgba(255, 159, 64, ALPHA)',   // orange
+    'rgba(54, 162, 235, ALPHA)',   // blue
+    'rgba(75, 192, 192, ALPHA)',   // green
+    'rgba(255, 99, 132, ALPHA)',   // red
+    'rgba(153, 102, 255, ALPHA)',  // purple
+    'rgba(100, 181, 246, ALPHA)',  // teal
+    'rgba(160, 120, 90, ALPHA)'    // brown
+  ];
+  return colors[index % colors.length].replace('ALPHA', alpha.toString());
+}
+
+document.getElementById("priceMetric").addEventListener("change", (e) => {
+  loadPriceHistory(e.target.value);
+});
+
+
 loadPriceHistory();
 
 const presetProfiles = {
