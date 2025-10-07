@@ -416,6 +416,13 @@ function exportChartCSV() {
   link.click();
 }
 
+// Make functions globally accessible
+window.exportChartImage = exportChartImage;
+window.exportChartCSV = exportChartCSV;
+window.resetZoom = () => {
+  if (chartInstance) chartInstance.resetZoom();
+};
+
 // Attach event listener for metric dropdown (if exists)
 document.getElementById("priceMetric").addEventListener("change", (e) => {
   loadPriceHistory(e.target.value);
