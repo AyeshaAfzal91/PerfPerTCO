@@ -9,7 +9,7 @@ export async function handler() {
 
   const owner = "AyeshaAfzal91";
   const repo = "PerfPerTCO";  
-  const path = "PerfPerTCO/data/prices.json";  
+  const path = "data/prices.json";  
 
   try {
     const { data: file } = await octokit.repos.getContent({ owner, repo, path });
