@@ -231,39 +231,43 @@ async function loadPriceHistory(metric = 'percentDiff') {
       pointRadius: 4
     }));
 
-    // Highlight biggest price jump per GPU with a point
-    const highlightPoints = gpuList.map((gpu, index) => {
-      const gpuData = grouped[gpu];
-      if (gpuData.length < 2) return null;
+    // Collect all peak jumps into one dataset
+const peakJumpPoints = [];
 
-      let maxJump = { diff: 0, entry: null };
-      for (let i = 1; i < gpuData.length; i++) {
-        const prevVal = metric === 'percentDiff' ? gpuData[i-1].percentDiff : gpuData[i-1].livePrice;
-        const currVal = metric === 'percentDiff' ? gpuData[i].percentDiff : gpuData[i].livePrice;
-        const jump = Math.abs(currVal - prevVal);
-        if (jump > maxJump.diff) {
-          maxJump = { diff: jump, entry: gpuData[i] };
-        }
-      }
-      if (!maxJump.entry) return null;
+gpuList.forEach((gpu, index) => {
+  const gpuData = grouped[gpu];
+  if (gpuData.length < 2) return;
 
-      return {
-        label: `${gpu} Peak Jump`,
-        data: [{
-          x: new Date(maxJump.entry.date),
-          y: metric === 'percentDiff' ? maxJump.entry.percentDiff : maxJump.entry.livePrice
-        }],
-        borderColor: 'black',
-        backgroundColor: 'yellow',
-        pointRadius: 7,
-        type: 'scatter',
-        showLine: false,
-        fill: false,
-        hoverRadius: 10,
-      };
-    }).filter(Boolean);
+  let maxJump = { diff: 0, entry: null };
+  for (let i = 1; i < gpuData.length; i++) {
+    const prevVal = metric === 'percentDiff' ? gpuData[i-1].percentDiff : gpuData[i-1].livePrice;
+    const currVal = metric === 'percentDiff' ? gpuData[i].percentDiff : gpuData[i].livePrice;
+    const jump = Math.abs(currVal - prevVal);
+    if (jump > maxJump.diff) {
+      maxJump = { diff: jump, entry: gpuData[i] };
+    }
+  }
+  if (!maxJump.entry) return;
 
-    datasets.push(...highlightPoints);
+  peakJumpPoints.push({
+    x: new Date(maxJump.entry.date),
+    y: metric === 'percentDiff' ? maxJump.entry.percentDiff : maxJump.entry.livePrice,
+  });
+});
+
+if (peakJumpPoints.length > 0) {
+  datasets.push({
+    label: 'Peak Jump',
+    data: peakJumpPoints,
+    borderColor: 'black',
+    backgroundColor: 'yellow',
+    pointRadius: 7,
+    type: 'scatter',
+    showLine: false,
+    fill: false,
+    hoverRadius: 10,
+  });
+}
 
     // Destroy existing chart before creating new one
     if (chartInstance) {
