@@ -224,9 +224,9 @@ async function loadPriceHistory() {
     const datasets = gpuList.map((gpu, index) => ({
       label: gpu,
       data: labels.map(date => {
-        const entry = grouped[gpu].find(e => e.date === date);
-        return entry ? entry.percentDiff : null; // Use null for missing data
-      }),
+		  const entry = grouped[gpu].find(e => e.date === date);
+		  return entry ? entry.livePrice : null;
+	  }),
       borderColor: getColor(index),
       fill: false,
       tension: 0.1
@@ -247,12 +247,12 @@ async function loadPriceHistory() {
         plugins: {
           title: {
             display: true,
-            text: '% Price Difference (Live vs Static) by GPU'
+            text: 'Live GPU Prices Over Time (€)'
           }
         },
         scales: {
           y: {
-            title: { display: true, text: "% Difference" }
+            title: { display: true, text: "Live GPU Price (€)" }
           },
           x: {
             title: { display: true, text: "Date" }
