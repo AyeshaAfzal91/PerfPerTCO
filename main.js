@@ -420,7 +420,10 @@ function exportChartCSV() {
 // Make functions globally accessible
 window.exportChartImage = exportChartImage;
 window.exportChartCSV = exportChartCSV;
-window.resetZoom = () => {
+window.zoomChart = function(factor) {
+  if (chartInstance) chartInstance.zoom(factor);
+};
+window.resetZoom = function() {
   if (chartInstance) chartInstance.resetZoom();
 };
 
