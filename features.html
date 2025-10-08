@@ -115,7 +115,7 @@ Let users save, name, version multiple scenarios, compare over time; share with 
         <strong>❓ Cooling Types & PUE Modeling</strong>
         <ul>
             <li><strong>Model:</strong> PUE = (factor_air * PUE_Air + factor_water * PUE_Water) / 2</li>
-            <li><strong>Comment:</strong> Incorporates cooling types (air-cooled, water-cooled), weighting factors for the fraction of energy consumption between air-cooled and water-cooled cluster to model heterogeneous clusters. Another variation: different codes on CPU and GPU clusters with varying PUEs require a weighted sum of benchmark power use.</li>
+            <li><strong>Comment:</strong> Incorporates cooling types (air-cooled, water-cooled), weighting factors for the fraction of energy consumption between air-cooled and water-cooled cluster to model heterogeneous clusters. Another variation: different codes on CPU and GPU clusters with varying PUEs require a weighted sum of benchmark power use. Incorporate PUE is good, but further modeling of cooling infrastructure overhead, power losses, UPS/PDUs, rack-level constraints.</li>
         </ul>
     </li>
     <li>
