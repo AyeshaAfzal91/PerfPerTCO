@@ -63,7 +63,9 @@
 
   <li><strong>Undervolting, Throttling</strong> Allow exploring how undervolting/underclocking or thermal throttling affects performance, power, TCO. Add plots of "power vs. perf loss" to visualize trade-offs. </li>
 
-  <li><strong>Budget & Constraint-based Suggestions</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”)</li>
+  <li><strong>Budget & Constraint-based Suggestions</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
+
+  <li><strong>ML Model for Suggestions:</strong> After collecting enough usage data, recommend configurations via learned patterns </li>
 
   <li><strong>Improved Visualisation, in priority order</strong>
     <ul>      
@@ -76,7 +78,7 @@
       <li><strong>Preset Profiles:</strong> Add top 10 clusters from the Top500 or Green500 list and improve currently available Alex (A40, A100) and Helma (H100) profiles. </li>
 
   	  <li><strong>Sourcing prices other than deltacomputer:</strong> Sourcing prices from deltacomputer.com when available; otherwise from alternate.de, sysgen.de, or internal records. VAT will be added if missing. One can always adjust the pricing (or take best option) if needed. Use crawlers or scraped data via public APIs where possible. Keep disclaimers — prices vary and VAT/local tax rules may apply.</li>
-      <li> Allow modeling of how GPU prices, electricity rates, grid carbon intensity might change over 5–10 years (e.g. falling GPU cost, rising carbon tax). Run forecasts / scenarios (optimistic, pessimistic). Let users select the trend type (Linear, Exponential), sensitivity bands, and duration (3, 5, 10 years).</li>
+      <li><strong>Forecasting:</strong>  Allow modeling of how GPU prices, electricity rates, grid carbon intensity might change over 5–10 years (e.g. falling GPU cost, rising carbon tax). Run forecasts / scenarios (optimistic, pessimistic). Let users select the trend type (Linear, Exponential), sensitivity bands, and duration (3, 5, 10 years).</li>
     </ul>
   </li>
   
@@ -89,7 +91,7 @@
   <li><strong>Detailed PDF Report Generator:</strong> Export project reports with charts and explanations and add a report format toggle (Summary vs. Detailed). Currently offers only a simple PDF report generator.</li>
     
   <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique, bookmarkable, shareable public URLs with embedded settings. Currently includes a simple auto-generated blog summary share option. Let users log in, store their configurations, revisit, manage scenario libraries.
-Let users save, name, version multiple scenarios, compare over time; share with collaborators; comment, version diffing.</li>
+Let users save, name, version multiple scenarios, compare over time; share with collaborators; comment, version diffing. Let external contributors define workloads, pricing models, or cooling setups via plugins or config files. </li>
   
   <li><strong>Programmatic Access:</strong> Expose Wattlytics as an API for researchers and developers so other tools (cluster schedulers, infrastructure planners) can query TCO estimations programmatically. Currently limited to a private GitHub repository.</li>
       
@@ -97,10 +99,6 @@ Let users save, name, version multiple scenarios, compare over time; share with 
 
   <li><strong>SEO Optimization:</strong> Add meta tags, sitemap.xml, alt text.</li>
 </ul>
-</ul>
-
-
-
         <h2> Model Assessment of Current Extensions; 🚦Overengineered?</h2>
 <ul>
     <li>
