@@ -29,7 +29,7 @@
 
 <section id="about">
   <p>
-    This tool estimates the Total Cost of Ownership (TCO) and total power for GPU-based compute systems.
+    This tool estimates the Total Cost of Ownership (TCO) and total power consumption for GPU-based compute systems.
     It allows you to configure capital and operational cost parameters, choose benchmarks (GROMACS/AMBER),
     and compare GPUs (GH200, H100, L40S, L40, A40, A100, L4) based on their performance, power, and cost.
   </p>
@@ -37,17 +37,16 @@
   <h3>🔍 Use Cases</h3>
   <ul>
     <li>
-      <strong>Current:</strong> Evaluate how various parameters affect different metrics of performance per TCO, power per TCO and performance per watt per TCO. For example, compare scenarios where 
-      a slower, more power-efficient GPU (Type 1) could outperform a faster, less power-efficient GPU (Type 2) by deploying more units 
-      within the same budget and system lifetime.
+      <strong>Current:</strong> Evaluate how various parameters affect key metrics such as performance per TCO, power per TCO, and performance per watt per TCO. For example, compare scenarios where 
+      a slower, more power-efficient GPU (Type 1) could outperform a faster, less power-efficient GPU (Type 2) by deploying more units within the same budget and system lifetime.
     </li>
     <li>
-      <strong>Future:</strong> Analyze the impact of adjusting GPU and (un-)core CPU clock frequencies (e.g., running GROMACS/AMBER benchmarks on an A100 at 100 MHz vs. 1.5 GHz) 
-      to help users decide whether to prioritize maximizing performance or finding the sweet spot for maximum performance per watt. 
+      <strong>Future:</strong> Analyze the impact of adjusting memory/graphics GPU and (un-)core CPU clock frequencies (e.g., running GROMACS/AMBER benchmarks on an A100 at 100 MHz vs. 1.5 GHz) 
+      to help users decide whether to prioritize raw performance or optimize for maximum performance per watt. 
     </li>
-	<li>
-	  <strong>Tool Focus:</strong> A tool for exploring the parameter space to analyze sensitivity, rather than for directly planning procurement, since procurement involves many dynamic factors that cannot be captured by a single tool.
-  	</li>
+    <li>
+      <strong>Tool Focus:</strong> This is a tool for exploring the parameter space and analyzing sensitivity, rather than for direct procurement planning, as procurement involves many dynamic factors that cannot be captured by a single tool.
+    </li>
   </ul>
 </section>
 
