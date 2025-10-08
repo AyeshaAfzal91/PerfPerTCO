@@ -73,10 +73,10 @@
       
       <li><strong>Monte Carlo / Uncertainty Analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results. For example, one can tweak parameters like W prefactors in the power model or the node's baseline power to see how they affect performance per TCO. Allow users choose “confidence level” (95%, 99%) and export summary statistics. Add pre-defined scenarios (e.g., “Power Variability ±5%”). </li>
 
-      <li><strong>Preset Profiles:</strong> Add top 10 clusters from the Top500 or Green500 list and improve currently available Alex (A40, A100) and Helma (H100) profiles.</li>
+      <li><strong>Preset Profiles:</strong> Add top 10 clusters from the Top500 or Green500 list and improve currently available Alex (A40, A100) and Helma (H100) profiles. </li>
 
-  	  <li><strong>Sourcing prices other than deltacomputer:</strong> Sourcing prices from deltacomputer.com when available; otherwise from alternate.de, sysgen.de, or internal records. VAT will be added if missing. One can always adjust the pricing (or take best option) if needed.</li>
-      <li> Allow modeling of how GPU prices, electricity rates, grid carbon intensity might change over 5–10 years (e.g. falling GPU cost, rising carbon tax). Run forecasts / scenarios (optimistic, pessimistic).</li>
+  	  <li><strong>Sourcing prices other than deltacomputer:</strong> Sourcing prices from deltacomputer.com when available; otherwise from alternate.de, sysgen.de, or internal records. VAT will be added if missing. One can always adjust the pricing (or take best option) if needed. Use crawlers or scraped data via public APIs where possible. Keep disclaimers — prices vary and VAT/local tax rules may apply.</li>
+      <li> Allow modeling of how GPU prices, electricity rates, grid carbon intensity might change over 5–10 years (e.g. falling GPU cost, rising carbon tax). Run forecasts / scenarios (optimistic, pessimistic). Let users select the trend type (Linear, Exponential), sensitivity bands, and duration (3, 5, 10 years).</li>
     </ul>
   </li>
   
@@ -108,20 +108,20 @@ Let users save, name, version multiple scenarios, compare over time; share with 
         <ul>
             <li><strong>Model:</strong> W_node_baseline(f_cCPU, f_ucCPU) = W_baseCPU + W_dynamicCPU + W_noncompute</li>
             <li><strong>Model:</strong> W_gpu(f_GPU)</li>
-            <li><strong>Comment:</strong> f_cCPU, f_ucCPU and f_GPU represents core CPU frequency, uncore CPU frequency and GPU graphics frequency. Example: On Alex, power usage is split as 11.6% CPU, 55% GPU, and 33.4% non-compute (including 6% fan and 27.4% other components) </li>
+            <li><strong>Comment:</strong> f_cCPU, f_ucCPU and f_GPU represents core CPU frequency, uncore CPU frequency and GPU graphics frequency. Example: On Alex, power usage is split as 11.6% CPU, 55% GPU, and 33.4% non-compute (including 6% fan and 27.4% other components). (Optional) Let advanced users input or tweak their own component-wise power ratios. </li>
         </ul>
     </li>
     <li>
         <strong>❓ Cooling Types & PUE Modeling</strong>
         <ul>
             <li><strong>Model:</strong> PUE = (factor_air * PUE_Air + factor_water * PUE_Water) / 2</li>
-            <li><strong>Comment:</strong> Incorporates cooling types (air-cooled, water-cooled), weighting factors for the fraction of energy consumption between air-cooled and water-cooled cluster to model heterogeneous clusters. Another variation: different codes on CPU and GPU clusters with varying PUEs require a weighted sum of benchmark power use. Incorporate PUE is good, but further modeling of cooling infrastructure overhead, power losses, UPS/PDUs, rack-level constraints.</li>
+            <li><strong>Comment:</strong> Incorporates cooling types (air-cooled, water-cooled), weighting factors for the fraction of energy consumption between air-cooled and water-cooled cluster to model heterogeneous clusters. Another variation: different codes on CPU and GPU clusters with varying PUEs require a weighted sum of benchmark power use. Incorporate PUE is good, but further modeling of cooling infrastructure overhead, power losses, UPS/PDUs, rack-level constraints. Refine PUE as nonlinear, temperature-dependent, or even: PUE = a + b*(ambient_temp). Show PUE vs. temperature curve (based on ASHRAE or DC operator data). </li>
         </ul>
     </li>
     <li>
         <strong>❓ Maintenance Cost Split: Capital vs. Operational</strong>
         <ul>
-            <li><strong>Comment:</strong> Capital cost applies to the first 3 years (as per DFG rules), while operational cost covers the remaining lifetime.</li>
+            <li><strong>Comment:</strong> Capital cost applies to the first 3 years (as per DFG rules), while operational cost covers the remaining lifetime. Allow user-defined splits as a fallback. </li>
         </ul>
     </li>
     <li>
@@ -130,7 +130,7 @@ Let users save, name, version multiple scenarios, compare over time; share with 
     <li>
         <strong>❓ Software Cost Dependency on Node Count</strong>
         <ul>
-            <li><strong>Comment:</strong> Many commercial licenses scale with node count, such as Moya scheduler, SUSE Enterprise, or IBM file systems like GPFS.</li>
+            <li><strong>Comment:</strong> Many commercial licenses scale with node count, such as Moya scheduler, SUSE Enterprise, or IBM file systems like GPFS. Include fields for "License per node vs. per core, "Floating license pools" and "Cost caps or institutional deals." </li>
         </ul>
     </li>
     <li>
