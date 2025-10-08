@@ -61,8 +61,15 @@
   <li><strong>Heterogeneous cluster of N different architectures</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU. Model interconnect costs/latencies or data transfer energy overhead when jobs cross hardware types (e.g., CPU ↔ GPU ↔ GPU of different gen).</li>
 
   <li><strong>Utilization Modeling</strong> Rather than assuming GPUs operate constantly, simulate a job mix (some jobs heavy, some light) or utilization curves. Compute effective utilization (e.g. 70% usage, peaks, idle periods) more realistically. Add "Idle Power" or "Scheduling Inefficiencies" into models so users can toggle between ideal vs. real usage curves. </li>
-
+</ul>
+</li>
+<li><strong>Phase 2: Advanced analytics</strong>
+   <ul> 
   <li><strong>Undervolting, Throttling</strong> Allow exploring how undervolting/underclocking or thermal throttling affects performance, power, TCO. Add plots of "power vs. perf loss" to visualize trade-offs. </li>
+
+  <li><strong>Multi-Year TCO Projection with Depreciation Curves:</strong> Visualize how total cost accumulates over the system’s lifetime. GPU cluster loses value over time affects Accounting, TCO realism and ROI and resale value (X-axis: 0 to lifetime in years; Y-axis: Cumulative TCO as a line and Depreciated asset value as shaded area). comment: Not sure how to factor this in, but in a commercial setting, asset value or cost decline over time matters. Since hardware loses value over time but power costs stay constant, power might be more important than hardware cost over the cluster's lifetime. Allow users to select a depreciation method (linear, double-declining, etc.) and add resale value estimates. </li>
+      
+  <li><strong>Monte Carlo / Uncertainty Analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results. For example, one can tweak parameters like W prefactors in the power model or the node's baseline power to see how they affect performance per TCO. Allow users choose “confidence level” (95%, 99%) and export summary statistics. Add pre-defined scenarios (e.g., “Power Variability ±5%”). </li>
 
   <li><strong>Budget & Constraint-based Suggestions</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
 
@@ -70,13 +77,9 @@
 </ul>
 </li>
   
-  <li><strong>Improved Visualisation, in priority order</strong>
+  <li><strong>User experience & collaboration</strong>
     <ul>      
       <li><strong>Fixed energy approach rather than a fixed budget</strong> Particularly relevant for larger insulations having power plants (LANL) and to a lesser extent for FAU power supplies at NHR@FAU. For example, given an X MW infrastructure, a cluster exceeding X MW within the allowed budget won’t work. How far can you optimize power (by reducing power cap or adjusting CPU/GPU clocks) before it forces you to switch to a different GPU? Given a power limit, how large can the system be while staying within the allowed budget? Add color bands or alerts on charts when a config exceeds power envelope. Explore "Power Envelope vs. Perf Curve" visualizations.</li>
-
-      <li><strong>Multi-Year TCO Projection with Depreciation Curves:</strong> Visualize how total cost accumulates over the system’s lifetime. GPU cluster loses value over time affects Accounting, TCO realism and ROI and resale value (X-axis: 0 to lifetime in years; Y-axis: Cumulative TCO as a line and Depreciated asset value as shaded area). comment: Not sure how to factor this in, but in a commercial setting, asset value or cost decline over time matters. Since hardware loses value over time but power costs stay constant, power might be more important than hardware cost over the cluster's lifetime. Allow users to select a depreciation method (linear, double-declining, etc.) and add resale value estimates. </li>
-      
-      <li><strong>Monte Carlo / Uncertainty Analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results. For example, one can tweak parameters like W prefactors in the power model or the node's baseline power to see how they affect performance per TCO. Allow users choose “confidence level” (95%, 99%) and export summary statistics. Add pre-defined scenarios (e.g., “Power Variability ±5%”). </li>
 
       <li><strong>Preset Profiles:</strong> Add top 10 clusters from the Top500 or Green500 list and improve currently available Alex (A40, A100) and Helma (H100) profiles. </li>
 
