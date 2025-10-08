@@ -57,13 +57,13 @@
 
   <li><strong>Benchmark/GPU Database Expansion:</strong> Support for more and mixed workloads from different domains (ML, CFD, molecular dynamics), e.g., AI (TensorFlow, MLPerf) and HPC loads (OpenFOAM, LAMMPS). Allow users to define custom workload mixes and save them as templates.  Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
 
-  <li><strong>Heterogeneous cluster of N different architectures</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU</li>
+  <li><strong>Heterogeneous cluster of N different architectures</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU. Model interconnect costs/latencies or data transfer energy overhead when jobs cross hardware types (e.g., CPU ↔ GPU ↔ GPU of different gen).</li>
 
-  <li>Rather than assuming GPUs operate constantly, simulate a job mix (some jobs heavy, some light) or utilization curves. Compute effective utilization (e.g. 70% usage, peaks, idle periods) more realistically.</li>
+  <li><strong>Utilization Modeling</strong> Rather than assuming GPUs operate constantly, simulate a job mix (some jobs heavy, some light) or utilization curves. Compute effective utilization (e.g. 70% usage, peaks, idle periods) more realistically. Add "Idle Power" or "Scheduling Inefficiencies" into models so users can toggle between ideal vs. real usage curves. </li>
 
-  <li>Allow exploring how undervolting/underclocking or thermal throttling affects performance, power, TCO.</li>
+  <li><strong>Undervolting, Throttling</strong> Allow exploring how undervolting/underclocking or thermal throttling affects performance, power, TCO. Add plots of "power vs. perf loss" to visualize trade-offs. </li>
 
-  <li>Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.).</li>
+  <li><strong>Budget & Constraint-based Suggestions</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”)</li>
 
   <li><strong>Improved Visualisation, in priority order</strong>
     <ul>      
