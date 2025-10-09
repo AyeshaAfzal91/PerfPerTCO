@@ -75,7 +75,7 @@
     <li><strong>Smart configuration guidance system:</strong>
       <ul>
      
-  <li><strong>Configuration recommendation engine (rule-based):</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). If a user sets a constraint (power < X, emissions < Y), highlight or warn when configurations exceed constraints. Currently only provides a basic rule-based Smart Strategy Tip.</li>
+  <li><strong>Configuration recommendation engine (rule-based):</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). If a user sets a constraint (power < X, emissions < Y), highlight or warn when configurations exceed constraints. <em>(Current: basic rule-based Smart Strategy Tip; Future: adaptive, data-driven suggestions)</em></li>
      
   <li><strong>Budget & constraint-based optimizer:</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
 
