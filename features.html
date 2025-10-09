@@ -59,14 +59,14 @@
    <ul> 
   <li><strong>Benchmark/GPU database expansion:</strong> Support for more and mixed workloads from different domains (ML, CFD, molecular dynamics), e.g., AI (TensorFlow, MLPerf) and HPC loads (OpenFOAM, LAMMPS). Allow users to define custom workload mixes and save them as templates.  Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
 
-  <li><strong>Heterogeneous cluster modeling</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU. In multi-architecture clusters (CPU + multiple GPU generations), model interconnect costs/latencies or data transfer energy overhead when jobs cross hardware types (e.g., CPU ↔ GPU ↔ GPU of different gen).</li>
+  <li><strong>Heterogeneous cluster modeling:</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU. In multi-architecture clusters (CPU + multiple GPU generations), model interconnect costs/latencies or data transfer energy overhead when jobs cross hardware types (e.g., CPU ↔ GPU ↔ GPU of different gen).</li>
 
-  <li><strong>Utilization modeling</strong> Rather than assuming GPUs operate constantly, simulate a job mix (some jobs heavy, some light) or utilization curves. Compute effective utilization (e.g. 70% usage, peaks, idle periods) more realistically. Add "Idle Power" or "Scheduling Inefficiencies" into models so users can toggle between ideal vs. real usage curves. </li>
+  <li><strong>Utilization modeling:</strong> Rather than assuming GPUs operate constantly, simulate a job mix (some jobs heavy, some light) or utilization curves. Compute effective utilization (e.g. 70% usage, peaks, idle periods) more realistically. Add "Idle Power" or "Scheduling Inefficiencies" into models so users can toggle between ideal vs. real usage curves. </li>
 </ul>
 </li>
 <li><strong>Phase 2: Advanced analytics</strong>
    <ul> 
-  <li><strong>Undervolting & throttling effects modeling</strong> Allow exploring how undervolting/underclocking or thermal throttling affects performance, power, TCO. Add plots of "power vs. perf loss" to visualize trade-offs. </li>
+  <li><strong>Undervolting & throttling effects modeling:</strong> Allow exploring how undervolting/underclocking or thermal throttling affects performance, power, TCO. Add plots of "power vs. perf loss" to visualize trade-offs. </li>
 
   <li><strong>Multi-year TCO projection with depreciation:</strong> Visualize how total cost accumulates over the system’s lifetime. GPU cluster loses value over time affects Accounting, TCO realism and ROI and resale value (X-axis: 0 to lifetime in years; Y-axis: Cumulative TCO as a line and Depreciated asset value as shaded area). comment: Not sure how to factor this in, but in a commercial setting, asset value or cost decline over time matters. Since hardware loses value over time but power costs stay constant, power might be more important than hardware cost over the cluster's lifetime. Allow users to select a depreciation method (linear, double-declining, etc.) and add resale value estimates. </li>
       
@@ -77,7 +77,7 @@
      
   <li><strong>Configuration recommendation engine (rule-based):</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). If a user sets a constraint (power < X, emissions < Y), highlight or warn when configurations exceed constraints. Currently only provides a basic rule-based Smart Strategy Tip.</li>
      
-  <li><strong>Budget & constraint-based optimizer</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
+  <li><strong>Budget & constraint-based optimizer:</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
 
   <li><strong>ML model for configuration recommendations:</strong> After collecting enough usage data, recommend configurations via learned patterns </li>
   </ul>
@@ -86,7 +86,7 @@
   
   <li><strong>Phase 3: User experience and data integration</strong>
     <ul>      
-      <li><strong>Fixed energy budget modeling</strong> Model based on fixed energy rather than a fixed budget. Particularly relevant for larger insulations having power plants (LANL) and to a lesser extent for FAU power supplies at NHR@FAU. For example, given an X MW infrastructure, a cluster exceeding X MW within the allowed budget won’t work. How far can you optimize power (by reducing power cap or adjusting CPU/GPU clocks) before it forces you to switch to a different GPU? Given a power limit, how large can the system be while staying within the allowed budget? Add color bands or alerts on charts when a config exceeds power envelope. Explore "Power Envelope vs. Perf Curve" visualizations.</li>
+      <li><strong>Fixed energy budget modeling:</strong> Model based on fixed energy rather than a fixed budget. Particularly relevant for larger insulations having power plants (LANL) and to a lesser extent for FAU power supplies at NHR@FAU. For example, given an X MW infrastructure, a cluster exceeding X MW within the allowed budget won’t work. How far can you optimize power (by reducing power cap or adjusting CPU/GPU clocks) before it forces you to switch to a different GPU? Given a power limit, how large can the system be while staying within the allowed budget? Add color bands or alerts on charts when a config exceeds power envelope. Explore "Power Envelope vs. Perf Curve" visualizations.</li>
 
       <li><strong>Forecasting & scenario planning:</strong>  Allow modeling of how GPU prices, electricity rates, grid carbon intensity might change over 5–10 years (e.g. falling GPU cost, rising carbon tax). Run forecasts / scenarios (optimistic, pessimistic). Let users select the trend type (Linear, Exponential), sensitivity bands, and duration (3, 5, 10 years).</li>
 
@@ -110,7 +110,6 @@ Let users save, name, version multiple scenarios, compare over time; share with 
       
   <li><strong>Currency Selector:</strong> Support for USD, GBP, INR, and more. Currently only supports EUR.</li>
 
-  <li><strong>SEO Optimization:</strong> Add meta tags, sitemap.xml, alt text.</li>
 </ul>
         <li><strong>Phase 5: Model assessment and extensions; 🚦Overengineered?</strong>
 <ul>
