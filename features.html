@@ -173,6 +173,24 @@ Let users save, name, version multiple scenarios, compare over time; share with 
             <li><strong>Comment:</strong> E.g., after X years some fraction of hardware fails, or maintenance increases.</li>
         </ul>
     </li>
+        <li>
+      <strong>❓ Thermal Zoning or Rack-Level Modeling</strong>
+      <ul>
+        <li><strong>Comment:</strong> Support for simulating heat hotspots or rack-level inefficiencies (especially important in mixed-density clusters). Suggest placement heuristics to reduce cooling imbalance and improve PUE at micro-level.</li>
+      </ul>
+    </li>
+    <li>
+      <strong>❓ Power Capping / RAPL Effect Modeling</strong>
+      <ul>
+        <li><strong>Comment:</strong> Integrate realistic models for RAPL or GPU power capping (e.g., NVIDIA nvidia-smi or AMD ROCm features). Consider frequency throttling, memory performance degradation, or latency effects. Especially useful for institutions using hard power limits for cluster management or within DC constraints.</li>
+      </ul>
+    </li>
+    <li>
+      <strong>❓ Interconnect & Network Energy Costs</strong>
+      <ul>
+        <li><strong>Comment:</strong> Extend modeling of network power costs, especially for multi-node MPI workloads. Include interconnect type (InfiniBand, Ethernet), bandwidth scaling, and latency penalties when mixing GPU generations or architectures (e.g., NVLink vs. PCIe-only). Factor into total system power and performance metrics.</li>
+      </ul>
+    </li>
     <li>
         <strong>⚠️ Conflict: Billed per hour vs. per kWh</strong>
         <ul>
