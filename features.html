@@ -72,7 +72,7 @@
       
   <li><strong>Monte Carlo / uncertainty analysis:</strong> Select parameters with a ± range, run 1000+ randomized calculations. Display mean, standard deviation, and box or violin plots of performance/TCO results. For example, one can tweak parameters like W prefactors in the power model or the node's baseline power to see how they affect performance per TCO. Allow users choose “confidence level” (95%, 99%) and export summary statistics. Add pre-defined scenarios (e.g., “Power Variability ±5%”). </li>
 
-  <li><strong>Budget & constraint-based suggestions</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
+  <li><strong>Budget & constraint-based optimizer</strong> Given a budget, power budget, or emission cap, automatically suggest optimal GPU combinations/cluster sizes to maximize target metrics (perf/TCO, perf/emissions, etc.). Possible backend: MILP solver or even heuristic methods to generate "good enough" cluster suggestions. Add “constraint check warnings” with clear labels (e.g., ⚠️ “Exceeds Power Cap by 10%”). Input annual CO₂ cap → see which clusters fit (Carbon Budget Planner)</li>
 
   <li><strong>ML model for configuration suggestions:</strong> After collecting enough usage data, recommend configurations via learned patterns </li>
 </ul>
