@@ -128,7 +128,7 @@
 <ul>
  <li><strong>Phase 1: Core expansions</strong>
    <ul> 
-  <li><strong>Benchmark/GPU database expansion:</strong> Support for more and mixed workloads from different domains (ML, CFD, molecular dynamics), e.g., AI (TensorFlow, MLPerf) and HPC loads (OpenFOAM, LAMMPS). Allow users to define custom workload mixes and save them as templates.  Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
+  <li><strong>Benchmark/GPU database expansion:</strong> Support for more and mixed workloads from different domains (ML, CFD, molecular dynamics), e.g., AI (TensorFlow, PyTorch, MLPerf) and HPC loads (OpenFOAM, LAMMPS, ORCA, VASP (license issue), CP2K (⚠️some functionalities are yet unavailable on GPU), Quantum Espresso (⚠️Few kernels are challenging to port to GPUs but performance critical part of QE already in CUDA, therefore, unsure whether it must be 1 MPI process per GPU or one should use all CPU cores for a given GPU), SIRIUS). Allow users to define custom workload mixes and save them as templates.  Currently supports GROMACS and AMBER with data export (CSV/JSON), plus custom data uploads (CSV/JSON) for users. </li>
 
   <li><strong>Heterogeneous cluster modeling:</strong> For example, Helma cluster has three parts: Helma 1, Helma 2 and CPU. In multi-architecture clusters (CPU + multiple GPU generations), model interconnect costs/latencies or data transfer energy overhead when jobs cross hardware types (e.g., CPU ↔ GPU ↔ GPU of different gen).</li>
 
