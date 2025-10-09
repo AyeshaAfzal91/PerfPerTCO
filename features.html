@@ -78,7 +78,7 @@
 </ul>
 </li>
   
-  <li><strong>Phase 3: User experience, collaboration & data integration</strong>
+  <li><strong>Phase 3: User experience & data integration</strong>
     <ul>      
       <li><strong>Fixed energy budget modeling</strong> Model based on fixed energy rather than a fixed budget. Particularly relevant for larger insulations having power plants (LANL) and to a lesser extent for FAU power supplies at NHR@FAU. For example, given an X MW infrastructure, a cluster exceeding X MW within the allowed budget won’t work. How far can you optimize power (by reducing power cap or adjusting CPU/GPU clocks) before it forces you to switch to a different GPU? Given a power limit, how large can the system be while staying within the allowed budget? Add color bands or alerts on charts when a config exceeds power envelope. Explore "Power Envelope vs. Perf Curve" visualizations.</li>
 
@@ -91,18 +91,18 @@
     </ul>
   </li>
   
-    <li><strong>Low-impact features (fun add-ons):</strong>
+    <li><strong>Phase 3: Collaboration and reporting</strong>
 
 <ul>
 
+    <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique, bookmarkable, shareable public URLs with embedded settings. Currently includes a simple auto-generated blog summary share option. Let users log in, store their configurations, revisit, manage scenario libraries.
+Let users save, name, version multiple scenarios, compare over time; share with collaborators; comment, version diffing. Let external contributors define workloads, pricing models, or cooling setups via plugins or config files. </li>
+
   <li><strong>Configuration Recommendation Engine:</strong> Suggest actionable ways to improve performance/TCO based on current inputs (trained on user sessions or simulated configs). If a user sets a constraint (power < X, emissions < Y), highlight or warn when configurations exceed constraints. Currently only provides a basic rule-based Smart Strategy Tip.</li>
 
-  <li><strong>Detailed PDF Report Generator:</strong> Export project reports with charts and explanations and add a report format toggle (Summary vs. Detailed). Currently offers only a simple PDF report generator.</li>
-    
-  <li><strong>Collaboration Mode:</strong> Share calculation setups with teammates via unique, bookmarkable, shareable public URLs with embedded settings. Currently includes a simple auto-generated blog summary share option. Let users log in, store their configurations, revisit, manage scenario libraries.
-Let users save, name, version multiple scenarios, compare over time; share with collaborators; comment, version diffing. Let external contributors define workloads, pricing models, or cooling setups via plugins or config files. </li>
-  
-  <li><strong>Programmatic Access:</strong> Expose Wattlytics as an API for researchers and developers so other tools (cluster schedulers, infrastructure planners) can query TCO estimations programmatically. Currently limited to a private GitHub repository.</li>
+  <li><strong>Detailed PDF report generator:</strong> Export project reports with charts and explanations and add a report format toggle (Summary vs. Detailed). Currently offers only a simple PDF report generator.</li>
+      
+  <li><strong>API/Programmatic Access:</strong> Expose Wattlytics as an API for researchers and developers so other tools (cluster schedulers, infrastructure planners) can query TCO estimations programmatically. Currently limited to a private GitHub repository.</li>
       
   <li><strong>Currency Selector:</strong> Support for USD, GBP, INR, and more. Currently only supports EUR.</li>
 
