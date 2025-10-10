@@ -29,9 +29,9 @@
 
 <section id="about">
   <p>
-    Wattlytics is a browser‑based tool for total cost of ownership (TCO), performance, and energy modeling of GPU-based compute systems.
-    It allows you to configure capital and operational cost parameters, choose benchmarks (GROMACS/AMBER),
-    and compare GPUs (GH200, H100, L40S, L40, A40, A100, L4) based on their performance, power, and cost.
+    Wattlytics is a browser‑based tool for modeling total cost of ownership (TCO), performance, and energy use in GPU-based compute systems.
+	  Users can configure cost parameters, select benchmarks (GROMACS/AMBER), and compare GPUs (GH200, H100, L40S, L40, A40, A100, L4)
+	  based on performance, power, and cost—under realistic workloads and shifting energy/cost conditions.
   </p>
 
   <h3>🔍 Use Cases</h3>
@@ -39,13 +39,14 @@
     <li>
       <strong>Current:</strong> Evaluate how various parameters affect key metrics such as performance per TCO, power per TCO, and performance per watt per TCO. For example, compare scenarios where 
       a slower, more power-efficient GPU (Type 1) could outperform a faster, less power-efficient GPU (Type 2) by deploying more units within the same budget and system lifetime.
+	Many such decisions still rely on heuristics or vendor specs, without full-system analysis—despite growing needs to decarbonize, use renewables, and reuse waste heat.
     </li>
     <li>
       <strong>Future:</strong> Analyze the impact of adjusting memory/graphics GPU and (un-)core CPU clock frequencies (e.g., running GROMACS/AMBER benchmarks on an A100 at 100 MHz vs. 1.5 GHz) 
       to help users decide whether to prioritize raw performance or optimize for maximum performance per watt. 
     </li>
     <li>
-      <strong>Tool Focus:</strong> This is a tool for exploring the parameter space and analyzing sensitivity, rather than for direct procurement planning, as procurement involves many dynamic factors that cannot be captured by a single tool. Accurately modeling trade‑offs between performance, power consumption, cost, and emissions is crucial for researchers, data center operators, and decision makers. Therefore, we will extend Wattlytics into a robust, flexible, and research‑grade platform for exploring realistic cluster design, scheduling inefficiencies, uncertainty, depreciation, and constraint‑aware optimization, with collaborative and programmatic access.
+      <strong>Tool Focus:</strong> This is a tool for exploring the parameter space and analyzing sensitivity, rather than for direct procurement planning, as procurement involves many dynamic factors that cannot be captured by a single tool. Accurately modeling trade‑offs between performance, power consumption, cost, and emissions is crucial for researchers, data center operators, and decision makers. Therefore, the broader goal is to evolve Wattlytics into a flexible, research-grade platform that models real-world performance and energy tradeoffs, supports exploring realistic cluster design, scheduling and scaling decisions under uncertainty, inefficiency, and constraints, with collaborative and programmatic access.
     </li>
   </ul>
 </section>
