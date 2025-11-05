@@ -2763,8 +2763,7 @@ async function shareSetup() {
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
-  let restored = false;
-  let state;
+  let state = null;
 
   // Case 1: /s/<id>
   if (path.startsWith("/s/")) {
@@ -2774,47 +2773,39 @@ async function tryRestoreFromUrlOnLoad() {
         const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
         if (res.ok) {
           const json = await res.json();
-          if (json?.data) {
-            state = json.data;
-            restored = true;
-          }
+          if (json?.data) state = json.data;
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching shared config:", err);
       }
     }
   }
 
   // Case 2: ?d=<compressed>
-  if (!restored && params.has("d")) {
+  if (!state && params.has("d")) {
     try {
       state = decodeState(params.get("d"));
-      if (state) restored = true;
     } catch (err) {
-      console.error(err);
+      console.error("Error decoding state from URL:", err);
     }
   }
 
-  if (restored && state) {
-    await restoreStateWhenReady(state);  // updates internal state
-    updateSlidersUI(state);             // explicitly update sliders
-    updateTables(state);                // recalc tables
-    updatePlots(state);                 // recalc plots
+  if (state) {
+    // restore state, update UI, and trigger calculations
+    await restoreStateWhenReady(state);
+    console.log("✅ State restored and calculations triggered");
+    return true;
   }
 
-  return restored;
+  return false;
 }
 
-// ✅ When DOM loads → restore state if possible
+// DOM ready → restore state from URL if possible
 document.addEventListener("DOMContentLoaded", () => {
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-  tryRestoreFromUrlOnLoad().then(async restored => {
-    if (restored) {
-      console.log("✅ State restored and calculate() triggered");
-    } else {
-      console.log("ℹ️ No state restored from URL");
-    }
+  tryRestoreFromUrlOnLoad().then(restored => {
+    if (!restored) console.log("ℹ️ No state restored from URL");
   });
 });
