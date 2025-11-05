@@ -1,11 +1,10 @@
-// netlify/functions/saveConfig.js
 import { v4 as uuidv4 } from "uuid";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY; // ✅ correct name
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
@@ -14,12 +13,11 @@ export async function handler(event) {
 
   try {
     const { config } = JSON.parse(event.body);
-
     const id = uuidv4().split("-")[0];
 
     const { error } = await supabase
-      .from("configs")
-      .insert({ id, config });
+      .from("shared_configs") // ✅ match the table name you created
+      .insert([{ id, config }]); // ✅ insert as array of objects
 
     if (error) throw error;
 
