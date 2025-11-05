@@ -2760,45 +2760,49 @@ async function shareSetup() {
   }
 }
 
-// ✅ FIXED: Try restoring from URL (shortlinks or embedded)
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+  let restored = false;
+  let state;
 
-  // ✅ Case 1: Short URL like /s/<id>
+  // Case 1: /s/<id>
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
-    if (!id) return false;
-
-    try {
-      const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
-      const json = await res.json();
-
-      if (json?.data) {
-        console.log("✅ Loaded shared config from backend:", json.data);
-        await restoreStateWhenReady(json.data);
-        return true;
+    if (id) {
+      try {
+        const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data) {
+            state = json.data;
+            restored = true;
+          }
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error("❌ Error restoring from backend:", err);
     }
   }
 
-  // ✅ Case 2: Embedded link with ?d=<compressed>
-  if (params.has("d")) {
+  // Case 2: ?d=<compressed>
+  if (!restored && params.has("d")) {
     try {
-      const decoded = decodeState(params.get("d"));
-      if (decoded) {
-        console.log("✅ Restored state from ?d= parameter");
-        await restoreStateWhenReady(decoded);
-        return true;
-      }
+      state = decodeState(params.get("d"));
+      if (state) restored = true;
     } catch (err) {
-      console.error("❌ Error restoring from ?d= parameter:", err);
+      console.error(err);
     }
   }
 
-  return false;
+  if (restored && state) {
+    await restoreStateWhenReady(state);  // updates internal state
+    updateSlidersUI(state);             // explicitly update sliders
+    updateTables(state);                // recalc tables
+    updatePlots(state);                 // recalc plots
+  }
+
+  return restored;
 }
 
 // ✅ When DOM loads → restore state if possible
