@@ -1,6 +1,9 @@
 {
   "type": "module",
   "dependencies": {
-    "@octokit/rest": "^21.1.1"
+    "@octokit/rest": "^21.1.1",
+    "@supabase/supabase-js": "^2.43.1",
+    "uuid": "^9.0.0",
+    "lz-string": "^1.5.0"
   }
 }
