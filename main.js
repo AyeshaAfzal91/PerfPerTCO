@@ -2635,46 +2635,78 @@ function getCurrentState(){
   return state;
 }
 
+// Define the map outside the function so it's only created once
+const spanMap = {
+    benchmarkId: "benchmarkVal",
+    total_budget: "v_budget",
+    C_node_server: "v_node_server",
+    C_node_infra: "v_node_infra",
+    C_node_facility: "v_node_facility",
+    C_software: "v_software",
+    C_electricity: "v_electricity",
+    C_PUE: "v_PUE",
+    C_maintenance: "v_maintenance",
+    system_usage: "v_usage",
+    lifetime: "v_lifetime",
+    W_node_baseline: "v_baseline",
+    C_depreciation: "v_depreciation",
+    C_subscription: "v_subscription",
+    C_uefficiency: "v_uefficiency",
+    C_heatreuseperkWh: "v_heatreuseperkWh",
+    Factor_heatreuse: "v_Factor_heatreuse"
+};
+
 function applyInputsFromState(state){
-  if(!state) return;
+    if(!state) return;
 
-  Object.entries(state.sliders || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-  });
+    // --- Sliders (Updated with the fix) ---
+    Object.entries(state.sliders || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        
+        el.value = val;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // **CRITICAL FIX: Update the display span**
+        const spanId = spanMap[id];
+        if (spanId && typeof updateValue === "function") {
+             updateValue(spanId, val); 
+        }
+    });
 
-  Object.entries(state.texts || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-  });
+    // --- Texts (Copied from Part A) ---
+    Object.entries(state.texts || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = val;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    
+    // --- Selects (Copied from Part A) ---
+    Object.entries(state.selects || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = val;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
-  Object.entries(state.selects || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  });
+    // --- Checkboxes (Copied from Part A) ---
+    Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.checked = Boolean(val);
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
-  Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.checked = Boolean(val);
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-
-  // Restore GPU data
-  if (state.gpu_data) {
-    try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
-    catch(e){ console.warn("Unable to restore GPU_data:", e); }
-  }
-  if (state.active_gpu_data) {
-    try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
-    catch(e){ console.warn("Unable to restore activeGPUData:", e); }
-  }
+    // --- Restore GPU data (Copied from Part A) ---
+    if (state.gpu_data) {
+        try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
+        catch(e){ console.warn("Unable to restore GPU_data:", e); }
+    }
+    if (state.active_gpu_data) {
+        try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
+        catch(e){ console.warn("Unable to restore activeGPUData:", e); }
+    }
 }
 
 // ===================== HELPER: waitFor =====================
