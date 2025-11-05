@@ -2572,242 +2572,245 @@ function downloadComparisonPDF() {
   - On load: check ?d=... or /s/<id> and restore
 ---------------------*/
 
-/***********************
- Robust shared-config loader + auto-calc
- - loadSharedConfig(idOrState): accepts an id (string) or a state object
- - ensureInputsRefreshed(): updates visible value labels after inputs set
- - safeCalculate(): chooses the right calculate function and waits briefly for plots to render
- - auto-load from /s/<id> or ?d=<encoded>
-***********************/
-
-async function ensureInputsRefreshed() {
-  // Update common visible labels that mirror slider values (IDs in your HTML)
-  const labelMap = [
-    ['benchmarkId', 'benchmarkVal'],
-    ['total_budget', 'v_budget'],
-    ['C_node_server', 'v_node_server'],
-    ['C_node_infra', 'v_node_infra'],
-    ['C_node_facility', 'v_node_facility'],
-    ['C_software', 'v_software'],
-    ['C_electricity', 'v_electricity'],
-    ['C_PUE', 'v_PUE'],
-    ['C_maintenance', 'v_maintenance'],
-    ['system_usage', 'v_usage'],
-    ['lifetime', 'v_lifetime'],
-    ['W_node_baseline', 'v_baseline'],
-    ['C_depreciation', 'v_depreciation'],
-    ['C_subscription', 'v_subscription'],
-    ['C_uefficiency', 'v_uefficiency'],
-    ['C_heatreuseperkWh', 'v_heatreuseperkWh'],
-    ['Factor_heatreuse', 'v_Factor_heatreuse'],
-    // add more pairs if you have other slider -> label IDs
-  ];
-
-  for (const [inputId, labelId] of labelMap) {
-    const inp = document.getElementById(inputId);
-    const lab = document.getElementById(labelId);
-    if (inp && lab) {
-      // if numeric, format nicely
-      lab.textContent = inp.value;
+function encodeState(obj){
+  try {
+    const json = JSON.stringify(obj);
+    if (typeof LZString !== "undefined" && LZString.compressToEncodedURIComponent) {
+      return LZString.compressToEncodedURIComponent(json);
+    } else {
+      return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
     }
+  } catch(e){
+    console.error("encodeState error:", e);
+    return null;
   }
-
-  // If you have other UI pieces that depend on JS state, call them if present
-  if (typeof updateAITip === "function") updateAITip();
-  if (typeof renderPerfPowerHeatmaps === "function") {
-    try { renderPerfPowerHeatmaps(); } catch (e) { /* non-fatal */ }
-  }
-  // small delay to let DOM repaint
-  await new Promise(r => setTimeout(r, 50));
 }
 
-// picks the right calculate function and runs it
-async function safeCalculate() {
+function decodeState(str){
   try {
-    if (typeof calculateResults === "function") {
-      calculateResults();
-    } else if (typeof calculate === "function") {
-      calculate();
-    } else if (typeof runAllCalculations === "function") {
-      runAllCalculations();
+    if (typeof LZString !== "undefined" && LZString.decompressFromEncodedURIComponent) {
+      return JSON.parse(LZString.decompressFromEncodedURIComponent(str));
     } else {
-      // fallback: click the calculate button if present
-      const btn = document.querySelector('button[onclick*="calculate"]') || document.getElementById('calculate');
-      if (btn) btn.click();
+      const json = decodeURIComponent(escape(atob(decodeURIComponent(str))));
+      return JSON.parse(json);
     }
-  } catch (err) {
-    console.warn("safeCalculate() error:", err);
+  } catch(e){
+    console.error("decodeState error:", e);
+    return null;
   }
-
-  // give plots/tables a moment to render
-  await new Promise(r => setTimeout(r, 200));
 }
 
-// main loader: accepts either id string or an already-decoded state object
-async function loadSharedConfig(idOrState) {
-  try {
-    console.log("loadSharedConfig() called with:", idOrState);
-
-    let state = null;
-
-    // If string: treat as ID and fetch from backend
-    if (typeof idOrState === 'string') {
-      const id = idOrState;
-      console.log("Fetching saved config for id:", id);
-      const res = await fetch(`/.netlify/functions/getConfig?id=${encodeURIComponent(id)}`);
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`getConfig returned ${res.status}: ${txt}`);
-      }
-      const payload = await res.json();
-      // payload may be { data: { ... } } or the config itself
-      state = payload?.data ?? payload;
-      if (!state) throw new Error("No 'data' in getConfig response");
-      console.log("Fetched saved state:", state);
-    } else if (typeof idOrState === 'object' && idOrState !== null) {
-      state = idOrState;
-    } else {
-      throw new Error("Invalid argument to loadSharedConfig (need id or state)");
+function getCurrentState(){
+  const state = {
+    sliders: {},
+    selects: {},
+    checkboxes: {},
+    texts: {},
+    gpu_data: typeof GPU_data !== "undefined" ? GPU_data : null,
+    active_gpu_data: typeof activeGPUData !== "undefined" ? activeGPUData : null,
+    meta: {
+      savedAt: (new Date()).toISOString(),
+      origin: window.location.origin
     }
+  };
 
-    // Wait until DOM inputs exist and GPU_data is present (if your UI depends on it)
-    const waitOk = await (async () => {
-      const start = Date.now();
-      const timeout = 7000;
-      while (true) {
-        const someInput = document.querySelector('input[type="range"], input[type="number"], select');
-        const calcReady = (typeof calculateResults === "function") || (typeof calculate === "function") || (typeof runAllCalculations === "function");
-        const gpuReady = (typeof GPU_data !== "undefined");
-        if (someInput && calcReady && gpuReady) return true;
-        if (Date.now() - start > timeout) return false;
-        // wait shortly
-        await new Promise(r => setTimeout(r, 100));
-      }
+  document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
+    if (input.id) state.sliders[input.id] = Number(input.value);
+  });
+
+  document.querySelectorAll('select').forEach(s => {
+    if (s.id) state.selects[s.id] = s.value;
+  });
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (cb.id) state.checkboxes[cb.id] = cb.checked;
+  });
+
+  document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
+    if (inp.id) state.texts[inp.id] = inp.value;
+  });
+
+  return state;
+}
+
+function applyInputsFromState(state){
+  if(!state) return;
+
+  Object.entries(state.sliders || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  Object.entries(state.texts || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  Object.entries(state.selects || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.checked = Boolean(val);
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  // Restore GPU data
+  if (state.gpu_data) {
+    try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
+    catch(e){ console.warn("Unable to restore GPU_data:", e); }
+  }
+  if (state.active_gpu_data) {
+    try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
+    catch(e){ console.warn("Unable to restore activeGPUData:", e); }
+  }
+}
+
+// Generic waitFor helper
+function waitFor(conditionFn, timeout = 5000, interval = 50) {
+  const start = Date.now();
+  return new Promise((resolve, reject) => {
+    (function check() {
+      if (conditionFn()) return resolve(true);
+      if (Date.now() - start > timeout) return reject("waitFor timeout");
+      setTimeout(check, interval);
     })();
-
-    if (!waitOk) {
-      console.warn("loadSharedConfig: page not fully ready (some inputs or calc function or GPU_data missing). Proceeding anyway.");
-    }
-
-    // Apply inputs — this uses your existing applyInputsFromState function
-    if (typeof applyInputsFromState === "function") {
-      applyInputsFromState(state);
-    } else {
-      // fallback: naive apply
-      if (state.sliders) {
-        Object.entries(state.sliders).forEach(([id, val]) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.value = val;
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        });
-      }
-      if (state.selects) {
-        Object.entries(state.selects).forEach(([id, val]) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.value = val;
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        });
-      }
-      if (state.texts) {
-        Object.entries(state.texts).forEach(([id, val]) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.value = val;
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        });
-      }
-      if (state.checkboxes) {
-        Object.entries(state.checkboxes).forEach(([id, val]) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.checked = Boolean(val);
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        });
-      }
-    }
-
-    // Restore GPU data (critical for calculations)
-    if (state.gpu_data) {
-      try {
-        window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data));
-        console.log("GPU_data restored");
-      } catch (e) {
-        console.warn("Failed to restore GPU_data:", e);
-      }
-    }
-    if (state.active_gpu_data) {
-      try {
-        window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data));
-        console.log("activeGPUData restored");
-      } catch (e) {
-        console.warn("Failed to restore activeGPUData:", e);
-      }
-    }
-
-    // Refresh visible labels and UI that mirror inputs
-    await ensureInputsRefreshed();
-
-    // Trigger the main calculation path so tables/plots are generated
-    await safeCalculate();
-
-    // Small extra refresh for plot components that need more time
-    await ensureInputsRefreshed();
-
-    console.log("loadSharedConfig: completed successfully");
-    return true;
-
-  } catch (err) {
-    console.error("loadSharedConfig error:", err);
-    return false;
-  }
+  });
 }
 
-// Auto-detect URL on load and call loadSharedConfig appropriately
-async function tryRestoreFromUrlOnLoad_v2() {
+// Restore state robustly after DOM & GPU ready
+async function restoreStateWhenReady(state){
+  if (!state) return;
+
   try {
-    const path = window.location.pathname || "";
-    const params = new URLSearchParams(window.location.search || "");
+    // Wait until sliders exist AND GPU_data is ready AND at least one calculation function exists
+    await waitFor(() => {
+      const sliderExists = document.querySelector('input[type="range"]');
+      const gpuReady = typeof GPU_data !== "undefined";
+      const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
+      return sliderExists && gpuReady && calcReady;
+    }, 7000); // 7s timeout for slow loading components
 
-    // Case: short link path /s/<id>
-    const m = path.match(/\/s\/([^/]+)/);
-    if (m) {
-      const id = m[1];
-      console.log("Detected short link id:", id);
-      return await loadSharedConfig(id);
+    // Apply inputs
+    applyInputsFromState(state);
+
+    // Extra delay for async plot/table rendering
+    await new Promise(r => setTimeout(r, 200));
+
+    // Trigger calculation
+    if (typeof calculateResults === "function") calculateResults();
+    else if (typeof calculate === "function") calculate();
+    else if (typeof runAllCalculations === "function") runAllCalculations();
+    else {
+      const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
+      if (calcBtn) calcBtn.click();
     }
 
-    // Case: embedded ?d=...
-    if (params.has("d")) {
-      const encoded = params.get("d");
-      const state = decodeState(encoded);
-      if (state) {
-        console.log("Detected embedded state in ?d= parameter");
-        return await loadSharedConfig(state);
-      }
-    }
+    console.log("State restored successfully.");
 
-    return false;
-  } catch (err) {
-    console.error("tryRestoreFromUrlOnLoad_v2 error:", err);
-    return false;
+  } catch(e){
+    console.warn("restoreStateWhenReady() failed:", e);
   }
 }
 
-// attach handler and auto-load on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-  // wire share button
-  const shareBtn = document.getElementById('shareBtn');
-  if (shareBtn) shareBtn.addEventListener('click', shareSetup);
+async function shareSetup() {
+  try {
+    const state = getCurrentState();
+    const encoded = encodeState(state);
+    if (!encoded) throw new Error("Failed to encode state.");
 
-  // try restore from URL (async and non-blocking)
-  tryRestoreFromUrlOnLoad_v2().then(restored => {
-    if (restored) console.log("Shared config loaded and applied.");
-    else console.log("No shared config applied on load.");
+    const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+    if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
+      try { await navigator.clipboard.writeText(urlIfEmbedded); alert("Copied shareable link (embedded) to clipboard."); }
+      catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", urlIfEmbedded); }
+      return { mode: "embedded", url: urlIfEmbedded };
+    }
+
+    const res = await fetch('/.netlify/functions/saveConfig', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config: state })
+    });
+
+    if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
+
+    const data = await res.json();
+    const id = data.id || data.ID || data.key;
+    if (!id) throw new Error("No id returned from backend.");
+
+    const shortUrl = `${window.location.origin}/s/${id}`;
+    try { await navigator.clipboard.writeText(shortUrl); alert("Copied shareable short link to clipboard."); }
+    catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", shortUrl); }
+
+    return { mode: "short", id, url: shortUrl };
+
+  } catch (e) {
+    console.error("shareSetup error:", e);
+    alert("Could not create share link: " + e.message);
+    return null;
+  }
+}
+
+// ✅ FIXED: Try restoring from URL (shortlinks or embedded)
+async function tryRestoreFromUrlOnLoad() {
+  const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
+
+  // ✅ Case 1: Short URL like /s/<id>
+  if (path.startsWith("/s/")) {
+    const id = path.replace("/s/", "").trim();
+    if (!id) return false;
+
+    try {
+      const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
+      const json = await res.json();
+
+      if (json?.data) {
+        console.log("✅ Loaded shared config from backend:", json.data);
+        await restoreStateWhenReady(json.data);
+        return true;
+      }
+    } catch (err) {
+      console.error("❌ Error restoring from backend:", err);
+    }
+  }
+
+  // ✅ Case 2: Embedded link with ?d=<compressed>
+  if (params.has("d")) {
+    try {
+      const decoded = decodeState(params.get("d"));
+      if (decoded) {
+        console.log("✅ Restored state from ?d= parameter");
+        await restoreStateWhenReady(decoded);
+        return true;
+      }
+    } catch (err) {
+      console.error("❌ Error restoring from ?d= parameter:", err);
+    }
+  }
+
+  return false;
+}
+
+// ✅ When DOM loads → restore state if possible
+document.addEventListener("DOMContentLoaded", () => {
+  const shareBtn = document.getElementById("shareBtn");
+  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
+
+  tryRestoreFromUrlOnLoad().then(async restored => {
+    if (restored) {
+      console.log("✅ State restored and calculate() triggered");
+    } else {
+      console.log("ℹ️ No state restored from URL");
+    }
   });
 });
