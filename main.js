@@ -2564,9 +2564,9 @@ function downloadComparisonPDF() {
 }
 
 /* --------------------
-  Short-share feature
+  Short-share feature (fixed)
   - encode/decode state
-  - getCurrentState() to capture all sliders/selects/checkboxes and central GPU data
+  - getCurrentState() to capture all sliders/selects/checkboxes/text inputs and GPU data
   - restoreState(state) to apply values and trigger calculateResults
   - shareSetup() to either encode into URL or POST to serverless saveConfig
   - On load: check ?d=... or /s/<id> and restore
@@ -2578,7 +2578,6 @@ function encodeState(obj){
     if (typeof LZString !== "undefined" && LZString.compressToEncodedURIComponent) {
       return LZString.compressToEncodedURIComponent(json);
     } else {
-      // fallback: base64 (URI-safe)
       return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
     }
   } catch(e){
@@ -2606,40 +2605,33 @@ function getCurrentState(){
     sliders: {},
     selects: {},
     checkboxes: {},
+    texts: {},
     gpu_data: typeof GPU_data !== "undefined" ? GPU_data : null,
     active_gpu_data: typeof activeGPUData !== "undefined" ? activeGPUData : null,
-    results: window.results || null,
     meta: {
       savedAt: (new Date()).toISOString(),
       origin: window.location.origin
     }
   };
 
-  // capture sliders and numeric inputs
+  // sliders / numeric inputs
   document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
-    if (input.id) state.sliders[input.id] = input.value;
+    if (input.id) state.sliders[input.id] = Number(input.value);
   });
 
-  // capture selects
+  // selects
   document.querySelectorAll('select').forEach(s => {
     if (s.id) state.selects[s.id] = s.value;
   });
 
-  // capture checkboxes
+  // checkboxes
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     if (cb.id) state.checkboxes[cb.id] = cb.checked;
   });
 
-  // capture textual inputs
+  // text/email inputs
   document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
-    if (inp.id) state.sliders[inp.id] = inp.value;
-  });
-
-  // optionally capture certain result containers (will be rebuilt by calculate)
-  const resultContainers = ["resultsTable", "comparison-message-container", "ai-tip-text"];
-  resultContainers.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) state[id] = el.innerHTML;
+    if (inp.id) state.texts[inp.id] = inp.value;
   });
 
   return state;
@@ -2648,17 +2640,20 @@ function getCurrentState(){
 function applyInputsFromState(state){
   if(!state) return;
 
-  // sliders/numbers/text
+  // sliders/numbers
   Object.entries(state.sliders || {}).forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (el.type === "checkbox") {
-      el.checked = Boolean(val);
-    } else {
-      el.value = val;
-      // trigger input event if present to update UI
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  // text/email inputs
+  Object.entries(state.texts || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 
   // selects
@@ -2677,26 +2672,23 @@ function applyInputsFromState(state){
     el.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
-  // GPU data - if provided, attempt to restore
+  // GPU data
   if (state.gpu_data) {
-    try {
-      window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data));
-    } catch(e){ console.warn("Unable to restore GPU_data:", e); }
+    try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
+    catch(e){ console.warn("Unable to restore GPU_data:", e); }
   }
   if (state.active_gpu_data) {
-    try {
-      window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data));
-    } catch(e){ console.warn("Unable to restore activeGPUData:", e); }
+    try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
+    catch(e){ console.warn("Unable to restore activeGPUData:", e); }
   }
 }
 
 async function restoreState(state){
   if(!state) return;
-  // First apply inputs
+
   applyInputsFromState(state);
 
-  // Re-run the main calculation path. Prefer to call existing calculate() or runFullCalculation
-  // Try common entrypoints found in the app:
+  // Run main calculation function
   if (typeof calculateResults === "function") {
     calculateResults();
   } else if (typeof calculate === "function") {
@@ -2704,19 +2696,8 @@ async function restoreState(state){
   } else if (typeof runAllCalculations === "function") {
     runAllCalculations();
   } else {
-    // fallback: trigger the main "Calculate" button if present
     const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
     if (calcBtn) calcBtn.click();
-  }
-
-  // small delay to let UI render, then restore result HTML if present
-  if (state.resultsTable) {
-    const el = document.getElementById('resultsTable');
-    if (el) el.innerHTML = state.resultsTable;
-  }
-  if (state['comparison-message-container']) {
-    const el = document.getElementById('comparison-message-container');
-    if (el) el.innerHTML = state['comparison-message-container'];
   }
 }
 
@@ -2726,43 +2707,28 @@ async function shareSetup() {
     const encoded = encodeState(state);
     if (!encoded) throw new Error("Failed to encode state.");
 
-    // if encoded URL length reasonable, embed
     const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
     if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
-      try {
-        await navigator.clipboard.writeText(urlIfEmbedded);
-        alert("Copied shareable link (embedded) to clipboard.");
-      } catch (err) {
-        console.warn("Clipboard write failed:", err);
-        prompt("Copy this link manually:", urlIfEmbedded);
-      }
+      try { await navigator.clipboard.writeText(urlIfEmbedded); alert("Copied shareable link (embedded) to clipboard."); }
+      catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", urlIfEmbedded); }
       return { mode: "embedded", url: urlIfEmbedded };
     }
 
-    // otherwise save to serverless backend
     const res = await fetch('/.netlify/functions/saveConfig', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ config: state })
     });
 
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`Save failed: ${res.status} ${txt}`);
-    }
+    if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
 
     const data = await res.json();
     const id = data.id || data.ID || data.key;
     if (!id) throw new Error("No id returned from backend.");
 
     const shortUrl = `${window.location.origin}/s/${id}`;
-    try {
-      await navigator.clipboard.writeText(shortUrl);
-      alert("Copied shareable short link to clipboard.");
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-      prompt("Copy this link manually:", shortUrl);
-    }
+    try { await navigator.clipboard.writeText(shortUrl); alert("Copied shareable short link to clipboard."); }
+    catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", shortUrl); }
 
     return { mode: "short", id, url: shortUrl };
 
@@ -2773,18 +2739,13 @@ async function shareSetup() {
   }
 }
 
-// On load: check for ?d= or /s/<id>
 async function tryRestoreFromUrlOnLoad(){
   try {
     const params = new URLSearchParams(window.location.search);
     const d = params.get('d');
     if (d) {
       const state = decodeState(d);
-      if (state) {
-        console.log("Restoring state from embedded URL.");
-        await restoreState(state);
-        return true;
-      }
+      if (state) { console.log("Restoring state from embedded URL."); await restoreState(state); return true; }
     }
 
     const path = window.location.pathname || '';
@@ -2802,27 +2763,17 @@ async function tryRestoreFromUrlOnLoad(){
         } else {
           console.warn("getConfig returned", res.status);
         }
-      } catch(e){
-        console.warn("Error fetching /getConfig:", e);
-      }
+      } catch(e){ console.warn("Error fetching /getConfig:", e); }
     }
-  } catch(e){
-    console.warn("tryRestoreFromUrlOnLoad()", e);
-  }
+  } catch(e){ console.warn("tryRestoreFromUrlOnLoad()", e); }
   return false;
 }
 
-// Auto-run on DOMContentLoaded (safe if Share button not yet added)
 document.addEventListener('DOMContentLoaded', () => {
-  // attach share button handler if the button exists
   const shareBtn = document.getElementById('shareBtn');
-  if (shareBtn) {
-    shareBtn.addEventListener('click', shareSetup);
-  }
+  if (shareBtn) shareBtn.addEventListener('click', shareSetup);
 
-  // attempt restore silently (don't block UI)
   tryRestoreFromUrlOnLoad().then(restored => {
     if (restored) console.log("State restored from URL.");
   });
 });
-
