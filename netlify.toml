@@ -5,3 +5,9 @@
 
 [build]
   command = "npm install"
+
+# Redirect /s/* to index.html so client-side routing works
+[[redirects]]
+  from = "/s/*"
+  to = "/index.html"
+  status = 200
