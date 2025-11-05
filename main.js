@@ -2800,12 +2800,35 @@ async function tryRestoreFromUrlOnLoad() {
   return false;
 }
 
-// DOM ready → restore state from URL if possible
 document.addEventListener("DOMContentLoaded", () => {
+  // 1️⃣ Setup Share button
   const shareBtn = document.getElementById("shareBtn");
-  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
+  if (shareBtn) {
+    shareBtn.addEventListener("click", shareSetup);
+  }
 
+  // 2️⃣ Try to restore state from URL
   tryRestoreFromUrlOnLoad().then(restored => {
-    if (!restored) console.log("ℹ️ No state restored from URL");
+    if (restored) {
+      // ✅ State restored from URL; calculations already triggered in restoreStateWhenReady()
+      console.log("✅ State restored and calculations triggered from URL data.");
+    } else {
+      // ℹ️ No state restored from URL; run default initialization
+      console.log("ℹ️ No state restored from URL, running default initialization.");
+
+      // --- PLACE YOUR DEFAULT INITIALIZATION CALLS HERE ---
+      // Example: if your app normally does these on load:
+      if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices(); // optional if needed
+      if (typeof calculate === "function") calculate();                    // main calculation
+      if (typeof runAllCalculations === "function") runAllCalculations();  // alternative entry point
+      // You can add any other default setup functions here, like resetForm()
+      // -------------------------------------------------------
+    }
+  }).catch(err => {
+    console.error("Error during state restoration from URL:", err);
+    // fallback to defaults if something went wrong
+    if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
+    if (typeof calculate === "function") calculate();
   });
 });
+
