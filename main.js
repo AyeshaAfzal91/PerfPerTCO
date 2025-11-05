@@ -2675,22 +2675,47 @@ function applyInputsFromState(state){
   }
 }
 
-async function restoreState(state){
-  if(!state) return;
+// Generic waitFor helper
+function waitFor(conditionFn, timeout = 5000, interval = 50) {
+  const start = Date.now();
+  return new Promise((resolve, reject) => {
+    (function check() {
+      if (conditionFn()) return resolve(true);
+      if (Date.now() - start > timeout) return reject("waitFor timeout");
+      setTimeout(check, interval);
+    })();
+  });
+}
 
-  // Apply inputs first
-  applyInputsFromState(state);
+// Restore state robustly after DOM & GPU ready
+async function restoreStateWhenReady(state){
+  if (!state) return;
 
-  // Wait until DOM is fully updated (including plots/tables dependencies)
-  await new Promise(r => setTimeout(r, 100)); // 100ms delay
+  try {
+    // Wait for at least one slider + GPU_data to exist
+    await waitFor(() => {
+      const sliderExists = document.querySelector('input[type="range"]');
+      const gpuReady = typeof GPU_data !== "undefined";
+      return sliderExists && gpuReady;
+    }, 5000);
 
-  // Then run calculation
-  if (typeof calculateResults === "function") calculateResults();
-  else if (typeof calculate === "function") calculate();
-  else if (typeof runAllCalculations === "function") runAllCalculations();
-  else {
-    const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
-    if (calcBtn) calcBtn.click();
+    // Apply inputs
+    applyInputsFromState(state);
+
+    // Wait a tiny bit for plots/tables to update
+    await new Promise(r => setTimeout(r, 100));
+
+    // Trigger calculation
+    if (typeof calculateResults === "function") calculateResults();
+    else if (typeof calculate === "function") calculate();
+    else if (typeof runAllCalculations === "function") runAllCalculations();
+    else {
+      const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
+      if (calcBtn) calcBtn.click();
+    }
+
+  } catch(e){
+    console.warn("restoreStateWhenReady() failed:", e);
   }
 }
 
@@ -2738,7 +2763,11 @@ async function tryRestoreFromUrlOnLoad(){
     const d = params.get('d');
     if (d) {
       const state = decodeState(d);
-      if (state) { console.log("Restoring state from embedded URL."); await restoreState(state); return true; }
+      if (state) {
+        console.log("Restoring state from embedded URL.");
+        await restoreStateWhenReady(state);
+        return true;
+      }
     }
 
     const path = window.location.pathname || '';
@@ -2751,7 +2780,7 @@ async function tryRestoreFromUrlOnLoad(){
           const payload = await res.json();
           const state = payload.data || payload;
           console.log("Restoring state from server for id:", id);
-          await restoreState(state);
+          await restoreStateWhenReady(state);
           return true;
         } else {
           console.warn("getConfig returned", res.status);
