@@ -659,4 +659,19 @@ td strong {
   color: #34495e;
 }
 
+.share-btn {
+    padding: 8px 16px;
+    margin-left: 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    transition: 0.3s;
+}
+
+.share-btn:hover {
+    opacity: 0.8;
+}
 
