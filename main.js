@@ -2692,18 +2692,19 @@ async function restoreStateWhenReady(state){
   if (!state) return;
 
   try {
-    // Wait for at least one slider + GPU_data to exist
+    // Wait until sliders exist AND GPU_data is ready AND at least one calculation function exists
     await waitFor(() => {
       const sliderExists = document.querySelector('input[type="range"]');
       const gpuReady = typeof GPU_data !== "undefined";
-      return sliderExists && gpuReady;
-    }, 5000);
+      const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
+      return sliderExists && gpuReady && calcReady;
+    }, 7000); // 7s timeout for slow loading components
 
     // Apply inputs
     applyInputsFromState(state);
 
-    // Wait a tiny bit for plots/tables to update
-    await new Promise(r => setTimeout(r, 100));
+    // Extra delay for async plot/table rendering
+    await new Promise(r => setTimeout(r, 200));
 
     // Trigger calculation
     if (typeof calculateResults === "function") calculateResults();
@@ -2713,6 +2714,8 @@ async function restoreStateWhenReady(state){
       const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
       if (calcBtn) calcBtn.click();
     }
+
+    console.log("State restored successfully.");
 
   } catch(e){
     console.warn("restoreStateWhenReady() failed:", e);
