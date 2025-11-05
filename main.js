@@ -2722,6 +2722,7 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
 }
 
 // ===================== RESTORE STATE =====================
+// ===================== RESTORE STATE (UPDATED) =====================
 async function restoreStateWhenReady(state){
     if (!state) return;
 
@@ -2730,15 +2731,17 @@ async function restoreStateWhenReady(state){
         await waitFor(() => {
             const sliderExists = document.querySelector('input[type="range"]');
             
-            // **CRITICAL UPDATE HERE:** Check if GPU_data is an array AND has elements
+            // **REFINEMENT HERE:** Check if GPU_data is an Array AND has elements
             const gpuDataReady = Array.isArray(window.GPU_data) && window.GPU_data.length > 0;
             
             const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
             
-            return sliderExists && gpuDataReady && calcReady;
+            // Note the use of gpuDataReady in the return condition
+            return sliderExists && gpuDataReady && calcReady; 
         }, 7000); // 7s timeout
 
-        // Apply inputs from state
+        // ... (rest of the function remains the same: applyInputsFromState, etc.)
+        
         applyInputsFromState(state);
 
         // Extra delay for async plot/table rendering
