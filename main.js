@@ -2760,12 +2760,14 @@ async function shareSetup() {
   }
 }
 
+// ✅ FIXED: Try restoring from URL (shortlinks or embedded)
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
 
-  // Case 1: /s/<uuid> → load from Supabase
+  // ✅ Case 1: Short URL like /s/<id>
   if (path.startsWith("/s/")) {
-    const id = path.split("/s/")[1];
+    const id = path.replace("/s/", "").trim();
     if (!id) return false;
 
     try {
@@ -2773,34 +2775,42 @@ async function tryRestoreFromUrlOnLoad() {
       const json = await res.json();
 
       if (json?.data) {
-        // ✅ Use the correct function that waits, applies + auto-calculates
+        console.log("✅ Loaded shared config from backend:", json.data);
         await restoreStateWhenReady(json.data);
         return true;
       }
     } catch (err) {
-      console.error("Error restoring from Supabase:", err);
+      console.error("❌ Error restoring from backend:", err);
     }
   }
 
-  // Case 2: ?d=<encoded-state>
-  const urlParams = new URLSearchParams(window.location.search);
-  const encoded = urlParams.get("d");
-  if (encoded) {
-    const state = decodeState(encoded);
-    if (state) {
-      await restoreStateWhenReady(state);
-      return true;
+  // ✅ Case 2: Embedded link with ?d=<compressed>
+  if (params.has("d")) {
+    try {
+      const decoded = decodeState(params.get("d"));
+      if (decoded) {
+        console.log("✅ Restored state from ?d= parameter");
+        await restoreStateWhenReady(decoded);
+        return true;
+      }
+    } catch (err) {
+      console.error("❌ Error restoring from ?d= parameter:", err);
     }
   }
 
   return false;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const shareBtn = document.getElementById('shareBtn');
-  if (shareBtn) shareBtn.addEventListener('click', shareSetup);
+// ✅ When DOM loads → restore state if possible
+document.addEventListener("DOMContentLoaded", () => {
+  const shareBtn = document.getElementById("shareBtn");
+  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-  tryRestoreFromUrlOnLoad().then(restored => {
-    if (restored) console.log("✅ State restored and calculation triggered.");
+  tryRestoreFromUrlOnLoad().then(async restored => {
+    if (restored) {
+      console.log("✅ State restored and calculate() triggered");
+    } else {
+      console.log("ℹ️ No state restored from URL");
+    }
   });
 });
