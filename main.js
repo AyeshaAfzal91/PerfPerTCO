@@ -2720,19 +2720,22 @@ async function restoreState(state){
   }
 }
 
-async function shareSetup(){
+async function shareSetup() {
   try {
     const state = getCurrentState();
-    const json = JSON.stringify(state);
-    // decide small vs large
     const encoded = encodeState(state);
     if (!encoded) throw new Error("Failed to encode state.");
 
     // if encoded URL length reasonable, embed
     const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
     if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
-      await navigator.clipboard.writeText(urlIfEmbedded);
-      alert("Copied shareable link (embedded) to clipboard.");
+      try {
+        await navigator.clipboard.writeText(urlIfEmbedded);
+        alert("Copied shareable link (embedded) to clipboard.");
+      } catch (err) {
+        console.warn("Clipboard write failed:", err);
+        prompt("Copy this link manually:", urlIfEmbedded);
+      }
       return { mode: "embedded", url: urlIfEmbedded };
     }
 
@@ -2740,18 +2743,27 @@ async function shareSetup(){
     const res = await fetch('/.netlify/functions/saveConfig', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-	  body: JSON.stringify({ config: state }) 
+      body: JSON.stringify({ config: state })
     });
+
     if (!res.ok) {
       const txt = await res.text();
       throw new Error(`Save failed: ${res.status} ${txt}`);
     }
+
     const data = await res.json();
     const id = data.id || data.ID || data.key;
     if (!id) throw new Error("No id returned from backend.");
+
     const shortUrl = `${window.location.origin}/s/${id}`;
-    await navigator.clipboard.writeText(shortUrl);
-    alert("Copied shareable short link to clipboard.");
+    try {
+      await navigator.clipboard.writeText(shortUrl);
+      alert("Copied shareable short link to clipboard.");
+    } catch (err) {
+      console.warn("Clipboard write failed:", err);
+      prompt("Copy this link manually:", shortUrl);
+    }
+
     return { mode: "short", id, url: shortUrl };
 
   } catch (e) {
