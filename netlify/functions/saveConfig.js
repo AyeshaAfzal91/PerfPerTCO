@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY; // ✅ correct name
+const supabaseKey = process.env.SUPABASE_ANON_KEY; 
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -13,7 +13,7 @@ export async function handler(event) {
 
   try {
     const { config } = JSON.parse(event.body);
-    const id = uuidv4().split("-")[0];
+    const id = uuidv4();
 
     const { error } = await supabase
       .from("shared_configs") // ✅ match the table name you created
