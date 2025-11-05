@@ -2740,7 +2740,7 @@ async function shareSetup(){
     const res = await fetch('/.netlify/functions/saveConfig', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: state })
+	  body: JSON.stringify({ config: state }) 
     });
     if (!res.ok) {
       const txt = await res.text();
