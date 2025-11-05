@@ -3,22 +3,22 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY // make sure to use the correct anon key
+  process.env.SUPABASE_ANON_KEY
 );
 
 export async function handler(event) {
   if (event.httpMethod !== "GET") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return { statusCode: 405, body: JSON.stringify({ error: "Method Not Allowed" }) };
   }
 
   const id = event.queryStringParameters?.id;
   if (!id) {
-    return { statusCode: 400, body: "Missing ID" };
+    return { statusCode: 400, body: JSON.stringify({ error: "Missing ID" }) };
   }
 
   try {
     const { data, error } = await supabase
-      .from("shared_configs") // updated table name
+      .from("shared_configs")
       .select("config")
       .eq("id", id)
       .single();
@@ -30,7 +30,7 @@ export async function handler(event) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ data: data.config }) // wrap in `data` for frontend
+      body: JSON.stringify({ data: data.config }) // always return as `data`
     };
   } catch (err) {
     console.error("getConfig error:", err);
