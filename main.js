@@ -2572,11 +2572,7 @@ function downloadComparisonPDF() {
   - On load: check ?d=... or /s/<id> and restore
 ---------------------*/
 
-/* --------------------
-  Short-share feature (fixed and improved)
----------------------*/
-
-function encodeState(obj) {
+function encodeState(obj){
   try {
     const json = JSON.stringify(obj);
     if (typeof LZString !== "undefined" && LZString.compressToEncodedURIComponent) {
@@ -2584,26 +2580,27 @@ function encodeState(obj) {
     } else {
       return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
     }
-  } catch (e) {
+  } catch(e){
     console.error("encodeState error:", e);
     return null;
   }
 }
 
-function decodeState(str) {
+function decodeState(str){
   try {
     if (typeof LZString !== "undefined" && LZString.decompressFromEncodedURIComponent) {
       return JSON.parse(LZString.decompressFromEncodedURIComponent(str));
     } else {
-      return JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(str)))));
+      const json = decodeURIComponent(escape(atob(decodeURIComponent(str))));
+      return JSON.parse(json);
     }
-  } catch (e) {
+  } catch(e){
     console.error("decodeState error:", e);
     return null;
   }
 }
 
-function getCurrentState() {
+function getCurrentState(){
   const state = {
     sliders: {},
     selects: {},
@@ -2611,70 +2608,91 @@ function getCurrentState() {
     texts: {},
     gpu_data: typeof GPU_data !== "undefined" ? GPU_data : null,
     active_gpu_data: typeof activeGPUData !== "undefined" ? activeGPUData : null,
-    meta: { savedAt: (new Date()).toISOString(), origin: window.location.origin }
+    meta: {
+      savedAt: (new Date()).toISOString(),
+      origin: window.location.origin
+    }
   };
 
-  document.querySelectorAll('input, select, textarea').forEach(el => {
-    if (!el.id) return;
+  document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
+    if (input.id) state.sliders[input.id] = Number(input.value);
+  });
 
-    if (el.type === 'range' || el.type === 'number') state.sliders[el.id] = Number(el.value);
-    else if (el.type === 'checkbox') state.checkboxes[el.id] = el.checked;
-    else if (el.tagName.toLowerCase() === 'select') state.selects[el.id] = el.value;
-    else if (el.type === 'text' || el.type === 'email') state.texts[el.id] = el.value;
+  document.querySelectorAll('select').forEach(s => {
+    if (s.id) state.selects[s.id] = s.value;
+  });
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (cb.id) state.checkboxes[cb.id] = cb.checked;
+  });
+
+  document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
+    if (inp.id) state.texts[inp.id] = inp.value;
   });
 
   return state;
 }
 
-function applyInputsFromState(state) {
-  if (!state) return;
+function applyInputsFromState(state){
+  if(!state) return;
 
-  const applyEvent = (el, type = 'input') => el.dispatchEvent(new Event(type, { bubbles: true }));
-
-  // sliders / numeric inputs
   Object.entries(state.sliders || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (!el) return;
-    el.value = val; applyEvent(el, 'input');
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 
-  // text/email inputs
   Object.entries(state.texts || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (!el) return;
-    el.value = val; applyEvent(el, 'input');
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 
-  // selects
   Object.entries(state.selects || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (!el) return;
-    el.value = val; applyEvent(el, 'change');
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
-  // checkboxes
   Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (!el) return;
-    el.checked = Boolean(val); applyEvent(el, 'change');
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.checked = Boolean(val);
+    el.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
-  // GPU data
-  if (state.gpu_data) window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data));
-  if (state.active_gpu_data) window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data));
+  // Restore GPU data
+  if (state.gpu_data) {
+    try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
+    catch(e){ console.warn("Unable to restore GPU_data:", e); }
+  }
+  if (state.active_gpu_data) {
+    try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
+    catch(e){ console.warn("Unable to restore activeGPUData:", e); }
+  }
 }
 
-async function restoreState(state) {
-  if (!state) return;
+async function restoreState(state){
+  if(!state) return;
+
   applyInputsFromState(state);
 
-  // small delay to ensure all DOM updates complete
-  await new Promise(r => setTimeout(r, 50));
-
-  // trigger main calculation
-  if (typeof calculateResults === "function") calculateResults();
-  else if (typeof calculate === "function") calculate();
-  else if (typeof runAllCalculations === "function") runAllCalculations();
-  else {
-    const btn = document.getElementById('calculate') || document.getElementById('run-calc');
-    if (btn) btn.click();
-  }
+  // Run calculation after DOM inputs updated
+  setTimeout(() => {
+    if (typeof calculateResults === "function") {
+      calculateResults();
+    } else if (typeof calculate === "function") {
+      calculate();
+    } else if (typeof runAllCalculations === "function") {
+      runAllCalculations();
+    } else {
+      const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
+      if (calcBtn) calcBtn.click();
+    }
+  }, 50); // small delay ensures inputs are updated before calculation
 }
 
 async function shareSetup() {
@@ -2683,11 +2701,11 @@ async function shareSetup() {
     const encoded = encodeState(state);
     if (!encoded) throw new Error("Failed to encode state.");
 
-    const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
-      try { await navigator.clipboard.writeText(embeddedUrl); alert("Copied embedded link."); }
-      catch { prompt("Copy manually:", embeddedUrl); }
-      return { mode: "embedded", url: embeddedUrl };
+    const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+    if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
+      try { await navigator.clipboard.writeText(urlIfEmbedded); alert("Copied shareable link (embedded) to clipboard."); }
+      catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", urlIfEmbedded); }
+      return { mode: "embedded", url: urlIfEmbedded };
     }
 
     const res = await fetch('/.netlify/functions/saveConfig', {
@@ -2695,14 +2713,19 @@ async function shareSetup() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ config: state })
     });
+
     if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
+
     const data = await res.json();
     const id = data.id || data.ID || data.key;
     if (!id) throw new Error("No id returned from backend.");
+
     const shortUrl = `${window.location.origin}/s/${id}`;
-    try { await navigator.clipboard.writeText(shortUrl); alert("Copied short link."); }
-    catch { prompt("Copy manually:", shortUrl); }
+    try { await navigator.clipboard.writeText(shortUrl); alert("Copied shareable short link to clipboard."); }
+    catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", shortUrl); }
+
     return { mode: "short", id, url: shortUrl };
+
   } catch (e) {
     console.error("shareSetup error:", e);
     alert("Could not create share link: " + e.message);
@@ -2710,16 +2733,17 @@ async function shareSetup() {
   }
 }
 
-async function tryRestoreFromUrlOnLoad() {
+async function tryRestoreFromUrlOnLoad(){
   try {
     const params = new URLSearchParams(window.location.search);
     const d = params.get('d');
     if (d) {
       const state = decodeState(d);
-      if (state) { console.log("Restoring from embedded URL."); await restoreState(state); return true; }
+      if (state) { console.log("Restoring state from embedded URL."); await restoreState(state); return true; }
     }
 
-    const m = window.location.pathname.match(/\/s\/([^\/]+)/);
+    const path = window.location.pathname || '';
+    const m = path.match(/\/s\/([^\/]+)/);
     if (m) {
       const id = m[1];
       try {
@@ -2727,18 +2751,23 @@ async function tryRestoreFromUrlOnLoad() {
         if (res.ok) {
           const payload = await res.json();
           const state = payload.data || payload;
-          console.log("Restoring from server for id:", id);
+          console.log("Restoring state from server for id:", id);
           await restoreState(state);
           return true;
-        } else console.warn("getConfig failed", res.status);
-      } catch(e) { console.warn("Error fetching /getConfig:", e); }
+        } else {
+          console.warn("getConfig returned", res.status);
+        }
+      } catch(e){ console.warn("Error fetching /getConfig:", e); }
     }
-  } catch(e) { console.warn("tryRestoreFromUrlOnLoad()", e); }
+  } catch(e){ console.warn("tryRestoreFromUrlOnLoad()", e); }
   return false;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const shareBtn = document.getElementById('shareBtn');
   if (shareBtn) shareBtn.addEventListener('click', shareSetup);
-  tryRestoreFromUrlOnLoad().then(restored => { if (restored) console.log("State restored from URL."); });
+
+  tryRestoreFromUrlOnLoad().then(restored => {
+    if (restored) console.log("State restored from URL and calculation triggered.");
+  });
 });
