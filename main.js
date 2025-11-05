@@ -2763,9 +2763,9 @@ async function shareSetup() {
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
 
-  // If URL is like /s/<uuid>
+  // Case 1: /s/<uuid> → load from Supabase
   if (path.startsWith("/s/")) {
-    const id = path.split("/s/")[1]; // extract UUID
+    const id = path.split("/s/")[1];
     if (!id) return false;
 
     try {
@@ -2773,22 +2773,34 @@ async function tryRestoreFromUrlOnLoad() {
       const json = await res.json();
 
       if (json?.data) {
-        await restoreState(json.data);  // apply config
+        // ✅ Use the correct function that waits, applies + auto-calculates
+        await restoreStateWhenReady(json.data);
         return true;
       }
     } catch (err) {
       console.error("Error restoring from Supabase:", err);
     }
   }
+
+  // Case 2: ?d=<encoded-state>
+  const urlParams = new URLSearchParams(window.location.search);
+  const encoded = urlParams.get("d");
+  if (encoded) {
+    const state = decodeState(encoded);
+    if (state) {
+      await restoreStateWhenReady(state);
+      return true;
+    }
+  }
+
   return false;
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const shareBtn = document.getElementById('shareBtn');
   if (shareBtn) shareBtn.addEventListener('click', shareSetup);
 
   tryRestoreFromUrlOnLoad().then(restored => {
-    if (restored) console.log("State restored from URL and calculation triggered.");
+    if (restored) console.log("✅ State restored and calculation triggered.");
   });
 });
