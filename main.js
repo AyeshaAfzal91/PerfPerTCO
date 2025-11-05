@@ -2760,39 +2760,29 @@ async function shareSetup() {
   }
 }
 
-async function tryRestoreFromUrlOnLoad(){
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const d = params.get('d');
-    if (d) {
-      const state = decodeState(d);
-      if (state) {
-        console.log("Restoring state from embedded URL.");
-        await restoreStateWhenReady(state);
+async function tryRestoreFromUrlOnLoad() {
+  const path = window.location.pathname;
+
+  // If URL is like /s/<uuid>
+  if (path.startsWith("/s/")) {
+    const id = path.split("/s/")[1]; // extract UUID
+    if (!id) return false;
+
+    try {
+      const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
+      const json = await res.json();
+
+      if (json?.data) {
+        await restoreState(json.data);  // apply config
         return true;
       }
+    } catch (err) {
+      console.error("Error restoring from Supabase:", err);
     }
-
-    const path = window.location.pathname || '';
-    const m = path.match(/\/s\/([^\/]+)/);
-    if (m) {
-      const id = m[1];
-      try {
-        const res = await fetch(`/.netlify/functions/getConfig?id=${encodeURIComponent(id)}`);
-        if (res.ok) {
-          const payload = await res.json();
-          const state = payload.data || payload;
-          console.log("Restoring state from server for id:", id);
-          await restoreStateWhenReady(state);
-          return true;
-        } else {
-          console.warn("getConfig returned", res.status);
-        }
-      } catch(e){ console.warn("Error fetching /getConfig:", e); }
-    }
-  } catch(e){ console.warn("tryRestoreFromUrlOnLoad()", e); }
+  }
   return false;
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const shareBtn = document.getElementById('shareBtn');
