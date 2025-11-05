@@ -2572,6 +2572,7 @@ function downloadComparisonPDF() {
   - On load: check ?d=... or /s/<id> and restore
 ---------------------*/
 
+// ===================== STATE ENCODE / DECODE =====================
 function encodeState(obj){
   try {
     const json = JSON.stringify(obj);
@@ -2600,6 +2601,7 @@ function decodeState(str){
   }
 }
 
+// ===================== GET & APPLY STATE =====================
 function getCurrentState(){
   const state = {
     sliders: {},
@@ -2675,7 +2677,7 @@ function applyInputsFromState(state){
   }
 }
 
-// Generic waitFor helper
+// ===================== HELPER: waitFor =====================
 function waitFor(conditionFn, timeout = 5000, interval = 50) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
@@ -2687,7 +2689,7 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
   });
 }
 
-// Restore state robustly after DOM & GPU ready
+// ===================== RESTORE STATE =====================
 async function restoreStateWhenReady(state){
   if (!state) return;
 
@@ -2698,9 +2700,9 @@ async function restoreStateWhenReady(state){
       const gpuReady = typeof GPU_data !== "undefined";
       const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
       return sliderExists && gpuReady && calcReady;
-    }, 7000); // 7s timeout for slow loading components
+    }, 7000); // 7s timeout
 
-    // Apply inputs
+    // Apply inputs from state
     applyInputsFromState(state);
 
     // Extra delay for async plot/table rendering
@@ -2715,13 +2717,14 @@ async function restoreStateWhenReady(state){
       if (calcBtn) calcBtn.click();
     }
 
-    console.log("State restored successfully.");
+    console.log("✅ State restored successfully.");
 
   } catch(e){
     console.warn("restoreStateWhenReady() failed:", e);
   }
 }
 
+// ===================== SHARE LINK =====================
 async function shareSetup() {
   try {
     const state = getCurrentState();
@@ -2760,6 +2763,7 @@ async function shareSetup() {
   }
 }
 
+// ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
@@ -2791,44 +2795,37 @@ async function tryRestoreFromUrlOnLoad() {
   }
 
   if (state) {
-    // restore state, update UI, and trigger calculations
     await restoreStateWhenReady(state);
-    console.log("✅ State restored and calculations triggered");
+    console.log("✅ State restored and calculations triggered from URL.");
     return true;
   }
 
   return false;
 }
 
+// ===================== DOMContentLoaded LISTENER =====================
 document.addEventListener("DOMContentLoaded", () => {
-  // 1️⃣ Setup Share button
+  // Setup Share button
   const shareBtn = document.getElementById("shareBtn");
-  if (shareBtn) {
-    shareBtn.addEventListener("click", shareSetup);
-  }
+  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-  // 2️⃣ Try to restore state from URL
+  // Restore state from URL if possible
   tryRestoreFromUrlOnLoad().then(restored => {
     if (restored) {
-      // ✅ State restored from URL; calculations already triggered in restoreStateWhenReady()
-      console.log("✅ State restored and calculations triggered from URL data.");
+      console.log("✅ URL state applied.");
     } else {
-      // ℹ️ No state restored from URL; run default initialization
-      console.log("ℹ️ No state restored from URL, running default initialization.");
+      console.log("ℹ️ No URL state found; running default initialization.");
 
-      // --- PLACE YOUR DEFAULT INITIALIZATION CALLS HERE ---
-      // Example: if your app normally does these on load:
-      if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices(); // optional if needed
-      if (typeof calculate === "function") calculate();                    // main calculation
-      if (typeof runAllCalculations === "function") runAllCalculations();  // alternative entry point
-      // You can add any other default setup functions here, like resetForm()
-      // -------------------------------------------------------
+      // --- DEFAULT INITIALIZATION ---
+      if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
+      if (typeof calculate === "function") calculate();
+      if (typeof runAllCalculations === "function") runAllCalculations();
+      // Add any other default setup here
     }
   }).catch(err => {
-    console.error("Error during state restoration from URL:", err);
-    // fallback to defaults if something went wrong
+    console.error("Error during URL restoration:", err);
+    // fallback to defaults
     if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
     if (typeof calculate === "function") calculate();
   });
 });
-
