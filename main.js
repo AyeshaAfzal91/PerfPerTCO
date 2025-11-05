@@ -2723,37 +2723,41 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
 
 // ===================== RESTORE STATE =====================
 async function restoreStateWhenReady(state){
-  if (!state) return;
+    if (!state) return;
 
-  try {
-    // Wait until sliders exist AND GPU_data is ready AND at least one calculation function exists
-    await waitFor(() => {
-      const sliderExists = document.querySelector('input[type="range"]');
-      const gpuReady = typeof GPU_data !== "undefined";
-      const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
-      return sliderExists && gpuReady && calcReady;
-    }, 7000); // 7s timeout
+    try {
+        // Wait until sliders exist AND GPU_data is ready AND at least one calculation function exists
+        await waitFor(() => {
+            const sliderExists = document.querySelector('input[type="range"]');
+            
+            // **CRITICAL UPDATE HERE:** Check if GPU_data is an array AND has elements
+            const gpuDataReady = Array.isArray(window.GPU_data) && window.GPU_data.length > 0;
+            
+            const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
+            
+            return sliderExists && gpuDataReady && calcReady;
+        }, 7000); // 7s timeout
 
-    // Apply inputs from state
-    applyInputsFromState(state);
+        // Apply inputs from state
+        applyInputsFromState(state);
 
-    // Extra delay for async plot/table rendering
-    await new Promise(r => setTimeout(r, 200));
+        // Extra delay for async plot/table rendering
+        await new Promise(r => setTimeout(r, 200));
 
-    // Trigger calculation
-    if (typeof calculateResults === "function") calculateResults();
-    else if (typeof calculate === "function") calculate();
-    else if (typeof runAllCalculations === "function") runAllCalculations();
-    else {
-      const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
-      if (calcBtn) calcBtn.click();
+        // Trigger calculation
+        if (typeof calculateResults === "function") calculateResults();
+        else if (typeof calculate === "function") calculate();
+        else if (typeof runAllCalculations === "function") runAllCalculations();
+        else {
+            const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
+            if (calcBtn) calcBtn.click();
+        }
+
+        console.log("✅ State restored successfully.");
+
+    } catch(e){
+        console.warn("restoreStateWhenReady() failed:", e);
     }
-
-    console.log("✅ State restored successfully.");
-
-  } catch(e){
-    console.warn("restoreStateWhenReady() failed:", e);
-  }
 }
 
 // ===================== SHARE LINK =====================
