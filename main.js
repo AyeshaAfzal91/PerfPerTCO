@@ -2678,21 +2678,20 @@ function applyInputsFromState(state){
 async function restoreState(state){
   if(!state) return;
 
+  // Apply inputs first
   applyInputsFromState(state);
 
-  // Run calculation after DOM inputs updated
-  setTimeout(() => {
-    if (typeof calculateResults === "function") {
-      calculateResults();
-    } else if (typeof calculate === "function") {
-      calculate();
-    } else if (typeof runAllCalculations === "function") {
-      runAllCalculations();
-    } else {
-      const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
-      if (calcBtn) calcBtn.click();
-    }
-  }, 50); // small delay ensures inputs are updated before calculation
+  // Wait until DOM is fully updated (including plots/tables dependencies)
+  await new Promise(r => setTimeout(r, 100)); // 100ms delay
+
+  // Then run calculation
+  if (typeof calculateResults === "function") calculateResults();
+  else if (typeof calculate === "function") calculate();
+  else if (typeof runAllCalculations === "function") runAllCalculations();
+  else {
+    const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
+    if (calcBtn) calcBtn.click();
+  }
 }
 
 async function shareSetup() {
