@@ -1,3 +1,4 @@
+// netlify/functions/saveConfig.js
 import { v4 as uuidv4 } from "uuid";
 import { createClient } from "@supabase/supabase-js";
 
@@ -8,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return { statusCode: 405, body: JSON.stringify({ error: "Method Not Allowed" }) };
   }
 
   try {
