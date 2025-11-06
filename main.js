@@ -2768,15 +2768,32 @@ async function restoreStateWhenReady(state){
  * @param {string} text - The text (URL) to copy.
  * @param {string} successMsg - Message to alert on successful copy.
  */
+// ===================== HELPER: COPY TO CLIPBOARD (UX IMPROVED) =====================
+/**
+ * Attempts to copy text to the clipboard and offers to open the link in a new tab.
+ * @param {string} text - The text (URL) to copy.
+ * @param {string} successMsg - Message to display on successful copy.
+ */
 async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
     try {
         await navigator.clipboard.writeText(text);
-        alert(successMsg);
+        
+        // --- UX IMPROVEMENT: Use confirm() to offer the New Tab option ---
+        const userChoice = confirm(
+            successMsg + "\n\nWould you like to open this link in a new tab now?"
+        );
+        
+        if (userChoice) {
+            // User clicked 'OK' (or similar button)
+            window.open(text, '_blank');
+        }
+        // If the user clicks 'Cancel' (or similar button), they proceed to share the copied link.
+        
         return true;
     } catch (err) {
         console.warn("Clipboard write failed (Security error or no permission):", err);
         
-        // Instead of two separate dialogs (alert then prompt), use one clear prompt box.
+        // --- Fallback Mechanism (for security failure) ---
         prompt(
             "Automatic clipboard access failed due to browser security. Please copy the link manually from this box:", 
             text
