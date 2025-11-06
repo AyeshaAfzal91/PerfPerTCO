@@ -1,13 +1,29 @@
 [functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-  external_node_modules = ["@octokit/rest"]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["@octokit/rest"]
 
 [build]
-  command = "npm install"
+  command = "npm install"
 
-# Redirect /s/* to index.html so client-side routing works
+# 1. Bypass redirect for all static asset files (.js, .css, etc.)
+# This ensures that /s/footer.js correctly loads footer.js from the root.
 [[redirects]]
-  from = "/s/*"
-  to = "/index.html"
+  from = "/s/*.js"
+  to = "/:splat"  # Load the file from the root directory (e.g., /footer.js)
   status = 200
+  force = false
+
+[[redirects]]
+  from = "/s/*.css"
+  to = "/:splat"
+  status = 200
+  force = false
+
+# 2. Rewrite all other /s/* paths to index.html for client-side routing
+# This handles URLs like /s/b1234.
+[[redirects]]
+  from = "/s/*"
+  to = "/index.html"
+  status = 200
+  force = false
