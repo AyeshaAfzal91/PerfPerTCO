@@ -2014,40 +2014,71 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function generateBlogPost() {
-  const workload = document.getElementById('workload').value;
-  const benchmarkId = document.getElementById('benchmarkId').value;
-  const totalBudget = document.getElementById('total_budget').value;
+// ===================== GENERATE BLOG POST (UPDATED) =====================
+async function generateBlogPost() {
+    // Check if the necessary sharing function exists
+    if (typeof shareSetup !== 'function') {
+        alert("Sharing functionality (shareSetup) is not available.");
+        return;
+    }
 
-  const bestGpu = window.bestResult?.name || "N/A";
-  const bestPerfTCO = window.bestResult?.perf_per_tco?.toFixed(2) || "N/A";
-  const tipText = document.getElementById("ai-tip-text").innerText || "No tips generated.";
+    const workload = document.getElementById('workload').value;
+    const benchmarkId = document.getElementById('benchmarkId').value;
+    const totalBudget = document.getElementById('total_budget').value;
 
-  if (bestGpu === "N/A") {
-    alert("Please run a calculation first before generating the blog post.");
-    return;
-  }
+    const bestGpu = window.bestResult?.name || "N/A";
+    const bestPerfTCO = window.bestResult?.perf_per_tco?.toFixed(2) || "N/A";
+    const tipText = document.getElementById("ai-tip-text")?.innerText || "No tips generated.";
 
-  const blog = `## Optimizing Performance Per TCO for GPU Systems
+    if (bestGpu === "N/A") {
+        alert("Please run a calculation first before generating the blog post.");
+        return;
+    }
 
-In this analysis, we used the **Wattlytics** to evaluate GPU-based compute nodes for ${workload} workloads using Benchmark ID **${benchmarkId}**.
+    // --- STEP 1: Generate Share Link ---
+    document.getElementById("blogOutput").value = "Generating share link, please wait...";
+    let shareUrl = 'https://wattlytics.netlify.app'; // Default URL
+
+    try {
+        const shareData = await shareSetup();
+        if (shareData && shareData.url) {
+            shareUrl = shareData.url;
+        }
+    } catch (e) {
+        console.error("Failed to generate share link for blog post:", e);
+        // Fallback to base URL if short link generation fails
+    }
+
+    // --- STEP 2: Generate Blog Content ---
+    
+    // Format the budget nicely
+    const formattedBudget = parseInt(totalBudget).toLocaleString('en-US', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 });
+
+    const blog = `## Optimizing Performance Per TCO for GPU Systems
+
+In this analysis, we used the **Wattlytics** tool to evaluate GPU-based compute nodes for **${workload}** workloads using Benchmark ID **${benchmarkId}**.
 
 ### 🛠️ System Configuration
-- **Total Budget**: €${parseInt(totalBudget).toLocaleString()}
+- **Total Budget**: ${formattedBudget}
 - **Benchmark**: ${workload} (ID ${benchmarkId})
 - **Capital & Operational Costs**: Customized using sliders.
 
 ### 📈 Results
-The best GPU configuration was:
+The best GPU configuration found was:
 - **GPU**: ${bestGpu}
-- **Performance per TCO**: ${bestPerfTCO} ns/day/€ * atom
+- **Performance per TCO**: **${bestPerfTCO}** ns/day/€ * atom
 
 ---
 
-This result can help inform purchasing and planning decisions for upcoming system acquisitions. You can explore further by adjusting budget, node costs, or energy parameters at [wattlytics.netlify.app](https://wattlytics.netlify.app).
+### 🔗 Explore This Scenario
+You can explore these exact configuration settings, including all custom costs and parameters, by clicking the link below:
+
+[**Replicate this Scenario in Wattlytics**](${shareUrl})
+
+This result can help inform purchasing and planning decisions for upcoming system acquisitions.
 `;
 
-  document.getElementById("blogOutput").value = blog;
+    document.getElementById("blogOutput").value = blog;
 }
 
 // Import and export CSV/JSON files
