@@ -124,6 +124,71 @@
       </ul>
     </section>
 
+        <!-- ✅ NEW SECTION: Sharing Feature -->
+    <section id="sharing">
+      <h2>Sharing Configurations (Hybrid URL / Short-Link Feature)</h2>
+      <p>
+        Wattlytics allows you to save and share your full configuration (all slider values, dropdowns, text inputs, GPU selections, scenario settings, etc.) using two smart mechanisms:
+      </p>
+
+      <h3>1. 🔗 Embedded “Instant” Share Links (<code>?d=...</code>)</h3>
+      <ul>
+        <li>When you click the <strong>Share</strong> button, Wattlytics first tries to save your setup directly inside the URL using compression.</li>
+        <li>This produces a link like:<br>
+          <code>https://wattlytics.netlify.app/?d=XYZ123</code>
+        </li>
+        <li>No data leaves your browser — secure and offline-friendly.</li>
+        <li>Limit: Only used if the full URL is under ~2000 characters.</li>
+      </ul>
+
+      <h3>2. 🔐 Short Share Links (<code>/s/&lt;uuid&gt;</code>) via Supabase</h3>
+      <ul>
+        <li>If the embedded URL is too long, Wattlytics automatically uploads your configuration to a secure Supabase database through a Netlify serverless function.</li>
+        <li>Then it generates a short link like:<br>
+          <code>https://wattlytics.netlify.app/s/135a754c-120f-4421-8ee5-f3c8935380b1</code>
+        </li>
+        <li>When someone opens this link:
+          <ul>
+            <li>Your saved configuration is fetched from Supabase.</li>
+            <li>All input fields (sliders, text, checkboxes) are restored.</li>
+            <li>GPU table data is reloaded.</li>
+            <li>The tool automatically triggers the calculation to show tables and charts.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>3. ✅ What Gets Saved?</h3>
+      <ul>
+        <li>All slider and numeric inputs</li>
+        <li>Dropdown/select values (GPU type, workload, price mode, etc.)</li>
+        <li>Checkboxes (e.g. “Use same GPU count”)</li>
+        <li>Custom GPU power/performance edits</li>
+        <li>activeGPUData and GPU_data objects</li>
+        <li>Benchmark selection and scenario mode</li>
+      </ul>
+
+      <h3>4. ⚠️ Notes</h3>
+      <ul>
+        <li>Saved configurations are public if someone knows the URL — do not include sensitive information.</li>
+        <li>Short links require internet access (Supabase & Netlify Functions).</li>
+        <li>Embedded <code>?d=</code> links work fully offline.</li>
+      </ul>
+
+      <h3>5. 💡 How to Use It</h3>
+      <ol>
+        <li>Adjust sliders, GPU settings, and inputs.</li>
+        <li>Click <strong>Share</strong> in the top-right toolbar.</li>
+        <li>A link is automatically copied to your clipboard.</li>
+        <li>Share with collaborators — they’ll see:
+          <ul>
+            <li>All sliders restored</li>
+            <li>Results automatically recalculated</li>
+            <li>Tables & plots exactly as you saw them</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+		  
     <section id="faq-link">
       <h2>Need More Help?</h2>
       <p>
