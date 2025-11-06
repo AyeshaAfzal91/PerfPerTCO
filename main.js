@@ -2776,12 +2776,11 @@ async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
     } catch (err) {
         console.warn("Clipboard write failed (Security error or no permission):", err);
         
-        // --- Fallback Mechanism ---
-        // 1. Alert the user that manual action is required.
-        alert("Clipboard access failed. Please copy the link manually.");
-        
-        // 2. Open the prompt box with the text pre-selected for easy copying.
-        prompt("Copy this link manually:", text);
+        // Instead of two separate dialogs (alert then prompt), use one clear prompt box.
+        prompt(
+            "Automatic clipboard access failed due to browser security. Please copy the link manually from this box:", 
+            text
+        );
         return false;
     }
 }
