@@ -4,7 +4,7 @@
   external_node_modules = ["@octokit/rest"]
 
 [build]
-  command = "npm install"
+  command = "npm install"
 
 # 1. Bypass redirect for all static asset files (.js, .css, etc.)
 # This ensures that /s/footer.js correctly loads footer.js from the root.
@@ -23,7 +23,7 @@
 # 2. Rewrite all other /s/* paths to index.html for client-side routing
 # This handles URLs like /s/b1234.
 [[redirects]]
-  from = "/s/*"
-  to = "/index.html"
-  status = 200
+  from = "/s/*"
+  to = "/index.html"
+  status = 200
   force = false
