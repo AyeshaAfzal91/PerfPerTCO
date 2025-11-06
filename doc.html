@@ -130,7 +130,7 @@
         Wattlytics allows you to save and share your full configuration (all slider values, dropdowns, text inputs, GPU selections, scenario settings, etc.) using two smart mechanisms:
       </p>
 
-      <h2>1. Embedded “Instant” Share Links</h2>
+      <h3>1. Embedded “Instant” Share Links</h3>
       <ul>
         <li>When you click the <strong>Share</strong> button, Wattlytics first tries to save your setup directly inside the URL using LZ-String compression.</li>
         <li>This produces a link like:<br>
@@ -140,7 +140,7 @@
         <li>Limit: Only used if the full URL is under ~2000 characters.</li>
       </ul>
 
-      <h2>2. Short Share Links via Supabase</h2>
+      <h3>2. Short Share Links via Supabase</h3>
       <ul>
         <li>If the embedded URL is too long, Wattlytics automatically uploads your configuration to a secure Supabase database through a Netlify serverless function.</li>
         <li>Then it generates a short link like:<br>
@@ -156,7 +156,7 @@
         </li>
       </ul>
 
-      <h2>3. What Gets Saved?</h2>
+      <h3>3. What Gets Saved?</h3>
       <ul>
         <li>All slider and numeric inputs</li>
         <li>Dropdown/select values (GPU type, workload, price mode, etc.)</li>
@@ -166,7 +166,7 @@
         <li>Benchmark selection and scenario mode</li>
       </ul>
 
-      <h2>4. How to Use It</h2>
+      <h3>4. How to Use It</h3>
       <ul>
         <li>Adjust sliders, GPU settings, and inputs and click "Calculate".</li>
 		<li>Click <strong>Share</strong>, located to the right of the Calculate button. Saved configurations are public if someone knows the URL — do not include sensitive information.</li>
@@ -174,7 +174,7 @@
 		<li>Share with collaborators to let them see restored sliders, automatically updated results, and tables and plots exactly as you viewed them.</li>
 	  </ul>
 
-	<h2>5. Generate Blog Post (with Share Link)</h3>
+	<h3>5. Generate Blog Post (with Share Link)</h3>
 	<ul>
 		<li>After running a successful calculation, users can generate auto-written blog summaries for sharing.</li>
 		<li>Click the <strong>Generate Blog Post</strong> button, the tool will <strong>automatically create a shareable link</strong> for the current configuration and embed it within a Markdown-formatted template.</li>
