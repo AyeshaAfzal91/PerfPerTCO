@@ -137,7 +137,7 @@
         <li>This produces a link like:<br>
           <code>https://wattlytics.netlify.app/?d=XYZ123</code>
         </li>
-        <li>No data leaves your browser — secure and offline-friendly.</li>
+        <li>No data leaves your browser — secure and fully offline.</li>
         <li>Limit: Only used if the full URL is under ~2000 characters.</li>
       </ul>
 
@@ -147,7 +147,7 @@
         <li>Then it generates a short link like:<br>
           <code>https://wattlytics.netlify.app/s/135a754c-120f-4421-8ee5-f3c8935380b1</code>
         </li>
-        <li>When someone opens this link:
+        <li>Short links require internet access. When someone opens this link:
           <ul>
             <li>Your saved configuration is fetched from Supabase.</li>
             <li>All input fields (sliders, text, checkboxes) are restored.</li>
@@ -167,20 +167,13 @@
         <li>Benchmark selection and scenario mode</li>
       </ul>
 
-      <h3>4. Notes</h3>
+      <h3>4. How to Use It</h3>
       <ul>
-        <li>Saved configurations are public if someone knows the URL — do not include sensitive information.</li>
-        <li>Short links require internet access (Supabase & Netlify Functions).</li>
-        <li>Embedded <code>?d=</code> links work fully offline.</li>
-      </ul>
-
-	  <h3>5. How to Use It</h3>
-      <ul>
-        <li>Adjust sliders, GPU settings, and inputs and click "Calculate".</li>
-		<li>Click <strong>Share</strong>, located to the right of the Calculate button.</li>
+        <li>Adjust sliders, GPU settings, and inputs and click "Calculate".</li>
+		<li>Click <strong>Share</strong>, located to the right of the Calculate button. Saved configurations are public if someone knows the URL — do not include sensitive information.</li>
 		<li>A link is <strong>automatically copied to your clipboard</strong> and a dialog will appear asking if you want to <strong>open the link in a new tab.</strong> If this fails due to browser security, a prompt will appear with the link for you to <strong>copy manually.</strong></li>
 		<li>Share with collaborators to let them see restored sliders, automatically updated results, and tables and plots exactly as you viewed them.</li>
-      </ul>
+	  </ul>
 		
     </section>
 		  
