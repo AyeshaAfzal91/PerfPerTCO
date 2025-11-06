@@ -2722,7 +2722,6 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
 }
 
 // ===================== RESTORE STATE =====================
-// ===================== RESTORE STATE (UPDATED) =====================
 async function restoreStateWhenReady(state){
     if (!state) return;
 
@@ -2763,43 +2762,70 @@ async function restoreStateWhenReady(state){
     }
 }
 
+// ===================== HELPER: COPY TO CLIPBOARD =====================
+/**
+ * Attempts to copy text to the clipboard, falling back to a manual prompt on failure.
+ * @param {string} text - The text (URL) to copy.
+ * @param {string} successMsg - Message to alert on successful copy.
+ */
+async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
+    try {
+        await navigator.clipboard.writeText(text);
+        alert(successMsg);
+        return true;
+    } catch (err) {
+        console.warn("Clipboard write failed (Security error or no permission):", err);
+        
+        // --- Fallback Mechanism ---
+        // 1. Alert the user that manual action is required.
+        alert("Clipboard access failed. Please copy the link manually.");
+        
+        // 2. Open the prompt box with the text pre-selected for easy copying.
+        prompt("Copy this link manually:", text);
+        return false;
+    }
+}
+
 // ===================== SHARE LINK =====================
 async function shareSetup() {
-  try {
-    const state = getCurrentState();
-    const encoded = encodeState(state);
-    if (!encoded) throw new Error("Failed to encode state.");
+    try {
+        const state = getCurrentState();
+        const encoded = encodeState(state);
+        if (!encoded) throw new Error("Failed to encode state.");
 
-    const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
-      try { await navigator.clipboard.writeText(urlIfEmbedded); alert("Copied shareable link (embedded) to clipboard."); }
-      catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", urlIfEmbedded); }
-      return { mode: "embedded", url: urlIfEmbedded };
+        const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+        
+        // --- Embedded Link Logic ---
+        if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
+            await copyToClipboard(urlIfEmbedded, "Copied shareable link (embedded) to clipboard.");
+            return { mode: "embedded", url: urlIfEmbedded };
+        }
+
+        // --- Short Link Fallback Logic ---
+        const res = await fetch('/.netlify/functions/saveConfig', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ config: state })
+        });
+
+        if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
+
+        const data = await res.json();
+        const id = data.id || data.ID || data.key;
+        if (!id) throw new Error("No id returned from backend.");
+
+        const shortUrl = `${window.location.origin}/s/${id}`;
+        
+        // Use the robust copyToClipboard function
+        await copyToClipboard(shortUrl, "Copied shareable short link to clipboard.");
+
+        return { mode: "short", id, url: shortUrl };
+
+    } catch (e) {
+        console.error("shareSetup error:", e);
+        alert("Could not create share link: " + e.message);
+        return null;
     }
-
-    const res = await fetch('/.netlify/functions/saveConfig', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ config: state })
-    });
-
-    if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
-
-    const data = await res.json();
-    const id = data.id || data.ID || data.key;
-    if (!id) throw new Error("No id returned from backend.");
-
-    const shortUrl = `${window.location.origin}/s/${id}`;
-    try { await navigator.clipboard.writeText(shortUrl); alert("Copied shareable short link to clipboard."); }
-    catch (err) { console.warn("Clipboard write failed:", err); prompt("Copy this link manually:", shortUrl); }
-
-    return { mode: "short", id, url: shortUrl };
-
-  } catch (e) {
-    console.error("shareSetup error:", e);
-    alert("Could not create share link: " + e.message);
-    return null;
-  }
 }
 
 // ===================== RESTORE FROM URL =====================
