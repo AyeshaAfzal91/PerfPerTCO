@@ -2056,19 +2056,17 @@ async function generateBlogPost() {
 
     const blog = `## Optimizing Performance Per TCO for GPU Systems
 
-In this analysis, we used the **Wattlytics** tool to evaluate GPU-based compute nodes for **${workload}** workloads using Benchmark ID **${benchmarkId}**.
+In this analysis, we used the Wattlytics tool to evaluate GPU-based compute nodes for ${workload} workloads using Benchmark ID ${benchmarkId}.
 
 ### 🛠️ System Configuration
-- **Total Budget**: ${formattedBudget}
-- **Benchmark**: ${workload} (ID ${benchmarkId})
-- **Capital & Operational Costs**: Customized using sliders.
+- Total Budget: ${formattedBudget}
+- Benchmark: ${workload} (ID ${benchmarkId})
+- Capital & Operational Costs: Customized using sliders.
 
 ### 📈 Results
 The best GPU configuration found was:
-- **GPU**: ${bestGpu}
-- **Performance per TCO**: **${bestPerfTCO}** ns/day/€ * atom
-
----
+- GPU: ${bestGpu}
+- Performance per TCO: ${bestPerfTCO} ns/day/€ * atom
 
 ### 🔗 Explore This Scenario
 You can explore these exact configuration settings, including all custom costs and parameters, by clicking the link below:
@@ -2076,6 +2074,8 @@ You can explore these exact configuration settings, including all custom costs a
 [**Replicate this Scenario in Wattlytics**](${shareUrl})
 
 This result can help inform purchasing and planning decisions for upcoming system acquisitions.
+
+---
 `;
 
     document.getElementById("blogOutput").value = blog;
@@ -2791,12 +2791,6 @@ async function restoreStateWhenReady(state){
 }
 
 // ===================== HELPER: COPY TO CLIPBOARD =====================
-/**
- * Attempts to copy text to the clipboard, falling back to a manual prompt on failure.
- * @param {string} text - The text (URL) to copy.
- * @param {string} successMsg - Message to alert on successful copy.
- */
-// ===================== HELPER: COPY TO CLIPBOARD (UX IMPROVED) =====================
 /**
  * Attempts to copy text to the clipboard and offers to open the link in a new tab.
  * @param {string} text - The text (URL) to copy.
