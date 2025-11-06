@@ -124,16 +124,16 @@
       </ul>
     </section>
 
-        <!-- ✅ NEW SECTION: Sharing Feature -->
+    <!-- Sharing Feature -->
     <section id="sharing">
       <h2>Sharing Configurations (Hybrid URL / Short-Link Feature)</h2>
       <p>
         Wattlytics allows you to save and share your full configuration (all slider values, dropdowns, text inputs, GPU selections, scenario settings, etc.) using two smart mechanisms:
       </p>
 
-      <h3>1. 🔗 Embedded “Instant” Share Links (<code>?d=...</code>)</h3>
+      <h3>1. 🔗 Embedded “Instant” Share Links</h3>
       <ul>
-        <li>When you click the <strong>Share</strong> button, Wattlytics first tries to save your setup directly inside the URL using compression.</li>
+        <li>When you click the <strong>Share</strong> button, Wattlytics first tries to save your setup directly inside the URL using LZ-String compression.</li>
         <li>This produces a link like:<br>
           <code>https://wattlytics.netlify.app/?d=XYZ123</code>
         </li>
@@ -141,7 +141,7 @@
         <li>Limit: Only used if the full URL is under ~2000 characters.</li>
       </ul>
 
-      <h3>2. 🔐 Short Share Links (<code>/s/&lt;uuid&gt;</code>) via Supabase</h3>
+      <h3>2. 🔐 Short Share Links via Supabase</h3>
       <ul>
         <li>If the embedded URL is too long, Wattlytics automatically uploads your configuration to a secure Supabase database through a Netlify serverless function.</li>
         <li>Then it generates a short link like:<br>
@@ -177,7 +177,7 @@
       <h3>5. 💡 How to Use It</h3>
       <ol>
         <li>Adjust sliders, GPU settings, and inputs.</li>
-        <li>Click <strong>Share</strong> in the top-right toolbar.</li>
+        <li>Click <strong>Share</strong>, located to the right of the Calculate button.</li>
         <li>A link is automatically copied to your clipboard.</li>
         <li>Share with collaborators — they’ll see:
           <ul>
