@@ -2030,7 +2030,7 @@ function generateBlogPost() {
 
   const blog = `## Optimizing Performance Per TCO for GPU Systems
 
-In this analysis, we used the **Performance per TCO Calculator** to evaluate GPU-based compute nodes for ${workload} workloads using Benchmark ID **${benchmarkId}**.
+In this analysis, we used the **Wattlytics** to evaluate GPU-based compute nodes for ${workload} workloads using Benchmark ID **${benchmarkId}**.
 
 ### 🛠️ System Configuration
 - **Total Budget**: €${parseInt(totalBudget).toLocaleString()}
@@ -2041,9 +2041,6 @@ In this analysis, we used the **Performance per TCO Calculator** to evaluate GPU
 The best GPU configuration was:
 - **GPU**: ${bestGpu}
 - **Performance per TCO**: ${bestPerfTCO} ns/day/€ * atom
-
-### 💡 Optimization Insight
-${tipText}
 
 ---
 
