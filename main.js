@@ -1694,7 +1694,6 @@ const sobolIndicesOptimized = computeTotalOrderSobolOptimized(5000);
 console.log("Optimized total-order Sobol indices:", sobolIndicesOptimized);
 
 // ---------- Monte Carlo Uncertainty Propagation ----------
-// ---------- Monte Carlo Uncertainty Propagation ----------
 function monteCarloUncertainty(numSamples = 1000) {
   const numGPUs = window.results.length;
   const monteCarloResults = [];
@@ -1807,9 +1806,15 @@ elasticities.forEach((gpuElasticity, i) => {
   const sortedVals = sorted.map(x => x.val);
   const sortedLabels = sorted.map(x => elasticityLabels[x.idx]);
 
-  const colors = sorted.map((x, idx) =>
-    idx < topN ? 'rgba(255,77,77,0.9)' : (x.val >= 0 ? 'rgba(102,204,102,0.7)' : 'rgba(51,102,255,0.7)')
-  );
+// === UPDATE colors + error bars + layout ===
+const maxAbs = Math.max(...sortedVals.map(Math.abs));
+
+const colors = sorted.map(x => {
+  const intensity = 0.5 + 0.5 * (Math.abs(x.val) / maxAbs); // transparency by magnitude
+  return x.val >= 0
+    ? `rgba(102,204,102,${intensity})` // green = cost-reducing
+    : `rgba(255,77,77,${intensity})`;   // red = cost-increasing
+});
 
   const chartId = `tornado-${gpuName.replace(/\s+/g, '-')}`;
   const chartDiv = document.createElement("div");
@@ -1817,41 +1822,33 @@ elasticities.forEach((gpuElasticity, i) => {
   chartDiv.className = "tornado-chart";
   tornadoContainer.appendChild(chartDiv);
 
-  const trace = {
-    x: sortedVals,
-    y: sortedLabels,
-    type: "bar",
-    orientation: "h",
-    marker: { color: colors },
-	error_x: {
+const trace = {
+  x: sortedVals,
+  y: sortedLabels,
+  type: "bar",
+  orientation: "h",
+  marker: { color: colors },
+  error_x: {
     type: 'data',
-    array: sorted.map(x => monteCarloResults[i].std),
+    array: sorted.map(x => monteCarloResults[i].std * Math.abs(x.val / maxAbs)), // scale error bars
     visible: true
-  	}
-  };
+  }
+};
 
-  const layout = {
-    xaxis: {
-          title: {
-      text: "Norm. sensitivity",
-      standoff: 20  // Adjust the distance between the x-axis and its title
-    },
-      zeroline: true,
-      zerolinewidth: 1,
-    tickangle: 0,  // Ensure x-axis labels are not rotated
-      zerolinecolor: "#000"
-    },
-    yaxis: {
-      automargin: true,
-    title: "Parameter",
-    tickmode: 'array',  // Ensure all labels are shown
-    tickvals: sortedLabels // Explicitly provide all label values if needed
-    },
-    margin: { l: 160, r: 20, t: 30, b: 30 },
-    height: 250,
-    width: 400,
-    showlegend: false
-  };
+const layout = {
+  title: gpuName,
+  xaxis: {
+    title: { text: "Normalized elasticity", standoff: 15 },
+    zeroline: true,
+    zerolinewidth: 1,
+    zerolinecolor: "#000"
+  },
+  yaxis: { automargin: true },
+  margin: { l: 160, r: 20, t: 40, b: 30 },
+  height: 260,
+  width: 420,
+  showlegend: false
+};
 
   Plotly.newPlot(chartId, [trace], layout, { displayModeBar: true });
 
@@ -1865,36 +1862,29 @@ elasticities.forEach((gpuElasticity, i) => {
 
 
 // ---------- Plotly Heat Map Chart ----------
-const whiteToRedColorscale = [
-  [0, 'rgb(255,255,255)'],  // White
-  [1, 'rgb(255,0,0)']       // Red
-];
-
-const allZ = elasticities.flat(); // Flatten for color scale limits
-const zMax = Math.max(...allZ);
+const zMatrix = elasticities[0].map((_, j) => elasticities.map(row => row[j]));
+const zAbsMax = Math.max(...elasticities.flat().map(Math.abs));
 
 const heatmapData = [{
-  z: elasticities[0].map((_, i) => elasticities.map(row => row[i])), 
+  z: zMatrix,
   x: window.results.map(r => r.name),
   y: elasticityLabels,
   type: 'heatmap',
-  colorscale: whiteToRedColorscale,
-  zmin: 0,
-  zmax: zMax,
-  colorbar: {
-    title: 'Normalized Sensitivity',
-    tickformat: '.2f'
-  }
+  colorscale: [
+    [0, 'rgb(0,0,255)'],     // Blue = negative (cost-reducing)
+    [0.5, 'rgb(255,255,255)'],
+    [1, 'rgb(255,0,0)']      // Red = positive (cost-increasing)
+  ],
+  zmin: -zAbsMax,
+  zmax: zAbsMax,
+  colorbar: { title: 'Elasticity (dimensionless)' }
 }];
 
 Plotly.newPlot('sensitivityHeatmap', heatmapData, {
-  title: '',
+  title: 'Cross-GPU Parameter Sensitivity Heatmap',
   xaxis: { title: 'GPU type' },
-  yaxis: { title: {
-      text: "Parameter",  // Ensure the title is explicitly set
-      standoff: 20  // Adds some space between the axis and the title
-    }, automargin: true },
-  margin: { t: 60, l: 150 }
+  yaxis: { title: 'Parameter', automargin: true },
+  margin: { t: 60, l: 160 }
 });
 
 // Add a button to download the Heatmap chart as PNG or SVG with high resolution
@@ -1926,6 +1916,8 @@ document.getElementById('sensitivityHeatmap').parentElement.insertBefore(chartTi
 
 
 renderElasticityTableWithColors();
+
+Correct?
 
 // ---------- Print sensitivities in HTML table ----------
 function getHeatmapColor(value, maxAbs) {
