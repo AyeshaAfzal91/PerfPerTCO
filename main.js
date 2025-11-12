@@ -1786,7 +1786,7 @@ const monteCarloResults = monteCarloUncertainty(2000);
 console.log("Monte Carlo uncertainty results:", monteCarloResults);
 
 // ---------- Combined Heatmaps ----------
-// ---------- Combined Heatmaps (Final Safe Version) ----------
+// ---------- Combined Heatmaps (Final Fixed Sobol Version) ----------
 const heatmapContainer = document.getElementById("sensitivityHeatmaps");
 if (!heatmapContainer) {
   console.error("Element #sensitivityHeatmaps not found.");
@@ -1796,88 +1796,89 @@ if (!heatmapContainer) {
   const numParams = elasticityLabels.length;
   const numGPUs = window.results.length;
 
-  // --- Sanitize Sobol results into a consistent 2D array ---
-  const cleanSobol = Array.from({ length: numGPUs }, (_, g) => {
-    const row = sobolIndicesOptimized[g];
-    if (!row || !Array.isArray(row)) return new Array(numParams).fill(0);
-    return Array.from({ length: numParams }, (_, j) => {
-      const val = row[j];
-      return Number.isFinite(val) && !isNaN(val) ? val : 0;
-    });
-  });
-
-  // --- Build transposed matrices for Plotly (param rows × GPU columns) ---
-  const zElasticity = elasticities[0].map((_, j) =>
-    elasticities.map((row) => row[j])
+  // --- Step 1: Convert Sobol Float64Arrays safely to plain arrays ---
+  const sobolMatrix = sobolIndicesOptimized.map(arr =>
+    Array.isArray(arr) ? arr : Array.from(arr || [])
   );
 
-  const zSobol = cleanSobol[0].map((_, j) =>
-    cleanSobol.map((row) => row[j])
+  // --- Step 2: Sanitize (replace NaN, undefined, or non-finite values) ---
+  const cleanSobol = sobolMatrix.map(row =>
+    row.map(v => (Number.isFinite(v) && !isNaN(v) ? v : 0))
   );
 
-  // --- Normalize Sobol indices (0–1 scale) ---
-  const maxSobol = Math.max(...zSobol.flat(), 0);
-  const zSobolNorm =
+  // --- Step 3: Normalize Sobol indices (0–1 scale) ---
+  const maxSobol = Math.max(...cleanSobol.flat(), 0);
+  const zSobolScaled =
     maxSobol > 0
-      ? zSobol.map((row) => row.map((v) => v / maxSobol))
-      : zSobol.map((row) => row.map(() => 0));
+      ? cleanSobol.map(row => row.map(v => v / maxSobol))
+      : cleanSobol.map(row => row.map(() => 0));
+
+  // --- Step 4: Build transposed matrices for Plotly (param rows × GPU columns) ---
+  const zElasticity = elasticities[0].map((_, j) =>
+    elasticities.map(row => row[j])
+  );
+
+  const zSobol = zSobolScaled[0].map((_, j) =>
+    zSobolScaled.map(row => row[j])
+  );
 
   // --- Monte Carlo std replicated per parameter ---
-  const zMonteCarlo = monteCarloResults.map((r) =>
+  const zMonteCarlo = monteCarloResults.map(r =>
     Array(numParams).fill(r.std)
   );
   const zMonteCarloT = zMonteCarlo[0].map((_, j) =>
-    zMonteCarlo.map((row) => row[j])
+    zMonteCarlo.map(row => row[j])
   );
 
   // --- Color scale ranges ---
   const zElasticityAbs = Math.max(...elasticities.flat().map(Math.abs));
-  const zSobolMax = Math.max(...zSobolNorm.flat(), 1);
+  const zSobolMax = Math.max(...zSobol.flat(), 1);
   const zMonteCarloMax = Math.max(...zMonteCarloT.flat(), 1);
 
   // --- Debug diagnostics ---
-  console.log("Sanitized Sobol matrix:", cleanSobol);
-  console.log("zSobolNorm sample:", zSobolNorm.slice(0, 3).map((r) => r.slice(0, 3)));
+  console.log("Raw Sobol results (before cleaning):", sobolIndicesOptimized);
+  console.log("Clean Sobol matrix:", cleanSobol);
+  console.log("zSobolScaled sample:", zSobolScaled.slice(0, 3).map(r => r.slice(0, 3)));
 
-  // --- Heatmap definitions ---
+  // --- Step 5: Heatmap definitions ---
   const heatmapData = [
     {
       z: zElasticity,
-      x: window.results.map((r) => r.name),
+      x: window.results.map(r => r.name),
       y: elasticityLabels,
       type: "heatmap",
       colorscale: [
         [0, "rgb(0,0,255)"],
         [0.5, "rgb(255,255,255)"],
-        [1, "rgb(255,0,0)"],
+        [1, "rgb(255,0,0)"]
       ],
       zmin: -zElasticityAbs,
       zmax: zElasticityAbs,
       colorbar: { title: "Elasticity" },
-      visible: true,
+      visible: true
     },
     {
-      z: zSobolNorm,
-      x: window.results.map((r) => r.name),
+      z: zSobol,
+      x: window.results.map(r => r.name),
       y: elasticityLabels,
       type: "heatmap",
       colorscale: "Viridis",
       zmin: 0,
       zmax: zSobolMax,
       colorbar: { title: "Sobol Total Index (normalized)" },
-      visible: false,
+      visible: false
     },
     {
       z: zMonteCarloT,
-      x: window.results.map((r) => r.name),
+      x: window.results.map(r => r.name),
       y: elasticityLabels,
       type: "heatmap",
       colorscale: "Cividis",
       zmin: 0,
       zmax: zMonteCarloMax,
       colorbar: { title: "Monte Carlo Std" },
-      visible: false,
-    },
+      visible: false
+    }
   ];
 
   const heatmapLayout = {
@@ -1898,21 +1899,21 @@ if (!heatmapContainer) {
           {
             label: "Elasticity",
             method: "update",
-            args: [{ visible: [true, false, false] }],
+            args: [{ visible: [true, false, false] }]
           },
           {
             label: "Sobol",
             method: "update",
-            args: [{ visible: [false, true, false] }],
+            args: [{ visible: [false, true, false] }]
           },
           {
             label: "Monte Carlo",
             method: "update",
-            args: [{ visible: [false, false, true] }],
-          },
-        ],
-      },
-    ],
+            args: [{ visible: [false, false, true] }]
+          }
+        ]
+      }
+    ]
   };
 
   Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
