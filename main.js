@@ -1574,6 +1574,75 @@ const elasticities = window.results.map((r, i) => {
   return vals ? vals.map((v, idx) => (v * baseValues[idx]) / r.total_cost) : null;
 }).filter(val => val !== null);
 
+// ---------- Sobol Variance-Based Sensitivity ----------
+function computeSobolIndices(N = 500) {
+  const numParams = elasticityLabels.length;
+  const numGPUs = window.results.length;
+  const sobolIndices = Array(numGPUs).fill(0).map(() => Array(numParams).fill(0));
+
+  for (let i = 0; i < numGPUs; i++) {
+    const r = window.results[i];
+
+    // Generate N random perturbations for each parameter
+    const Y_samples = Array(N).fill(0).map(() => {
+      const perturbed = elasticityLabels.map((_, idx) => {
+        const delta = baseValues[idx] * 0.05 * (Math.random() - 0.5); // ±2.5% random perturb
+        return baseValues[idx] + delta;
+      });
+
+      // Recompute total cost for this perturbation
+      return r.total_cost; // Replace with full cost model function using perturbed values
+    });
+
+    const meanY = Y_samples.reduce((a, b) => a + b, 0) / N;
+    const varY = Y_samples.reduce((a, b) => a + Math.pow(b - meanY, 2), 0) / (N - 1);
+
+    // Variance contribution per parameter
+    for (let j = 0; j < numParams; j++) {
+      // For demonstration, assign equal fractional contribution
+      sobolIndices[i][j] = varY / numParams / varY; // Simplified placeholder
+    }
+  }
+
+  return sobolIndices;
+}
+
+const sobolIndices = computeSobolIndices();
+
+// ---------- Monte Carlo Uncertainty Propagation ----------
+function monteCarloUncertainty(numSamples = 1000) {
+  const numGPUs = window.results.length;
+  const monteCarloResults = [];
+
+  for (let i = 0; i < numGPUs; i++) {
+    const r = window.results[i];
+    const samples = [];
+
+    for (let k = 0; k < numSamples; k++) {
+      const sampledParams = elasticityLabels.map((label, idx) => {
+        // Define distributions: Gaussian ±5% for costs, uniform for usage etc.
+        const sigma = 0.05 * baseValues[idx]; // 5% std deviation
+        return baseValues[idx] * (1 + sigma * (Math.random() - 0.5) * 2);
+      });
+
+      // Evaluate total cost for sampled parameters
+      const totalCostSample = r.total_cost; // Replace with full cost model function using sampledParams
+      samples.push(totalCostSample);
+    }
+
+    // Compute mean, variance, 95% CI
+    const mean = samples.reduce((a, b) => a + b, 0) / numSamples;
+    const std = Math.sqrt(samples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (numSamples - 1));
+    const ci95 = [mean - 1.96 * std, mean + 1.96 * std];
+
+    monteCarloResults.push({ mean, std, ci95 });
+  }
+
+  return monteCarloResults;
+}
+
+const monteCarloResults = monteCarloUncertainty();
+console.log("Monte Carlo uncertainty results:", monteCarloResults);
 
 // ---------- Plotly Tornado Chart ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
@@ -1613,6 +1682,11 @@ elasticities.forEach((gpuElasticity, i) => {
     type: "bar",
     orientation: "h",
     marker: { color: colors }
+	error_x: {
+    type: 'data',
+    array: sorted.map(x => monteCarloResults[i].std),
+    visible: true
+  	}
   };
 
   const layout = {
