@@ -1518,15 +1518,38 @@ const elasticityLabels = [
   'Depreciation cost (€/year)', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
+// Base values constants (without GPU cost)
+const baseValues = [
+  0,               // Placeholder for GPU cost
+  C_node_server,
+  C_node_infra,
+  C_node_facility,  
+  C_software,
+  C_electricity,
+  C_heatreuseperkWh, 
+  PUE,
+  C_maintenance,
+  system_usage, 
+  lifetime, 
+  W_node_baseline,
+  C_depreciation,
+  C_subscription,
+  C_uefficiency
+];
+
 const elasticities = window.results.map((r, i) => {
   const originalGPUIndex = r.originalGPUIndex;
 
   if (originalGPUIndex === undefined || originalGPUIndex < 0 || originalGPUIndex >= GPU_data.length) {
     console.error(`Invalid originalGPUIndex: ${originalGPUIndex} for result ${r.name}`);
-    return null;  // Skip this result
+    return null;
   }
 
   const gpu = GPU_data[originalGPUIndex];
+
+  // Clone baseValues and update GPU cost for this GPU
+  const baseValuesPerGPU = [...baseValues];
+  baseValuesPerGPU[0] = gpu.cost;
 
   const n_gpu = r.n_gpu;
   const n_nodes = n_gpu / gpu.per_node;
@@ -1541,39 +1564,22 @@ const elasticities = window.results.map((r, i) => {
     n_nodes, // Infra cost
     n_nodes, // Facility cost
     1, // Software cost
-     PUE * (W_node_total + W_gpu_total), // Electricity 
+    PUE * (W_node_total + W_gpu_total), // Electricity 
     - PUE * (W_node_total + W_gpu_total), // Heat reuse 
     (C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * (W_node_total + W_gpu_total), // PUE
     n_nodes * lifetime, // Maintenance
-    (C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * lifetime * n_nodes) + (W_gpu * lifetime * n_gpu)) / 1000, // System Usage (hrs/year)
-    ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * system_usage * n_nodes) + (W_gpu * system_usage * n_gpu)) / 1000) + (C_maintenance  * n_nodes) + C_depreciation + C_subscription + C_uefficiency, // System Lifetime (years)
-    ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * system_usage * lifetime * n_nodes) / 1000, // Node Baseline Power w/o GPUs (W)
+    (C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * lifetime * n_nodes) + (W_gpu * lifetime * n_gpu)) / 1000, // System Usage
+    ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * system_usage * n_nodes) + (W_gpu * system_usage * n_gpu)) / 1000) + (C_maintenance  * n_nodes) + C_depreciation + C_subscription + C_uefficiency, // System Lifetime
+    ((C_electricity - ( F_heatreuse * C_heatreuseperkWh)) * PUE * system_usage * lifetime * n_nodes) / 1000, // Node Baseline Power
     lifetime, // Depreciation
     lifetime, // Subscription
     lifetime // Uefficiency
   ];
 
-  const baseValues = [
-    gpu.cost,
-    C_node_server,
-    C_node_infra,
-    C_node_facility,  
-    C_software,
-    C_electricity,
-    C_heatreuseperkWh, 
-    PUE,
-    C_maintenance,
-    system_usage, 
-    lifetime, 
-    W_node_baseline,
-    C_depreciation,
-    C_subscription,
-    C_uefficiency
-  ];
-
-  return vals ? vals.map((v, idx) => (v * baseValues[idx]) / r.total_cost) : null;
+  return vals.map((v, idx) => (v * baseValuesPerGPU[idx]) / r.total_cost);
 }).filter(val => val !== null);
 
+// ---------- Sobol Variance-Based Sensitivity ----------
 // ---------- Sobol Variance-Based Sensitivity ----------
 function computeSobolIndices(N = 500) {
   const numParams = elasticityLabels.length;
@@ -1582,25 +1588,103 @@ function computeSobolIndices(N = 500) {
 
   for (let i = 0; i < numGPUs; i++) {
     const r = window.results[i];
+    const originalGPUIndex = r.originalGPUIndex;
 
-    // Generate N random perturbations for each parameter
+    if (originalGPUIndex === undefined || originalGPUIndex < 0 || originalGPUIndex >= GPU_data.length) {
+      console.error(`Invalid originalGPUIndex: ${originalGPUIndex} for result ${r.name}`);
+      continue;
+    }
+
+    const gpu = GPU_data[originalGPUIndex];
+
+    // Construct baseValues per GPU
+    const baseValuesPerGPU = [
+      gpu.cost,
+      C_node_server,
+      C_node_infra,
+      C_node_facility,
+      C_software,
+      C_electricity,
+      C_heatreuseperkWh,
+      PUE,
+      C_maintenance,
+      system_usage,
+      lifetime,
+      W_node_baseline,
+      C_depreciation,
+      C_subscription,
+      C_uefficiency
+    ];
+
+    // Generate N random perturbations
     const Y_samples = Array(N).fill(0).map(() => {
-      const perturbed = elasticityLabels.map((_, idx) => {
-        const delta = baseValues[idx] * 0.05 * (Math.random() - 0.5); // ±2.5% random perturb
-        return baseValues[idx] + delta;
+      const perturbed = baseValuesPerGPU.map(val => {
+        const delta = val * 0.05 * (Math.random() - 0.5); // ±2.5%
+        return val + delta;
       });
 
-      // Recompute total cost for this perturbation
-      return r.total_cost; // Replace with full cost model function using perturbed values
+      // Recompute total cost for this perturbation using your model
+      const n_gpu = r.n_gpu;
+      const n_nodes = n_gpu / gpu.per_node;
+      const W_gpu = gpu.power[workload][benchmarkId];
+
+      const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
+      const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+
+      const total_cost = 
+        n_gpu * perturbed[0] +      // GPU
+        n_nodes * perturbed[1] +    // Node server
+        n_nodes * perturbed[2] +    // Infra
+        n_nodes * perturbed[3] +    // Facility
+        perturbed[4] +              // Software
+        perturbed[5] * PUE * (W_node_total + W_gpu_total) + // Electricity
+        perturbed[6] * (-PUE * (W_node_total + W_gpu_total)) + // Heat reuse
+        perturbed[7] +              // PUE (placeholder)
+        n_nodes * perturbed[8] +    // Maintenance
+        perturbed[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu) / 1000) + // System usage
+        perturbed[10] +             // System Lifetime (simplified)
+        perturbed[11] +             // Node Baseline Power
+        perturbed[12] +             // Depreciation
+        perturbed[13] +             // Subscription
+        perturbed[14];              // Uefficiency
+
+      return total_cost;
     });
 
     const meanY = Y_samples.reduce((a, b) => a + b, 0) / N;
     const varY = Y_samples.reduce((a, b) => a + Math.pow(b - meanY, 2), 0) / (N - 1);
 
-    // Variance contribution per parameter
+    // Variance contribution per parameter (first-order Sobol indices)
     for (let j = 0; j < numParams; j++) {
-      // For demonstration, assign equal fractional contribution
-      sobolIndices[i][j] = varY / numParams / varY; // Simplified placeholder
+      // Simple estimate: contribution proportional to perturbation effect
+      const Yj_samples = Y_samples.map((_, k) => {
+        // Perturb only j-th parameter
+        const perturbed = [...baseValuesPerGPU];
+        const delta = perturbed[j] * 0.05 * (Math.random() - 0.5);
+        perturbed[j] += delta;
+
+        // Recompute total cost
+        return n_gpu * perturbed[0] +
+               n_nodes * perturbed[1] +
+               n_nodes * perturbed[2] +
+               n_nodes * perturbed[3] +
+               perturbed[4] +
+               perturbed[5] * PUE * (W_node_total + W_gpu_total) +
+               perturbed[6] * (-PUE * (W_node_total + W_gpu_total)) +
+               perturbed[7] +
+               n_nodes * perturbed[8] +
+               perturbed[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu)/1000) +
+               perturbed[10] +
+               perturbed[11] +
+               perturbed[12] +
+               perturbed[13] +
+               perturbed[14];
+      });
+
+      const meanYj = Yj_samples.reduce((a, b) => a + b, 0) / N;
+      const varYj = Yj_samples.reduce((a, b) => a + Math.pow(b - meanYj, 2), 0) / (N - 1);
+
+      sobolIndices[i][j] = varYj / varY;
     }
   }
 
