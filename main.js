@@ -1917,8 +1917,6 @@ document.getElementById('sensitivityHeatmap').parentElement.insertBefore(chartTi
 
 renderElasticityTableWithColors();
 
-Correct?
-
 // ---------- Print sensitivities in HTML table ----------
 function getHeatmapColor(value, maxAbs) {
   const intensity = Math.min(Math.abs(value) / maxAbs, 1); // normalize [0,1]
