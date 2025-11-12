@@ -1681,7 +1681,7 @@ elasticities.forEach((gpuElasticity, i) => {
     y: sortedLabels,
     type: "bar",
     orientation: "h",
-    marker: { color: colors }
+    marker: { color: colors },
 	error_x: {
     type: 'data',
     array: sorted.map(x => monteCarloResults[i].std),
