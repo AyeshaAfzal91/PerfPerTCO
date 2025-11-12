@@ -1696,9 +1696,11 @@ console.log("First GPU Sobol indices:", sobolIndicesOptimized?.[0]);
 
 
 // ---------- Monte Carlo Uncertainty Propagation ----------
-function monteCarloUncertainty(numSamples = 1000) {
+// ---------- Monte Carlo Uncertainty Propagation (per-parameter variability) ----------
+function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
   const numGPUs = window.results.length;
-  const monteCarloResults = [];
+  const numParams = 15; // match your parameter vector length
+  const monteCarloResultsPerParam = [];
 
   // --- Cost evaluation identical to Sobol model ---
   function evaluateCost(params, gpuIndex) {
@@ -1734,7 +1736,7 @@ function monteCarloUncertainty(numSamples = 1000) {
     const gpu = GPU_data[r.originalGPUIndex];
 
     // Base parameter vector for this GPU
-    const baseValuesPerGPU = [
+    const baseValues = [
       gpu.cost,
       C_node_server,
       C_node_infra,
@@ -1752,41 +1754,47 @@ function monteCarloUncertainty(numSamples = 1000) {
       C_uefficiency
     ];
 
-    const samples = new Float64Array(numSamples);
+    const stdPerParam = new Float64Array(numParams);
 
-    // --- Draw samples and evaluate cost ---
-    for (let k = 0; k < numSamples; k++) {
-      const sampledParams = baseValuesPerGPU.map((val, idx) => {
-        // 5% normal perturbation (can swap to uniform if desired)
-        const sigma = 0.05 * val;
-        const perturb = sigma * (Math.random() * 2 - 1); // ±1σ uniform → ±5%
-        return val * (1 + perturb);
-      });
+    // --- Loop over each parameter separately ---
+    for (let j = 0; j < numParams; j++) {
+      const samples = new Float64Array(numSamples);
 
-      samples[k] = evaluateCost(sampledParams, i);
+      for (let k = 0; k < numSamples; k++) {
+        const params = baseValues.slice();
+        const perturb = (Math.random() - 0.5) * 2 * perturbation; // ±5%
+        params[j] = baseValues[j] * (1 + perturb);
+        samples[k] = evaluateCost(params, i);
+      }
+
+      // Compute standard deviation for this parameter
+      const mean = samples.reduce((sum, v) => sum + v, 0) / numSamples;
+      const variance = samples.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (numSamples - 1);
+      stdPerParam[j] = Math.sqrt(variance);
     }
 
-    // --- Compute mean, standard deviation, and 95% CI ---
-    const mean =
-      samples.reduce((sum, val) => sum + val, 0) / numSamples;
-    const variance =
-      samples.reduce((sum, val) => sum + (val - mean) ** 2, 0) /
-      (numSamples - 1);
-    const std = Math.sqrt(variance);
-    const ci95 = [mean - 1.96 * std, mean + 1.96 * std];
-
-    monteCarloResults.push({ mean, std, ci95 });
+    monteCarloResultsPerParam.push(Array.from(stdPerParam));
   }
 
-  return monteCarloResults;
+  return monteCarloResultsPerParam;
 }
 
 // Usage:
-const monteCarloResults = monteCarloUncertainty(2000);
-console.log("Monte Carlo uncertainty results:", monteCarloResults);
+const monteCarloParamResults = monteCarloUncertaintyPerParam(2000);
+
+// --- Prepare heatmap (transpose GPU×param matrix) ---
+const numParams = elasticityLabels.length;
+const zMonteCarloT = monteCarloParamResults[0].map((_, j) =>
+  monteCarloParamResults.map(row => row[j])
+);
+const zMonteCarloMax = Math.max(...zMonteCarloT.flat(), 1);
+
+// --- Replace previous zMonteCarloT in your heatmap data ---
+heatmapData[2].z = zMonteCarloT;
+heatmapData[2].zmax = zMonteCarloMax;
+
 
 // ---------- Combined Heatmaps ----------
-// ---------- Combined Heatmaps (Final Fixed Sobol Version) ----------
 const heatmapContainer = document.getElementById("sensitivityHeatmaps");
 if (!heatmapContainer) {
   console.error("Element #sensitivityHeatmaps not found.");
