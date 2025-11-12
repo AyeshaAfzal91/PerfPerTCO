@@ -1694,29 +1694,84 @@ const sobolIndicesOptimized = computeTotalOrderSobolOptimized(5000);
 console.log("Optimized total-order Sobol indices:", sobolIndicesOptimized);
 
 // ---------- Monte Carlo Uncertainty Propagation ----------
+// ---------- Monte Carlo Uncertainty Propagation ----------
 function monteCarloUncertainty(numSamples = 1000) {
   const numGPUs = window.results.length;
   const monteCarloResults = [];
 
+  // --- Cost evaluation identical to Sobol model ---
+  function evaluateCost(params, gpuIndex) {
+    const r = window.results[gpuIndex];
+    const gpu = GPU_data[r.originalGPUIndex];
+    const n_gpu = r.n_gpu;
+    const n_nodes = n_gpu / gpu.per_node;
+    const W_gpu = gpu.power[workload][benchmarkId];
+    const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
+    const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+
+    return (
+      n_gpu * params[0] +                          // GPU (€)
+      n_nodes * params[1] +                        // Node Server (€)
+      n_nodes * params[2] +                        // Infrastructure (€)
+      n_nodes * params[3] +                        // Facility (€)
+      params[4] +                                  // Software (€)
+      params[5] * PUE * (W_node_total + W_gpu_total) +          // Electricity (€/kWh)
+      params[6] * (-PUE * (W_node_total + W_gpu_total)) +       // Heat reuse revenue
+      params[7] +                                  // PUE (placeholder)
+      n_nodes * params[8] +                        // Maintenance (€ / year)
+      params[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu)/1000) + // System usage
+      params[10] +                                 // Lifetime
+      params[11] +                                 // Node baseline power
+      params[12] +                                 // Depreciation
+      params[13] +                                 // Subscription
+      params[14]                                   // Utilization inefficiency
+    );
+  }
+
   for (let i = 0; i < numGPUs; i++) {
     const r = window.results[i];
-    const samples = [];
+    const gpu = GPU_data[r.originalGPUIndex];
 
+    // Base parameter vector for this GPU
+    const baseValuesPerGPU = [
+      gpu.cost,
+      C_node_server,
+      C_node_infra,
+      C_node_facility,
+      C_software,
+      C_electricity,
+      C_heatreuseperkWh,
+      PUE,
+      C_maintenance,
+      system_usage,
+      lifetime,
+      W_node_baseline,
+      C_depreciation,
+      C_subscription,
+      C_uefficiency
+    ];
+
+    const samples = new Float64Array(numSamples);
+
+    // --- Draw samples and evaluate cost ---
     for (let k = 0; k < numSamples; k++) {
-      const sampledParams = elasticityLabels.map((label, idx) => {
-        // Define distributions: Gaussian ±5% for costs, uniform for usage etc.
-        const sigma = 0.05 * baseValues[idx]; // 5% std deviation
-        return baseValues[idx] * (1 + sigma * (Math.random() - 0.5) * 2);
+      const sampledParams = baseValuesPerGPU.map((val, idx) => {
+        // 5% normal perturbation (can swap to uniform if desired)
+        const sigma = 0.05 * val;
+        const perturb = sigma * (Math.random() * 2 - 1); // ±1σ uniform → ±5%
+        return val * (1 + perturb);
       });
 
-      // Evaluate total cost for sampled parameters
-      const totalCostSample = r.total_cost; // Replace with full cost model function using sampledParams
-      samples.push(totalCostSample);
+      samples[k] = evaluateCost(sampledParams, i);
     }
 
-    // Compute mean, variance, 95% CI
-    const mean = samples.reduce((a, b) => a + b, 0) / numSamples;
-    const std = Math.sqrt(samples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (numSamples - 1));
+    // --- Compute mean, standard deviation, and 95% CI ---
+    const mean =
+      samples.reduce((sum, val) => sum + val, 0) / numSamples;
+    const variance =
+      samples.reduce((sum, val) => sum + (val - mean) ** 2, 0) /
+      (numSamples - 1);
+    const std = Math.sqrt(variance);
     const ci95 = [mean - 1.96 * std, mean + 1.96 * std];
 
     monteCarloResults.push({ mean, std, ci95 });
@@ -1725,8 +1780,10 @@ function monteCarloUncertainty(numSamples = 1000) {
   return monteCarloResults;
 }
 
-const monteCarloResults = monteCarloUncertainty();
+// Usage:
+const monteCarloResults = monteCarloUncertainty(2000);
 console.log("Monte Carlo uncertainty results:", monteCarloResults);
+
 
 // ---------- Plotly Tornado Chart ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
