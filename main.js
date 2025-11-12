@@ -1783,139 +1783,126 @@ function monteCarloUncertainty(numSamples = 1000) {
 const monteCarloResults = monteCarloUncertainty(2000);
 console.log("Monte Carlo uncertainty results:", monteCarloResults);
 
+// ---------- Combined Heatmaps ----------
+const heatmapContainer = document.getElementById("sensitivityHeatmaps");
+heatmapContainer.innerHTML = "";
 
-// ---------- Plotly Tornado Chart ----------
-const tornadoContainer = document.getElementById("gpuTornadoPlots");
-tornadoContainer.innerHTML = ""; // Clear previous charts
+// Prepare z matrices
+const zElasticity = elasticities[0].map((_, j) => elasticities.map(row => row[j]));
+const zSobol = sobolIndicesOptimized[0].map((_, j) => sobolIndicesOptimized.map(row => row[j]));
+const zMonteCarlo = monteCarloResults.map(r => elasticities[0].map((_, j) => r.std)); // replicate std for each param
 
-// Add a main title above the charts
-const mainTitle = document.createElement("h2");
-mainTitle.textContent = "Parameters Sensitivity Analysis";  // Main title for all charts
-mainTitle.className = "main-chart-title";  // Add a class for styling
-tornadoContainer.appendChild(mainTitle);  // Append the title before all charts
-
-elasticities.forEach((gpuElasticity, i) => {
-  const gpuName = window.results[i].name;
-
-  // Sort by absolute value of elasticity
-  const sorted = gpuElasticity
-    .map((val, idx) => ({ val, idx }))
-    .sort((a, b) => Math.abs(b.val) - Math.abs(a.val));
-
-  const topN = 3;
-  const sortedVals = sorted.map(x => x.val);
-  const sortedLabels = sorted.map(x => elasticityLabels[x.idx]);
-
-// === UPDATE colors + error bars + layout ===
-const maxAbs = Math.max(...sortedVals.map(Math.abs));
-
-const colors = sorted.map(x => {
-  const intensity = 0.5 + 0.5 * (Math.abs(x.val) / maxAbs); // transparency by magnitude
-  return x.val >= 0
-    ? `rgba(102,204,102,${intensity})` // green = cost-reducing
-    : `rgba(255,77,77,${intensity})`;   // red = cost-increasing
-});
-
-  const chartId = `tornado-${gpuName.replace(/\s+/g, '-')}`;
-  const chartDiv = document.createElement("div");
-  chartDiv.id = chartId;
-  chartDiv.className = "tornado-chart";
-  tornadoContainer.appendChild(chartDiv);
-
-const trace = {
-  x: sortedVals,
-  y: sortedLabels,
-  type: "bar",
-  orientation: "h",
-  marker: { color: colors },
-  error_x: {
-    type: 'data',
-    array: sorted.map(x => monteCarloResults[i].std * Math.abs(x.val / maxAbs)), // scale error bars
+const heatmapData = [
+  {
+    z: zElasticity,
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: 'heatmap',
+    colorscale: [
+      [0, 'rgb(0,0,255)'],
+      [0.5, 'rgb(255,255,255)'],
+      [1, 'rgb(255,0,0)']
+    ],
+    zmin: -Math.max(...elasticities.flat().map(Math.abs)),
+    zmax: Math.max(...elasticities.flat().map(Math.abs)),
+    colorbar: { title: 'Elasticity' },
     visible: true
-  }
-};
-
-const layout = {
-  title: gpuName,
-  xaxis: {
-    title: { text: "Normalized elasticity", standoff: 15 },
-    zeroline: true,
-    zerolinewidth: 1,
-    zerolinecolor: "#000"
   },
-  yaxis: { automargin: true },
-  margin: { l: 160, r: 20, t: 40, b: 30 },
-  height: 260,
-  width: 420,
-  showlegend: false
-};
+  {
+    z: zSobol,
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: 'heatmap',
+    colorscale: 'Viridis',
+    colorbar: { title: 'Sobol Total Index' },
+    visible: false
+  },
+  {
+    z: zMonteCarlo,
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: 'heatmap',
+    colorscale: 'Cividis',
+    colorbar: { title: 'Monte Carlo Std' },
+    visible: false
+  }
+];
 
-  Plotly.newPlot(chartId, [trace], layout, { displayModeBar: true });
-
-  // Optional: You can add the GPU name as a subtitle under each chart if desired
-  const titleDiv = document.createElement("div");
-  titleDiv.className = "chart-title";
-  titleDiv.textContent = gpuName;  // Use the GPU name as the title for each chart
-  tornadoContainer.appendChild(titleDiv);
-});
-
-
-
-// ---------- Plotly Heat Map Chart ----------
-const zMatrix = elasticities[0].map((_, j) => elasticities.map(row => row[j]));
-const zAbsMax = Math.max(...elasticities.flat().map(Math.abs));
-
-const heatmapData = [{
-  z: zMatrix,
-  x: window.results.map(r => r.name),
-  y: elasticityLabels,
-  type: 'heatmap',
-  colorscale: [
-    [0, 'rgb(0,0,255)'],     // Blue = negative (cost-reducing)
-    [0.5, 'rgb(255,255,255)'],
-    [1, 'rgb(255,0,0)']      // Red = positive (cost-increasing)
-  ],
-  zmin: -zAbsMax,
-  zmax: zAbsMax,
-  colorbar: { title: 'Elasticity (dimensionless)' }
-}];
-
-Plotly.newPlot('sensitivityHeatmap', heatmapData, {
-  title: 'Cross-GPU Parameter Sensitivity Heatmap',
+const heatmapLayout = {
+  title: 'Parameter Sensitivity Heatmaps',
   xaxis: { title: 'GPU type' },
   yaxis: { title: 'Parameter', automargin: true },
-  margin: { t: 60, l: 160 }
+  margin: { t: 60, l: 160 },
+  height: 600,
+  width: 900,
+  updatemenus: [{
+    type: 'buttons',
+    y: 1.15,
+    x: 0,
+    xanchor: 'left',
+    yanchor: 'top',
+    buttons: [
+      { label: 'Elasticity', method: 'update', args: [{ visible: [true, false, false] }] },
+      { label: 'Sobol', method: 'update', args: [{ visible: [false, true, false] }] },
+      { label: 'Monte Carlo', method: 'update', args: [{ visible: [false, false, true] }] }
+    ]
+  }]
+};
+
+Plotly.newPlot('sensitivityHeatmaps', heatmapData, heatmapLayout);
+
+
+// ---------- Grouped Tornado Charts ----------
+const tornadoContainer = document.getElementById("gpuTornadoPlots");
+tornadoContainer.innerHTML = "";
+
+window.results.forEach((gpu, i) => {
+  const gpuName = gpu.name;
+
+  // Data arrays
+  const elasticityVals = elasticities[i].map(Math.abs);
+  const sobolVals = sobolIndicesOptimized[i];
+  const mcVals = elasticities[i].map((_, j) => monteCarloResults[i].std); // use std or normalized CI
+
+  const traceElasticity = {
+    x: elasticityVals,
+    y: elasticityLabels,
+    name: 'Elasticity',
+    type: 'bar',
+    orientation: 'h'
+  };
+  const traceSobol = {
+    x: sobolVals,
+    y: elasticityLabels,
+    name: 'Sobol Total',
+    type: 'bar',
+    orientation: 'h'
+  };
+  const traceMC = {
+    x: mcVals,
+    y: elasticityLabels,
+    name: 'Monte Carlo Std',
+    type: 'bar',
+    orientation: 'h'
+  };
+
+  const layout = {
+    title: gpuName,
+    barmode: 'group',
+    margin: { l: 200, r: 40, t: 50, b: 30 },
+    height: 500,
+    width: 600,
+    xaxis: { title: 'Sensitivity / Std', automargin: true },
+    yaxis: { automargin: true }
+  };
+
+  const chartDiv = document.createElement("div");
+  chartDiv.id = `tornado-${gpuName.replace(/\s+/g, '-')}`;
+  tornadoContainer.appendChild(chartDiv);
+
+  Plotly.newPlot(chartDiv.id, [traceElasticity, traceSobol, traceMC], layout);
 });
 
-// Add a button to download the Heatmap chart as PNG or SVG with high resolution
-const heatmapDownloadDiv = document.createElement('div');
-heatmapDownloadDiv.classList.add('download-btn-container');
-heatmapDownloadDiv.innerHTML = `<button id="heatmap-download-btn">Download Heatmap (High Resolution)</button>`;
-document.getElementById('sensitivityHeatmap').parentElement.insertBefore(heatmapDownloadDiv, document.getElementById('sensitivityHeatmap'));
-
-// Add event listener for Heatmap chart download
-document.getElementById('heatmap-download-btn').addEventListener('click', () => {
-  Plotly.toImage('sensitivityHeatmap', {
-    format: 'png',   // You can change to 'svg' for vector output
-    height: 800,
-    width: 1200,
-    scale: 2
-  }).then(function (url) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'sensitivity_heatmap_high_res.png';
-    link.click();
-  });
-});
-
-
-const chartTitleDiv = document.createElement('div');
-chartTitleDiv.classList.add('chart-title');
-chartTitleDiv.innerHTML = 'Heatmap: Sensitivity of Parameters across GPUs';
-document.getElementById('sensitivityHeatmap').parentElement.insertBefore(chartTitleDiv, document.getElementById('sensitivityHeatmap'));
-
-
-renderElasticityTableWithColors();
 
 // ---------- Print sensitivities in HTML table ----------
 function getHeatmapColor(value, maxAbs) {
