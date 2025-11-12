@@ -1580,7 +1580,6 @@ const elasticities = window.results.map((r, i) => {
 }).filter(val => val !== null);
 
 // ---------- Sobol Variance-Based Sensitivity ----------
-// ---------- Sobol Variance-Based Sensitivity ----------
 function computeSobolIndices(N = 500) {
   const numParams = elasticityLabels.length;
   const numGPUs = window.results.length;
@@ -1616,20 +1615,20 @@ function computeSobolIndices(N = 500) {
       C_uefficiency
     ];
 
+    // Compute constants per GPU for this result
+    const n_gpu = r.n_gpu;
+    const n_nodes = n_gpu / gpu.per_node;
+    const W_gpu = gpu.power[workload][benchmarkId];
+
+    const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
+    const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+
     // Generate N random perturbations
     const Y_samples = Array(N).fill(0).map(() => {
       const perturbed = baseValuesPerGPU.map(val => {
         const delta = val * 0.05 * (Math.random() - 0.5); // ±2.5%
         return val + delta;
       });
-
-      // Recompute total cost for this perturbation using your model
-      const n_gpu = r.n_gpu;
-      const n_nodes = n_gpu / gpu.per_node;
-      const W_gpu = gpu.power[workload][benchmarkId];
-
-      const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
-      const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
 
       const total_cost = 
         n_gpu * perturbed[0] +      // GPU
@@ -1642,7 +1641,7 @@ function computeSobolIndices(N = 500) {
         perturbed[7] +              // PUE (placeholder)
         n_nodes * perturbed[8] +    // Maintenance
         perturbed[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu) / 1000) + // System usage
-        perturbed[10] +             // System Lifetime (simplified)
+        perturbed[10] +             // System Lifetime
         perturbed[11] +             // Node Baseline Power
         perturbed[12] +             // Depreciation
         perturbed[13] +             // Subscription
@@ -1656,14 +1655,11 @@ function computeSobolIndices(N = 500) {
 
     // Variance contribution per parameter (first-order Sobol indices)
     for (let j = 0; j < numParams; j++) {
-      // Simple estimate: contribution proportional to perturbation effect
-      const Yj_samples = Y_samples.map((_, k) => {
-        // Perturb only j-th parameter
+      const Yj_samples = Array(N).fill(0).map(() => {
         const perturbed = [...baseValuesPerGPU];
         const delta = perturbed[j] * 0.05 * (Math.random() - 0.5);
         perturbed[j] += delta;
 
-        // Recompute total cost
         return n_gpu * perturbed[0] +
                n_nodes * perturbed[1] +
                n_nodes * perturbed[2] +
