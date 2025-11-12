@@ -1691,7 +1691,9 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
 
 // Usage:
 const sobolIndicesOptimized = computeTotalOrderSobolOptimized(5000);
-console.log("Optimized total-order Sobol indices:", sobolIndicesOptimized);
+console.log("Raw Sobol results (before cleaning):", sobolIndicesOptimized);
+console.log("First GPU Sobol indices:", sobolIndicesOptimized?.[0]);
+
 
 // ---------- Monte Carlo Uncertainty Propagation ----------
 function monteCarloUncertainty(numSamples = 1000) {
