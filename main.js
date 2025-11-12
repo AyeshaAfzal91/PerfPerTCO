@@ -1784,57 +1784,60 @@ const monteCarloResults = monteCarloUncertainty(2000);
 console.log("Monte Carlo uncertainty results:", monteCarloResults);
 
 // ---------- Combined Heatmaps ----------
+// ---------- Combined Heatmaps (Final Safe Version) ----------
 const heatmapContainer = document.getElementById("sensitivityHeatmaps");
 if (!heatmapContainer) {
   console.error("Element #sensitivityHeatmaps not found.");
 } else {
   heatmapContainer.innerHTML = "";
 
-  // --- Sanitize Sobol indices to avoid NaN or Infinity ---
-  for (let g = 0; g < sobolIndicesOptimized.length; g++) {
-    if (!sobolIndicesOptimized[g]) {
-      sobolIndicesOptimized[g] = new Array(15).fill(0);
-      continue;
-    }
-    for (let j = 0; j < sobolIndicesOptimized[g].length; j++) {
-      const val = sobolIndicesOptimized[g][j];
-      sobolIndicesOptimized[g][j] =
-        Number.isFinite(val) && !isNaN(val) ? val : 0;
-    }
-  }
+  const numParams = elasticityLabels.length;
+  const numGPUs = window.results.length;
 
-  // --- Prepare z-matrices ---
+  // --- Sanitize Sobol results into a consistent 2D array ---
+  const cleanSobol = Array.from({ length: numGPUs }, (_, g) => {
+    const row = sobolIndicesOptimized[g];
+    if (!row || !Array.isArray(row)) return new Array(numParams).fill(0);
+    return Array.from({ length: numParams }, (_, j) => {
+      const val = row[j];
+      return Number.isFinite(val) && !isNaN(val) ? val : 0;
+    });
+  });
+
+  // --- Build transposed matrices for Plotly (param rows × GPU columns) ---
   const zElasticity = elasticities[0].map((_, j) =>
     elasticities.map((row) => row[j])
   );
-  let zSobol = sobolIndicesOptimized[0].map((_, j) =>
-    sobolIndicesOptimized.map((row) => row[j])
+
+  const zSobol = cleanSobol[0].map((_, j) =>
+    cleanSobol.map((row) => row[j])
   );
 
-  // Sanitize and normalize Sobol values
-  zSobol = zSobol.map((row) =>
-    row.map((v) => (Number.isFinite(v) && !isNaN(v) ? v : 0))
-  );
-  const maxSobol = Math.max(...zSobol.flat());
-  if (maxSobol > 0) {
-    zSobol = zSobol.map((row) => row.map((v) => v / maxSobol));
-  }
+  // --- Normalize Sobol indices (0–1 scale) ---
+  const maxSobol = Math.max(...zSobol.flat(), 0);
+  const zSobolNorm =
+    maxSobol > 0
+      ? zSobol.map((row) => row.map((v) => v / maxSobol))
+      : zSobol.map((row) => row.map(() => 0));
 
-  // Monte Carlo std matrix (replicate per parameter for visualization)
+  // --- Monte Carlo std replicated per parameter ---
   const zMonteCarlo = monteCarloResults.map((r) =>
-    elasticityLabels.map(() => r.std)
+    Array(numParams).fill(r.std)
+  );
+  const zMonteCarloT = zMonteCarlo[0].map((_, j) =>
+    zMonteCarlo.map((row) => row[j])
   );
 
-  // --- Determine color scale ranges safely ---
+  // --- Color scale ranges ---
   const zElasticityAbs = Math.max(...elasticities.flat().map(Math.abs));
-  const zSobolMax = Math.max(...zSobol.flat());
-  const zMonteCarloMax = Math.max(...zMonteCarlo.flat());
+  const zSobolMax = Math.max(...zSobolNorm.flat(), 1);
+  const zMonteCarloMax = Math.max(...zMonteCarloT.flat(), 1);
 
-  // --- Diagnostic logs ---
-  console.log("Sobol indices (sanitized):", sobolIndicesOptimized);
-  console.log("zSobol (sample):", zSobol.slice(0, 3).map((r) => r.slice(0, 3)));
+  // --- Debug diagnostics ---
+  console.log("Sanitized Sobol matrix:", cleanSobol);
+  console.log("zSobolNorm sample:", zSobolNorm.slice(0, 3).map((r) => r.slice(0, 3)));
 
-  // --- Build heatmaps ---
+  // --- Heatmap definitions ---
   const heatmapData = [
     {
       z: zElasticity,
@@ -1852,24 +1855,24 @@ if (!heatmapContainer) {
       visible: true,
     },
     {
-      z: zSobol,
+      z: zSobolNorm,
       x: window.results.map((r) => r.name),
       y: elasticityLabels,
       type: "heatmap",
       colorscale: "Viridis",
       zmin: 0,
-      zmax: zSobolMax || 1,
-      colorbar: { title: "Sobol Total Index" },
+      zmax: zSobolMax,
+      colorbar: { title: "Sobol Total Index (normalized)" },
       visible: false,
     },
     {
-      z: zMonteCarlo,
+      z: zMonteCarloT,
       x: window.results.map((r) => r.name),
       y: elasticityLabels,
       type: "heatmap",
       colorscale: "Cividis",
       zmin: 0,
-      zmax: zMonteCarloMax || 1,
+      zmax: zMonteCarloMax,
       colorbar: { title: "Monte Carlo Std" },
       visible: false,
     },
@@ -1912,7 +1915,6 @@ if (!heatmapContainer) {
 
   Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 }
-
 
 
 // ---------- Grouped Tornado Charts ----------
