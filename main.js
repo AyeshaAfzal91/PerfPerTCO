@@ -1576,68 +1576,65 @@ function evaluateCost(params, gpuIndex) {
 }
 
 // ---------- Sobol Total-Order Sensitivity (robust) ----------
-function computeTotalOrderSobolRobust(numSamples = 5000, perturbation = 0.05) {
+function computeTotalOrderSobolNormalized(numSamples = 2000) {
   const numGPUs = window.results.length;
   const numParams = 15;
-  const sobolResults = [];
+  const sobolResults = new Array(numGPUs);
 
-  function generateBasePerturbation(N, k, scale = 0.05) {
+  function generatePerturbations(N, k) {
     const p = new Float64Array(N * k);
-    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 2 * scale; // ±scale
+    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.2; // ±10%
     return p;
   }
 
   for (let g = 0; g < numGPUs; g++) {
     const gpu = GPU_data[window.results[g].originalGPUIndex];
-    const base = new Float64Array([
+    const base = [
       gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
       C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
       lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
-    ]);
+    ];
 
-    // Generate two matrices A and B
-    const perturbA = generateBasePerturbation(numSamples, numParams, perturbation);
-    const perturbB = generateBasePerturbation(numSamples, numParams, perturbation);
+    // Normalize to ~1
+    const normBase = base.map(v => v === 0 ? 1 : v);
+
+    const perturbA = generatePerturbations(numSamples, numParams);
+    const perturbB = generatePerturbations(numSamples, numParams);
     const A = [], B = [];
+
     for (let i = 0; i < numSamples; i++) {
       const rowA = new Float64Array(numParams);
       const rowB = new Float64Array(numParams);
       for (let j = 0; j < numParams; j++) {
-        rowA[j] = base[j] * (1 + perturbA[i * numParams + j]);
-        rowB[j] = base[j] * (1 + perturbB[i * numParams + j]);
+        rowA[j] = normBase[j] * (1 + perturbA[i * numParams + j]);
+        rowB[j] = normBase[j] * (1 + perturbB[i * numParams + j]);
       }
       A.push(rowA);
       B.push(rowB);
     }
 
-    // Evaluate Y
     const Y_A = A.map(a => evaluateCost(a, g));
-    const Y_B = B.map(b => evaluateCost(b, g));
-
-    // Total variance using all samples
-    const meanY = (Y_A.reduce((s, v) => s + v, 0) + Y_B.reduce((s, v) => s + v, 0)) / (2 * numSamples);
-    const varY = (Y_A.concat(Y_B).reduce((s, v) => s + (v - meanY) ** 2, 0)) / (2 * numSamples - 1);
-
-    // Compute total-order indices
+    const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples;
+    const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1);
     const S_T = new Float64Array(numParams);
+
     for (let j = 0; j < numParams; j++) {
       let sumSqDiff = 0;
       for (let i = 0; i < numSamples; i++) {
         const hybrid = new Float64Array(A[i]);
-        hybrid[j] = B[i][j];  // replace j-th parameter
-        const Y_hybrid = evaluateCost(hybrid, g);
-        sumSqDiff += (Y_hybrid - Y_A[i]) ** 2;
+        hybrid[j] = B[i][j];
+        sumSqDiff += (Y_A[i] - evaluateCost(hybrid, g)) ** 2;
       }
-      S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples));
+      S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); // % of total variance
     }
 
-    sobolResults.push(Array.from(S_T));
+    sobolResults[g] = S_T;
   }
 
   return sobolResults;
 }
 
-const sobolIndicesRobust = computeTotalOrderSobolRobust(5000, 0.1); // larger perturbation if needed
+const sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
 
 
 // ---------- Monte Carlo (% std / base cost) ----------
@@ -1677,27 +1674,34 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
 
 const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 
-// ---------- Combined Heatmaps (all in %) ----------
+// ---------- Helper Functions ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
 const makePlainArray = arr => arr.map(row => Array.from(row));
 
-const normalizePerRow = row => {
-  const maxVal = Math.max(...row.map(Math.abs), 1e-6); // avoid division by zero
-  return row.map(v => (v / maxVal) * 100);
-};
-
+// ---------- Prepare Heatmap Data ----------
+// Elasticity: keep as before
 const zElasticity = makePlainArray(transpose(elasticities));
 
-const zSobol = makePlainArray(transpose(
-  sobolIndicesOptimized.map(row => normalizePerRow(row))
-));
+// Sobol: use raw values, no per-row normalization
+const zSobol = makePlainArray(transpose(sobolIndicesOptimized));
+
+// Monte Carlo: optional normalization per GPU, if you like
+const normalizePerRow = row => {
+  const maxVal = Math.max(...row.map(Math.abs));
+  if (maxVal < 1e-6) return row.map(() => 0);
+  return row.map(v => (v / maxVal) * 100);
+};
 const zMonteCarlo = makePlainArray(transpose(
-  monteCarloParamResults.map(row => normalizePerRow(row))
+  monteCarloParamResults.map(normalizePerRow)
 ));
 
+// Compute global max for scaling
 const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
 const zMaxElasticity = Math.max(...flatten2D(zElasticity).map(Math.abs), 1);
+const zMaxSobol = Math.max(...flatten2D(zSobol).map(Math.abs), 1);
+const zMaxMonteCarlo = 100; // already normalized per GPU
 
+// ---------- Heatmap Traces ----------
 const heatmapData = [
   {
     z: zElasticity,
@@ -1713,27 +1717,28 @@ const heatmapData = [
   {
     z: zSobol,
     x: window.results.map(r => r.name),
-    y: elasticityLabels,       // always full list of parameters
+    y: elasticityLabels,
     type: "heatmap",
     colorscale: "Viridis",
     zmin: 0,
-    zmax: 100,                 // normalized per GPU
+    zmax: zMaxSobol,
     colorbar: { title: "Sobol (%)" },
     visible: false
   },
   {
     z: zMonteCarlo,
     x: window.results.map(r => r.name),
-    y: elasticityLabels,       // always full list of parameters
+    y: elasticityLabels,
     type: "heatmap",
     colorscale: "Cividis",
     zmin: 0,
-    zmax: 100,                 // normalized per GPU
+    zmax: zMaxMonteCarlo,
     colorbar: { title: "Monte Carlo (%)" },
     visible: false
   }
 ];
 
+// ---------- Heatmap Layout ----------
 const heatmapLayout = {
   title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
   xaxis: { title: "GPU type" },
@@ -1768,6 +1773,7 @@ const heatmapLayout = {
 };
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 
 // ---------- Tornado Charts (also in %) ----------
