@@ -1674,20 +1674,22 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
 const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 
 // ---------- Combined Heatmaps (all in %) ----------
+// ---------- Helper Functions ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
 const makePlainArray = arr => arr.map(row => Array.from(row));
 
-const zElasticity = makePlainArray(transpose(elasticities));
-const zSobol = makePlainArray(transpose(sobolIndicesOptimized));
-const zMonteCarlo = makePlainArray(transpose(monteCarloParamResults));
+const normalizePerRow = row => {
+  const maxVal = Math.max(...row.map(Math.abs), 1e-6); // avoid division by zero
+  return row.map(v => (v / maxVal) * 100);
+};
 
+const zElasticity = makePlainArray(transpose(elasticities));
+const zSobol = makePlainArray(transpose(sobolIndicesOptimized.map(normalizePerRow)));
+const zMonteCarlo = makePlainArray(transpose(monteCarloParamResults.map(normalizePerRow)));
+
+// Use global max only for symmetric color scaling for elasticity
 const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
-const zMax = Math.max(
-  ...flatten2D(zElasticity).map(Math.abs),
-  ...flatten2D(zSobol),
-  ...flatten2D(zMonteCarlo),
-  1
-);
+const zMaxElasticity = Math.max(...flatten2D(zElasticity).map(Math.abs), 1);
 
 const heatmapData = [
   {
@@ -1696,8 +1698,8 @@ const heatmapData = [
     y: elasticityLabels,
     type: "heatmap",
     colorscale: [[0, "rgb(0,0,255)"], [0.5, "rgb(255,255,255)"], [1, "rgb(255,0,0)"]],
-    zmin: -zMax,
-    zmax: zMax,
+    zmin: -zMaxElasticity,
+    zmax: zMaxElasticity,
     colorbar: { title: "Elasticity (%)" },
     visible: true
   },
@@ -1708,8 +1710,8 @@ const heatmapData = [
     type: "heatmap",
     colorscale: "Viridis",
     zmin: 0,
-    zmax: zMax,
-    colorbar: { title: "Sobol Total Index (%)" },
+    zmax: 100, // normalized per row
+    colorbar: { title: "Sobol (%)" },
     visible: false
   },
   {
@@ -1719,8 +1721,8 @@ const heatmapData = [
     type: "heatmap",
     colorscale: "Cividis",
     zmin: 0,
-    zmax: zMax,
-    colorbar: { title: "Monte Carlo Std (%)" },
+    zmax: 100, // normalized per row
+    colorbar: { title: "Monte Carlo (%)" },
     visible: false
   }
 ];
@@ -1759,6 +1761,7 @@ const heatmapLayout = {
 };
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 
 // ---------- Tornado Charts (also in %) ----------
