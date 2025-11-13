@@ -1676,8 +1676,8 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
         samples[k] = evaluateCost(params, i);
       }
       const mean = samples.reduce((s, v) => s + v, 0) / numSamples;
-      const var = samples.reduce((s, v) => s + (v - mean) ** 2, 0) / (numSamples - 1);
-      stds[j] = 100 * (Math.sqrt(var) / baseCost); // % uncertainty contribution
+      const variance = samples.reduce((s, v) => s + (v - mean) ** 2, 0) / (numSamples - 1);
+      stds[j] = 100 * (Math.sqrt(variance) / baseCost); // % uncertainty contribution
     }
     results.push(Array.from(stds));
   }
