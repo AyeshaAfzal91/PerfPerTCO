@@ -1575,66 +1575,70 @@ function evaluateCost(params, gpuIndex) {
     params[10] + params[11] + params[12] + params[13] + params[14];
 }
 
-// ---------- Sobol Variance-Based Sensitivity (% of total variance) ----------
-function computeTotalOrderSobolNormalized(numSamples = 2000) {
+// ---------- Sobol Total-Order Sensitivity (robust) ----------
+function computeTotalOrderSobolRobust(numSamples = 5000, perturbation = 0.05) {
   const numGPUs = window.results.length;
   const numParams = 15;
-  const sobolResults = new Array(numGPUs);
+  const sobolResults = [];
 
-  function generatePerturbations(N, k) {
+  function generateBasePerturbation(N, k, scale = 0.05) {
     const p = new Float64Array(N * k);
-    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.2; // ±10%
+    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 2 * scale; // ±scale
     return p;
   }
 
   for (let g = 0; g < numGPUs; g++) {
     const gpu = GPU_data[window.results[g].originalGPUIndex];
-    const base = [
+    const base = new Float64Array([
       gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
       C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
       lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
-    ];
+    ]);
 
-    // Normalize to ~1
-    const normBase = base.map(v => v === 0 ? 1 : v);
-
-    const perturbA = generatePerturbations(numSamples, numParams);
-    const perturbB = generatePerturbations(numSamples, numParams);
+    // Generate two matrices A and B
+    const perturbA = generateBasePerturbation(numSamples, numParams, perturbation);
+    const perturbB = generateBasePerturbation(numSamples, numParams, perturbation);
     const A = [], B = [];
-
     for (let i = 0; i < numSamples; i++) {
       const rowA = new Float64Array(numParams);
       const rowB = new Float64Array(numParams);
       for (let j = 0; j < numParams; j++) {
-        rowA[j] = normBase[j] * (1 + perturbA[i * numParams + j]);
-        rowB[j] = normBase[j] * (1 + perturbB[i * numParams + j]);
+        rowA[j] = base[j] * (1 + perturbA[i * numParams + j]);
+        rowB[j] = base[j] * (1 + perturbB[i * numParams + j]);
       }
       A.push(rowA);
       B.push(rowB);
     }
 
+    // Evaluate Y
     const Y_A = A.map(a => evaluateCost(a, g));
-    const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples;
-    const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1);
-    const S_T = new Float64Array(numParams);
+    const Y_B = B.map(b => evaluateCost(b, g));
 
+    // Total variance using all samples
+    const meanY = (Y_A.reduce((s, v) => s + v, 0) + Y_B.reduce((s, v) => s + v, 0)) / (2 * numSamples);
+    const varY = (Y_A.concat(Y_B).reduce((s, v) => s + (v - meanY) ** 2, 0)) / (2 * numSamples - 1);
+
+    // Compute total-order indices
+    const S_T = new Float64Array(numParams);
     for (let j = 0; j < numParams; j++) {
       let sumSqDiff = 0;
       for (let i = 0; i < numSamples; i++) {
         const hybrid = new Float64Array(A[i]);
-        hybrid[j] = B[i][j];
-        sumSqDiff += (Y_A[i] - evaluateCost(hybrid, g)) ** 2;
+        hybrid[j] = B[i][j];  // replace j-th parameter
+        const Y_hybrid = evaluateCost(hybrid, g);
+        sumSqDiff += (Y_hybrid - Y_A[i]) ** 2;
       }
-      S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); // % of total variance
+      S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples));
     }
 
-    sobolResults[g] = S_T;
+    sobolResults.push(Array.from(S_T));
   }
 
   return sobolResults;
 }
 
-const sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
+const sobolIndicesRobust = computeTotalOrderSobolRobust(5000, 0.1); // larger perturbation if needed
+
 
 // ---------- Monte Carlo (% std / base cost) ----------
 function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) {
