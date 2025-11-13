@@ -1883,20 +1883,22 @@ if (!heatmapContainer) {
     margin: { t: 60, l: 160 },
     height: 600,
     width: 900,
-    updatemenus: [
-      {
-        type: "buttons",
-        y: 1.15,
-        x: 0,
-        xanchor: "left",
-        yanchor: "top",
-        buttons: [
-          { label: "Elasticity", method: "update", args: [{ visible: [true, false, false] }] },
-          { label: "Sobol", method: "update", args: [{ visible: [false, true, false] }] },
-          { label: "Monte Carlo", method: "update", args: [{ visible: [false, false, true] }] }
-        ]
-      }
+updatemenus: [
+  {
+    type: "dropdown",
+    direction: "down",
+    showactive: true,
+    x: 1.05,
+    xanchor: "left",
+    y: 0.8,
+    yanchor: "middle",
+    buttons: [
+      { label: "Elasticity", method: "update", args: [{ visible: [true, false, false] }] },
+      { label: "Sobol", method: "update", args: [{ visible: [false, true, false] }] },
+      { label: "Monte Carlo", method: "update", args: [{ visible: [false, false, true] }] }
     ]
+  }
+]
   };
 
   Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
