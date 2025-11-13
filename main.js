@@ -1766,7 +1766,6 @@ const heatmapLayout = {
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
 
-
 // ---------- Tornado Charts (also in %) ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
 tornadoContainer.innerHTML = "";
