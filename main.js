@@ -1508,8 +1508,6 @@ if (!document.getElementById('download-pie-btn')) {
   });
 }
 
-
-
 // ---------- Parameter Sensitivities Analysis ----------
 const elasticityLabels = [
   'GPU (€)', 'Node Server (€)', 'Node Infrastructure (€)', 'Node Facility (€)', 'Software (€)',
@@ -1696,7 +1694,6 @@ console.log("First GPU Sobol indices:", sobolIndicesOptimized?.[0]);
 
 
 // ---------- Monte Carlo Uncertainty Propagation ----------
-// ---------- Monte Carlo Uncertainty Propagation (per-parameter variability) ----------
 function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
   const numGPUs = window.results.length;
   const numParams = 15; // match your parameter vector length
@@ -1788,11 +1785,6 @@ const zMonteCarloT = monteCarloParamResults[0].map((_, j) =>
   monteCarloParamResults.map(row => row[j])
 );
 const zMonteCarloMax = Math.max(...zMonteCarloT.flat(), 1);
-
-// --- Replace previous zMonteCarloT in your heatmap data ---
-heatmapData[2].z = zMonteCarloT;
-heatmapData[2].zmax = zMonteCarloMax;
-
 
 // ---------- Combined Heatmaps ----------
 const heatmapContainer = document.getElementById("sensitivityHeatmaps");
