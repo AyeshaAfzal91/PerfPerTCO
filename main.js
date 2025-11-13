@@ -1674,7 +1674,6 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
 const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 
 // ---------- Combined Heatmaps (all in %) ----------
-// ---------- Helper Functions ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
 const makePlainArray = arr => arr.map(row => Array.from(row));
 
@@ -1684,10 +1683,14 @@ const normalizePerRow = row => {
 };
 
 const zElasticity = makePlainArray(transpose(elasticities));
-const zSobol = makePlainArray(transpose(sobolIndicesOptimized.map(normalizePerRow)));
-const zMonteCarlo = makePlainArray(transpose(monteCarloParamResults.map(normalizePerRow)));
 
-// Use global max only for symmetric color scaling for elasticity
+const zSobol = makePlainArray(transpose(
+  sobolIndicesOptimized.map(row => normalizePerRow(row))
+));
+const zMonteCarlo = makePlainArray(transpose(
+  monteCarloParamResults.map(row => normalizePerRow(row))
+));
+
 const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
 const zMaxElasticity = Math.max(...flatten2D(zElasticity).map(Math.abs), 1);
 
@@ -1706,22 +1709,22 @@ const heatmapData = [
   {
     z: zSobol,
     x: window.results.map(r => r.name),
-    y: elasticityLabels,
+    y: elasticityLabels,       // always full list of parameters
     type: "heatmap",
     colorscale: "Viridis",
     zmin: 0,
-    zmax: 100, // normalized per row
+    zmax: 100,                 // normalized per GPU
     colorbar: { title: "Sobol (%)" },
     visible: false
   },
   {
     z: zMonteCarlo,
     x: window.results.map(r => r.name),
-    y: elasticityLabels,
+    y: elasticityLabels,       // always full list of parameters
     type: "heatmap",
     colorscale: "Cividis",
     zmin: 0,
-    zmax: 100, // normalized per row
+    zmax: 100,                 // normalized per GPU
     colorbar: { title: "Monte Carlo (%)" },
     visible: false
   }
