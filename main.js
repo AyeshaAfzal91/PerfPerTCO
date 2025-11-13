@@ -1687,29 +1687,33 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
 const monteCarloParamResults = monteCarloUncertaintyPerParam(2000);
 
 // ---------- Combined Heatmaps (all in %) ----------
-// Ensure all rows are plain arrays
+
+// Utility: transpose a 2D array
+const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
+
+// Ensure plain arrays (convert Float64Array etc. to regular arrays)
 const makePlainArray = arr => arr.map(row => Array.from(row));
 
-// Convert to plain arrays
-const zElasticityPlain = makePlainArray(elasticities[0].map((_, j) => elasticities.map(r => r[j])));
-const zSobolPlain = makePlainArray(sobolIndicesOptimized[0].map((_, j) => sobolIndicesOptimized.map(r => r[j])));
-const zMonteCarloPlain = makePlainArray(monteCarloParamResults[0].map((_, j) => monteCarloParamResults.map(r => r[j])));
+// Transpose and convert to plain arrays for heatmaps
+const zElasticity = makePlainArray(transpose(elasticities));
+const zSobol = makePlainArray(transpose(sobolIndicesOptimized));
+const zMonteCarlo = makePlainArray(transpose(monteCarloParamResults));
 
-// Flatten manually to compute max
-const flatten2D = arr => arr.reduce((acc, row) => acc.concat(Array.from(row)), []);
+// Flatten manually to compute max for color scale
+const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
 
-// Compute max for color scale
+// Compute zMax for color scale
 const zMax = Math.max(
-  ...flatten2D(zElasticityPlain).map(Math.abs),
-  ...flatten2D(zSobolPlain),
-  ...flatten2D(zMonteCarloPlain),
+  ...flatten2D(zElasticity).map(Math.abs),
+  ...flatten2D(zSobol),
+  ...flatten2D(zMonteCarlo),
   1
 );
 
 // Heatmap data
 const heatmapData = [
   {
-    z: zElasticityPlain,
+    z: zElasticity,
     x: window.results.map(r => r.name),
     y: elasticityLabels,
     type: "heatmap",
@@ -1720,7 +1724,7 @@ const heatmapData = [
     visible: true
   },
   {
-    z: zSobolPlain,
+    z: zSobol,
     x: window.results.map(r => r.name),
     y: elasticityLabels,
     type: "heatmap",
@@ -1731,7 +1735,7 @@ const heatmapData = [
     visible: false
   },
   {
-    z: zMonteCarloPlain,
+    z: zMonteCarlo,
     x: window.results.map(r => r.name),
     y: elasticityLabels,
     type: "heatmap",
@@ -1777,6 +1781,7 @@ const heatmapLayout = {
   }]
 };
 
+// Plot
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
 // ---------- Tornado Charts (also in %) ----------
