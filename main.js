@@ -1681,28 +1681,34 @@ const makePlainArray = arr => arr.map(row => Array.from(row));
 // Function to normalize values across a dimension (e.g., across all GPUs for one parameter)
 const normalizeAcrossDimension = arr => {
     // 1. Transpose to group by parameter (rows are parameters, columns are GPUs)
+    // The input 'arr' here is expected to be an array of arrays (e.g., [[p1_g1, p2_g1...], [p1_g2, p2_g2...]])
     const transposed = transpose(arr);
     
     // 2. Normalize each parameter row based on its max value across all GPUs
     const normalizedTransposed = transposed.map(row => {
-        const maxVal = Math.max(...row.map(Math.abs));
-        if (maxVal < 1e-6) return row.map(() => 0); // Avoid division by zero/tiny numbers
-        return row.map(v => (v / maxVal) * 100);
+        // Ensure 'row' is a standard array for .map() and Math.max() to work correctly
+        const plainRow = Array.from(row);
+        
+        const maxVal = Math.max(...plainRow.map(Math.abs));
+        if (maxVal < 1e-6) return plainRow.map(() => 0); // Avoid division by zero/tiny numbers
+        return plainRow.map(v => (v / maxVal) * 100);
     });
     
     // 3. The result is already correctly shaped for Plotly (Parameters x GPUs)
     return normalizedTransposed;
 };
 
+// ---------- Prepare Heatmap Data ----------
 // Elasticity: keep as before (Transposed: Parameters x GPUs)
 const zElasticity = makePlainArray(transpose(elasticities));
 
-// Sobol: Normalize across all GPUs for each parameter to make differences visible
-// The z matrix is now normalized (0 to 100) per parameter row.
-const zSobol = makePlainArray(normalizeAcrossDimension(sobolIndicesOptimized));
+// Sobol: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
+// Normalize across all GPUs for each parameter to make differences visible
+const zSobol = makePlainArray(normalizeAcrossDimension(makePlainArray(sobolIndicesOptimized)));
 
-// Monte Carlo: Normalize across all GPUs for each parameter
-const zMonteCarlo = makePlainArray(normalizeAcrossDimension(monteCarloParamResults));
+// Monte Carlo: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
+// Normalize across all GPUs for each parameter
+const zMonteCarlo = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloParamResults)));
 
 
 // Compute global max for scaling
@@ -1712,6 +1718,7 @@ const zMaxElasticity = Math.max(...flatten2D(zElasticity).map(Math.abs), 1);
 const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
+// ---------- Heatmap Traces ----------
 const heatmapData = [
     {
         z: zElasticity,
@@ -1752,6 +1759,7 @@ const heatmapData = [
     }
 ];
 
+// ---------- Heatmap Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
     xaxis: { title: "GPU type" },
