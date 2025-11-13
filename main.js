@@ -1678,103 +1678,121 @@ const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
 const makePlainArray = arr => arr.map(row => Array.from(row));
 
-// ---------- Prepare Heatmap Data ----------
-// Elasticity: keep as before
+// Function to normalize values across a dimension (e.g., across all GPUs for one parameter)
+const normalizeAcrossDimension = arr => {
+    // 1. Transpose to group by parameter (rows are parameters, columns are GPUs)
+    const transposed = transpose(arr);
+    
+    // 2. Normalize each parameter row based on its max value across all GPUs
+    const normalizedTransposed = transposed.map(row => {
+        const maxVal = Math.max(...row.map(Math.abs));
+        if (maxVal < 1e-6) return row.map(() => 0); // Avoid division by zero/tiny numbers
+        return row.map(v => (v / maxVal) * 100);
+    });
+    
+    // 3. The result is already correctly shaped for Plotly (Parameters x GPUs)
+    return normalizedTransposed;
+};
+
+// Elasticity: keep as before (Transposed: Parameters x GPUs)
 const zElasticity = makePlainArray(transpose(elasticities));
 
-// Sobol: use raw values, no per-row normalization
-const zSobol = makePlainArray(transpose(sobolIndicesOptimized));
+// Sobol: Normalize across all GPUs for each parameter to make differences visible
+// The z matrix is now normalized (0 to 100) per parameter row.
+const zSobol = makePlainArray(normalizeAcrossDimension(sobolIndicesOptimized));
 
-// Monte Carlo: optional normalization per GPU, if you like
-const normalizePerRow = row => {
-  const maxVal = Math.max(...row.map(Math.abs));
-  if (maxVal < 1e-6) return row.map(() => 0);
-  return row.map(v => (v / maxVal) * 100);
-};
-const zMonteCarlo = makePlainArray(transpose(
-  monteCarloParamResults.map(normalizePerRow)
-));
+// Monte Carlo: Normalize across all GPUs for each parameter
+const zMonteCarlo = makePlainArray(normalizeAcrossDimension(monteCarloParamResults));
+
 
 // Compute global max for scaling
 const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
+// For normalized data, max is 100. For elasticity, calculate max.
 const zMaxElasticity = Math.max(...flatten2D(zElasticity).map(Math.abs), 1);
-const zMaxSobol = Math.max(...flatten2D(zSobol).map(Math.abs), 1);
-const zMaxMonteCarlo = 100; // already normalized per GPU
+const zMaxSobol = 100; // Normalized to 100
+const zMaxMonteCarlo = 100; // Normalized to 100
 
-// ---------- Heatmap Traces ----------
 const heatmapData = [
-  {
-    z: zElasticity,
-    x: window.results.map(r => r.name),
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: [[0, "rgb(0,0,255)"], [0.5, "rgb(255,255,255)"], [1, "rgb(255,0,0)"]],
-    zmin: -zMaxElasticity,
-    zmax: zMaxElasticity,
-    colorbar: { title: "Elasticity (%)" },
-    visible: true
-  },
-  {
-    z: zSobol,
-    x: window.results.map(r => r.name),
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: "Viridis",
-    zmin: 0,
-    zmax: zMaxSobol,
-    colorbar: { title: "Sobol (%)" },
-    visible: false
-  },
-  {
-    z: zMonteCarlo,
-    x: window.results.map(r => r.name),
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: "Cividis",
-    zmin: 0,
-    zmax: zMaxMonteCarlo,
-    colorbar: { title: "Monte Carlo (%)" },
-    visible: false
-  }
+    {
+        z: zElasticity,
+        x: window.results.map(r => r.name),
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0, "rgb(0,0,255)"], [0.5, "rgb(255,255,255)"], [1, "rgb(255,0,0)"]],
+        zmin: -zMaxElasticity,
+        zmax: zMaxElasticity,
+        colorbar: { title: "Elasticity (%)" },
+        visible: true,
+        // Add text on hover to see actual values
+        hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Elasticity: %{z:.2f}%<extra></extra>'
+    },
+    {
+        z: zSobol,
+        x: window.results.map(r => r.name),
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: "Viridis",
+        zmin: 0,
+        zmax: zMaxSobol,
+        colorbar: { title: "Sobol (Rel. %)" }, // Added "Rel." to indicate relative normalization
+        visible: false,
+        hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Sobol: %{z:.2f}% (Rel.)<extra></extra>'
+    },
+    {
+        z: zMonteCarlo,
+        x: window.results.map(r => r.name),
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: "Cividis",
+        zmin: 0,
+        zmax: zMaxMonteCarlo,
+        colorbar: { title: "Monte Carlo (Rel. %)" }, // Added "Rel."
+        visible: false,
+        hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>MC: %{z:.2f}% (Rel.)<extra></extra>'
+    }
 ];
 
-// ---------- Heatmap Layout ----------
 const heatmapLayout = {
-  title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
-  xaxis: { title: "GPU type" },
-  yaxis: { title: "Parameter", automargin: true },
-  margin: { t: 60, l: 160, r: 260, b: 60 },
-  height: 600,
-  width: 950,
-  updatemenus: [{
-    type: "dropdown",
-    direction: "down",
-    x: 1.25,
-    y: 0.8,
-    xanchor: "left",
-    yanchor: "middle",
-    buttons: [
-      { label: "Elasticity (%)", method: "update", args: [{ visible: [true, false, false] }] },
-      { label: "Sobol (%)", method: "update", args: [{ visible: [false, true, false] }] },
-      { label: "Monte Carlo (%)", method: "update", args: [{ visible: [false, false, true] }] }
-    ]
-  }],
-  annotations: [{
-    text: "Select Heatmap:",
-    x: 1.25,
-    y: 0.92,
-    xref: "paper",
-    yref: "paper",
-    xanchor: "left",
-    yanchor: "bottom",
-    showarrow: false,
-    font: { size: 14 }
-  }]
+    title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
+    xaxis: { title: "GPU type" },
+    yaxis: {
+        title: "Parameter",
+        automargin: true,
+        // Force display of all 15 labels to fix the "missing parameter" issue
+        tickmode: 'array',
+        tickvals: elasticityLabels,
+        ticktext: elasticityLabels
+    },
+    margin: { t: 60, l: 160, r: 260, b: 60 },
+    height: 600,
+    width: 950,
+    updatemenus: [{
+        type: "dropdown",
+        direction: "down",
+        x: 1.25,
+        y: 0.8,
+        xanchor: "left",
+        yanchor: "middle",
+        buttons: [
+            { label: "Elasticity (%)", method: "update", args: [{ visible: [true, false, false] }] },
+            { label: "Sobol (Rel. %)", method: "update", args: [{ visible: [false, true, false] }] },
+            { label: "Monte Carlo (Rel. %)", method: "update", args: [{ visible: [false, false, true] }] }
+        ]
+    }],
+    annotations: [{
+        text: "Select Heatmap:",
+        x: 1.25,
+        y: 0.92,
+        xref: "paper",
+        yref: "paper",
+        xanchor: "left",
+        yanchor: "bottom",
+        showarrow: false,
+        font: { size: 14 }
+    }]
 };
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
-
-
 
 // ---------- Tornado Charts (also in %) ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
