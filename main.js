@@ -1877,29 +1877,62 @@ if (!heatmapContainer) {
   ];
 
   const heatmapLayout = {
-    title: "Parameter Sensitivity Heatmaps",
-    xaxis: { title: "GPU type" },
-    yaxis: { title: "Parameter", automargin: true },
-    margin: { t: 60, l: 160 },
-    height: 600,
-    width: 900,
-updatemenus: [
-  {
-    type: "dropdown",
-    direction: "down",
-    showactive: true,
-    x: 1.05,
-    xanchor: "left",
-    y: 0.8,
-    yanchor: "middle",
-    buttons: [
-      { label: "Elasticity", method: "update", args: [{ visible: [true, false, false] }] },
-      { label: "Sobol", method: "update", args: [{ visible: [false, true, false] }] },
-      { label: "Monte Carlo", method: "update", args: [{ visible: [false, false, true] }] }
-    ]
-  }
-]
-  };
+  title: "Parameter Sensitivity Heatmaps",
+  xaxis: { title: "GPU type" },
+  yaxis: { title: "Parameter", automargin: true },
+  margin: { t: 60, l: 160, r: 160, b: 60 },
+  height: 600,
+  width: 900,
+
+  // --- Dropdown toggle for the three heatmap types ---
+  updatemenus: [
+    {
+      type: "dropdown",
+      direction: "down",
+      showactive: true,
+      x: 1.05,             // move to the right of the plot
+      xanchor: "left",
+      y: 0.8,              // roughly middle-right
+      yanchor: "middle",
+      pad: { r: 10, t: 10 },
+      bgcolor: "rgba(245,245,245,0.95)",
+      bordercolor: "rgba(150,150,150,0.5)",
+      borderwidth: 1,
+      buttons: [
+        {
+          label: "Elasticity",
+          method: "update",
+          args: [{ visible: [true, false, false] }]
+        },
+        {
+          label: "Sobol Total Index",
+          method: "update",
+          args: [{ visible: [false, true, false] }]
+        },
+        {
+          label: "Monte Carlo Std",
+          method: "update",
+          args: [{ visible: [false, false, true] }]
+        }
+      ]
+    }
+  ],
+
+  annotations: [
+    {
+      text: "Select Heatmap:",
+      x: 1.05,
+      y: 0.92,
+      xref: "paper",
+      yref: "paper",
+      xanchor: "left",
+      yanchor: "bottom",
+      showarrow: false,
+      font: { size: 14, color: "black" }
+    }
+  ]
+};
+
 
   Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 }
