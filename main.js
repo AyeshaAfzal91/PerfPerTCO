@@ -1880,9 +1880,9 @@ if (!heatmapContainer) {
   title: "Parameter Sensitivity Heatmaps",
   xaxis: { title: "GPU type" },
   yaxis: { title: "Parameter", automargin: true },
-  margin: { t: 60, l: 160, r: 160, b: 60 },
+  margin: { t: 60, l: 160, r: 240, b: 60 }, // extra right margin for dropdown
   height: 600,
-  width: 900,
+  width: 950,
 
   // --- Dropdown toggle for the three heatmap types ---
   updatemenus: [
@@ -1890,9 +1890,9 @@ if (!heatmapContainer) {
       type: "dropdown",
       direction: "down",
       showactive: true,
-      x: 1.05,             // move to the right of the plot
+      x: 1.22,             // move further right (was 1.05)
       xanchor: "left",
-      y: 0.8,              // roughly middle-right
+      y: 0.8,              // vertical position (middle-right)
       yanchor: "middle",
       pad: { r: 10, t: 10 },
       bgcolor: "rgba(245,245,245,0.95)",
@@ -1921,7 +1921,7 @@ if (!heatmapContainer) {
   annotations: [
     {
       text: "Select Heatmap:",
-      x: 1.05,
+      x: 1.22,
       y: 0.92,
       xref: "paper",
       yref: "paper",
@@ -1932,6 +1932,7 @@ if (!heatmapContainer) {
     }
   ]
 };
+
 
 
   Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
