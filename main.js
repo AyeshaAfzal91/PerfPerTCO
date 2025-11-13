@@ -1576,24 +1576,27 @@ function evaluateCost(params, gpuIndex) {
 }
 
 // ---------- Sobol Variance-Based Sensitivity (% of total variance) ----------
-function computeTotalOrderSobolOptimized(numSamples = 2000) {
+function computeTotalOrderSobolNormalized(numSamples = 2000) {
   const numGPUs = window.results.length;
   const numParams = 15;
   const sobolResults = new Array(numGPUs);
 
   function generatePerturbations(N, k) {
     const p = new Float64Array(N * k);
-    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.1; // ±5%
+    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.2; // ±10%
     return p;
   }
 
   for (let g = 0; g < numGPUs; g++) {
     const gpu = GPU_data[window.results[g].originalGPUIndex];
-    const base = new Float64Array([
+    const base = [
       gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
       C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
       lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
-    ]);
+    ];
+
+    // Normalize to ~1
+    const normBase = base.map(v => v === 0 ? 1 : v);
 
     const perturbA = generatePerturbations(numSamples, numParams);
     const perturbB = generatePerturbations(numSamples, numParams);
@@ -1603,8 +1606,8 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
       const rowA = new Float64Array(numParams);
       const rowB = new Float64Array(numParams);
       for (let j = 0; j < numParams; j++) {
-        rowA[j] = base[j] * (1 + perturbA[i * numParams + j]);
-        rowB[j] = base[j] * (1 + perturbB[i * numParams + j]);
+        rowA[j] = normBase[j] * (1 + perturbA[i * numParams + j]);
+        rowB[j] = normBase[j] * (1 + perturbB[i * numParams + j]);
       }
       A.push(rowA);
       B.push(rowB);
@@ -1631,10 +1634,10 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
   return sobolResults;
 }
 
-const sobolIndicesOptimized = computeTotalOrderSobolOptimized(2000);
+const sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
 
 // ---------- Monte Carlo (% std / base cost) ----------
-function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
+function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) {
   const results = [];
   const numParams = 15;
 
@@ -1646,13 +1649,14 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
       lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
     ];
 
-    const baseCost = evaluateCost(base, i);
+    const normBase = base.map(v => v === 0 ? 1 : v);
+    const baseCost = evaluateCost(normBase, i);
     const stds = new Float64Array(numParams);
 
     for (let j = 0; j < numParams; j++) {
       const samples = new Float64Array(numSamples);
       for (let k = 0; k < numSamples; k++) {
-        const params = base.slice();
+        const params = [...normBase];
         params[j] *= 1 + (Math.random() - 0.5) * 2 * perturbation;
         samples[k] = evaluateCost(params, i);
       }
@@ -1667,7 +1671,7 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
   return results;
 }
 
-const monteCarloParamResults = monteCarloUncertaintyPerParam(2000);
+const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 
 // ---------- Combined Heatmaps (all in %) ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
@@ -1755,6 +1759,7 @@ const heatmapLayout = {
 };
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 // ---------- Tornado Charts (also in %) ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
