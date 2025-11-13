@@ -2014,6 +2014,8 @@ function renderElasticityTableWithColors() {
   document.getElementById("elasticityTableContainer").innerHTML = tableHTML;
 }
 
+renderElasticityTableWithColors();
+
 document.getElementById("download-elasticity-csv").addEventListener("click", () => {
   const headers = ["GPU", ...elasticityLabels];
   const rows = elasticities.map((row, i) => [
