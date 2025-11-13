@@ -1687,15 +1687,29 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
 const monteCarloParamResults = monteCarloUncertaintyPerParam(2000);
 
 // ---------- Combined Heatmaps (all in %) ----------
-const zElasticity = elasticities[0].map((_, j) => elasticities.map(r => r[j]));
-const zSobol = sobolIndicesOptimized[0].map((_, j) => sobolIndicesOptimized.map(r => r[j]));
-const zMonteCarlo = monteCarloParamResults[0].map((_, j) => monteCarloParamResults.map(r => r[j]));
+// Ensure all rows are plain arrays
+const makePlainArray = arr => arr.map(row => Array.from(row));
 
-const zMax = Math.max(...zElasticity.flat().map(Math.abs), ...zSobol.flat(), ...zMonteCarlo.flat(), 1);
+// Convert to plain arrays
+const zElasticityPlain = makePlainArray(elasticities[0].map((_, j) => elasticities.map(r => r[j])));
+const zSobolPlain = makePlainArray(sobolIndicesOptimized[0].map((_, j) => sobolIndicesOptimized.map(r => r[j])));
+const zMonteCarloPlain = makePlainArray(monteCarloParamResults[0].map((_, j) => monteCarloParamResults.map(r => r[j])));
 
+// Flatten manually to compute max
+const flatten2D = arr => arr.reduce((acc, row) => acc.concat(Array.from(row)), []);
+
+// Compute max for color scale
+const zMax = Math.max(
+  ...flatten2D(zElasticityPlain).map(Math.abs),
+  ...flatten2D(zSobolPlain),
+  ...flatten2D(zMonteCarloPlain),
+  1
+);
+
+// Heatmap data
 const heatmapData = [
   {
-    z: zElasticity,
+    z: zElasticityPlain,
     x: window.results.map(r => r.name),
     y: elasticityLabels,
     type: "heatmap",
@@ -1706,7 +1720,7 @@ const heatmapData = [
     visible: true
   },
   {
-    z: zSobol,
+    z: zSobolPlain,
     x: window.results.map(r => r.name),
     y: elasticityLabels,
     type: "heatmap",
@@ -1717,7 +1731,7 @@ const heatmapData = [
     visible: false
   },
   {
-    z: zMonteCarlo,
+    z: zMonteCarloPlain,
     x: window.results.map(r => r.name),
     y: elasticityLabels,
     type: "heatmap",
@@ -1729,6 +1743,7 @@ const heatmapData = [
   }
 ];
 
+// Heatmap layout
 const heatmapLayout = {
   title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
   xaxis: { title: "GPU type" },
