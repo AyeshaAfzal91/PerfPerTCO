@@ -1692,7 +1692,6 @@ const sobolIndicesOptimized = computeTotalOrderSobolOptimized(5000);
 console.log("Raw Sobol results (before cleaning):", sobolIndicesOptimized);
 console.log("First GPU Sobol indices:", sobolIndicesOptimized?.[0]);
 
-
 // ---------- Monte Carlo Uncertainty Propagation ----------
 function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
   const numGPUs = window.results.length;
@@ -1776,17 +1775,15 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
   return monteCarloResultsPerParam;
 }
 
-// Usage:
 const monteCarloParamResults = monteCarloUncertaintyPerParam(2000);
 
-// --- Prepare heatmap (transpose GPU×param matrix) ---
+// ---------- Combined Heatmaps ----------
 const numParams = elasticityLabels.length;
 const zMonteCarloT = monteCarloParamResults[0].map((_, j) =>
   monteCarloParamResults.map(row => row[j])
 );
 const zMonteCarloMax = Math.max(...zMonteCarloT.flat(), 1);
 
-// ---------- Combined Heatmaps ----------
 const heatmapContainer = document.getElementById("sensitivityHeatmaps");
 if (!heatmapContainer) {
   console.error("Element #sensitivityHeatmaps not found.");
@@ -1822,10 +1819,8 @@ if (!heatmapContainer) {
     zSobolScaled.map(row => row[j])
   );
 
-  // --- Monte Carlo std replicated per parameter ---
-  const zMonteCarlo = monteCarloResults.map(r =>
-    Array(numParams).fill(r.std)
-  );
+  // --- Use Monte Carlo std (per parameter per GPU) ---
+  const zMonteCarlo = monteCarloParamResults;
   const zMonteCarloT = zMonteCarlo[0].map((_, j) =>
     zMonteCarlo.map(row => row[j])
   );
@@ -1896,21 +1891,9 @@ if (!heatmapContainer) {
         xanchor: "left",
         yanchor: "top",
         buttons: [
-          {
-            label: "Elasticity",
-            method: "update",
-            args: [{ visible: [true, false, false] }]
-          },
-          {
-            label: "Sobol",
-            method: "update",
-            args: [{ visible: [false, true, false] }]
-          },
-          {
-            label: "Monte Carlo",
-            method: "update",
-            args: [{ visible: [false, false, true] }]
-          }
+          { label: "Elasticity", method: "update", args: [{ visible: [true, false, false] }] },
+          { label: "Sobol", method: "update", args: [{ visible: [false, true, false] }] },
+          { label: "Monte Carlo", method: "update", args: [{ visible: [false, false, true] }] }
         ]
       }
     ]
@@ -1927,10 +1910,9 @@ tornadoContainer.innerHTML = "";
 window.results.forEach((gpu, i) => {
   const gpuName = gpu.name;
 
-  // Data arrays
   const elasticityVals = elasticities[i].map(Math.abs);
   const sobolVals = sobolIndicesOptimized[i];
-  const mcVals = elasticities[i].map((_, j) => monteCarloResults[i].std); // use std or normalized CI
+  const mcVals = monteCarloParamResults[i]; // ✅ fixed: use per-param Monte Carlo std
 
   const traceElasticity = {
     x: elasticityVals,
