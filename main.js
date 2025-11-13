@@ -1554,6 +1554,27 @@ const elasticities = window.results.map((r, i) => {
   return vals.map((v, idx) => 100 * (v * baseValues[idx]) / r.total_cost);
 }).filter(Boolean);
 
+// ---------- Shared Cost Evaluation Function ----------
+function evaluateCost(params, gpuIndex) {
+  const r = window.results[gpuIndex];
+  const gpu = GPU_data[r.originalGPUIndex];
+  const n_gpu = r.n_gpu;
+  const n_nodes = n_gpu / gpu.per_node;
+  const W_gpu = gpu.power[workload][benchmarkId];
+  const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
+  const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+
+  return n_gpu * params[0] +
+    n_nodes * (params[1] + params[2] + params[3]) +
+    params[4] +
+    params[5] * PUE * (W_node_total + W_gpu_total) +
+    params[6] * (-PUE * (W_node_total + W_gpu_total)) +
+    params[7] +
+    n_nodes * params[8] +
+    params[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu) / 1000) +
+    params[10] + params[11] + params[12] + params[13] + params[14];
+}
+
 // ---------- Sobol Variance-Based Sensitivity (% of total variance) ----------
 function computeTotalOrderSobolOptimized(numSamples = 2000) {
   const numGPUs = window.results.length;
@@ -1564,26 +1585,6 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
     const p = new Float64Array(N * k);
     for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.1; // ±5%
     return p;
-  }
-
-  function evaluateCost(params, gpuIndex) {
-    const r = window.results[gpuIndex];
-    const gpu = GPU_data[r.originalGPUIndex];
-    const n_gpu = r.n_gpu;
-    const n_nodes = n_gpu / gpu.per_node;
-    const W_gpu = gpu.power[workload][benchmarkId];
-    const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
-    const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
-
-    return n_gpu * params[0] +
-      n_nodes * (params[1] + params[2] + params[3]) +
-      params[4] +
-      params[5] * PUE * (W_node_total + W_gpu_total) +
-      params[6] * (-PUE * (W_node_total + W_gpu_total)) +
-      params[7] +
-      n_nodes * params[8] +
-      params[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu) / 1000) +
-      params[10] + params[11] + params[12] + params[13] + params[14];
   }
 
   for (let g = 0; g < numGPUs; g++) {
@@ -1597,6 +1598,7 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
     const perturbA = generatePerturbations(numSamples, numParams);
     const perturbB = generatePerturbations(numSamples, numParams);
     const A = [], B = [];
+
     for (let i = 0; i < numSamples; i++) {
       const rowA = new Float64Array(numParams);
       const rowB = new Float64Array(numParams);
@@ -1609,7 +1611,6 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
     }
 
     const Y_A = A.map(a => evaluateCost(a, g));
-    const Y_B = B.map(b => evaluateCost(b, g));
     const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples;
     const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1);
     const S_T = new Float64Array(numParams);
@@ -1619,13 +1620,14 @@ function computeTotalOrderSobolOptimized(numSamples = 2000) {
       for (let i = 0; i < numSamples; i++) {
         const hybrid = new Float64Array(A[i]);
         hybrid[j] = B[i][j];
-        const Y_AB = evaluateCost(hybrid, g);
-        sumSqDiff += (Y_A[i] - Y_AB) ** 2;
+        sumSqDiff += (Y_A[i] - evaluateCost(hybrid, g)) ** 2;
       }
       S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); // % of total variance
     }
+
     sobolResults[g] = S_T;
   }
+
   return sobolResults;
 }
 
@@ -1635,26 +1637,6 @@ const sobolIndicesOptimized = computeTotalOrderSobolOptimized(2000);
 function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
   const results = [];
   const numParams = 15;
-
-  function evaluateCost(params, gpuIndex) {
-    const r = window.results[gpuIndex];
-    const gpu = GPU_data[r.originalGPUIndex];
-    const n_gpu = r.n_gpu;
-    const n_nodes = n_gpu / gpu.per_node;
-    const W_gpu = gpu.power[workload][benchmarkId];
-    const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
-    const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
-
-    return n_gpu * params[0] +
-      n_nodes * (params[1] + params[2] + params[3]) +
-      params[4] +
-      params[5] * PUE * (W_node_total + W_gpu_total) +
-      params[6] * (-PUE * (W_node_total + W_gpu_total)) +
-      params[7] +
-      n_nodes * params[8] +
-      params[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu) / 1000) +
-      params[10] + params[11] + params[12] + params[13] + params[14];
-  }
 
   for (let i = 0; i < window.results.length; i++) {
     const gpu = GPU_data[window.results[i].originalGPUIndex];
@@ -1671,38 +1653,31 @@ function monteCarloUncertaintyPerParam(numSamples = 1000, perturbation = 0.05) {
       const samples = new Float64Array(numSamples);
       for (let k = 0; k < numSamples; k++) {
         const params = base.slice();
-        const perturb = (Math.random() - 0.5) * 2 * perturbation;
-        params[j] = base[j] * (1 + perturb);
+        params[j] *= 1 + (Math.random() - 0.5) * 2 * perturbation;
         samples[k] = evaluateCost(params, i);
       }
       const mean = samples.reduce((s, v) => s + v, 0) / numSamples;
       const variance = samples.reduce((s, v) => s + (v - mean) ** 2, 0) / (numSamples - 1);
-      stds[j] = 100 * (Math.sqrt(variance) / baseCost); // % uncertainty contribution
+      stds[j] = 100 * (Math.sqrt(variance) / baseCost);
     }
+
     results.push(Array.from(stds));
   }
+
   return results;
 }
 
 const monteCarloParamResults = monteCarloUncertaintyPerParam(2000);
 
 // ---------- Combined Heatmaps (all in %) ----------
-
-// Utility: transpose a 2D array
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
-
-// Ensure plain arrays (convert Float64Array etc. to regular arrays)
 const makePlainArray = arr => arr.map(row => Array.from(row));
 
-// Transpose and convert to plain arrays for heatmaps
 const zElasticity = makePlainArray(transpose(elasticities));
 const zSobol = makePlainArray(transpose(sobolIndicesOptimized));
 const zMonteCarlo = makePlainArray(transpose(monteCarloParamResults));
 
-// Flatten manually to compute max for color scale
 const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
-
-// Compute zMax for color scale
 const zMax = Math.max(
   ...flatten2D(zElasticity).map(Math.abs),
   ...flatten2D(zSobol),
@@ -1710,7 +1685,6 @@ const zMax = Math.max(
   1
 );
 
-// Heatmap data
 const heatmapData = [
   {
     z: zElasticity,
@@ -1747,7 +1721,6 @@ const heatmapData = [
   }
 ];
 
-// Heatmap layout
 const heatmapLayout = {
   title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
   xaxis: { title: "GPU type" },
@@ -1781,7 +1754,6 @@ const heatmapLayout = {
   }]
 };
 
-// Plot
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
 // ---------- Tornado Charts (also in %) ----------
