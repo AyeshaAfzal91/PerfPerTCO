@@ -1790,7 +1790,7 @@ const heatmapLayout = {
     annotations: [{
         text: "Select Heatmap:",
         x: 1.25,
-        y: 0.92,
+        y: 0.52,
         xref: "paper",
         yref: "paper",
         xanchor: "left",
