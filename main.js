@@ -1583,7 +1583,7 @@ function computeTotalOrderSobolNormalized(numSamples = 2000) {
 
   function generatePerturbations(N, k) {
     const p = new Float64Array(N * k);
-    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.2; // ±10%
+    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.2; // uniform [0,1] shifts to [-0.5, 0.5] and then scales to [-0.1, 0.1], i.e., ±10%
     return p;
   }
 
