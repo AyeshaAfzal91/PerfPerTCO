@@ -1516,8 +1516,9 @@ const elasticityLabels = [
   'Depreciation cost (€/year)', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
-// ---------- Parameter-specific uncertainty ranges (± fraction) ----------
-const paramUncertainty = [
+const uniformUncertainty = new Array(15).fill(0.20);
+
+const realisticUncertainty = [
   0.10, // GPU (€)
   0.15, // Node Server (€)
   0.15, // Node Infrastructure (€)
@@ -1534,6 +1535,10 @@ const paramUncertainty = [
   0.05, // Software Subscription (€/year)
   0.25  // Utilization Inefficiency (€/year)
 ];
+
+// Active uncertainty model (default realistic)
+let activeUncertainty = realisticUncertainty;
+
 
 // ---------- Elasticity (% form) ----------
 const elasticities = window.results.map((r, i) => {
@@ -1623,8 +1628,8 @@ function generatePerturbations(N, k, ranges) {
     // Normalize to ~1
     const normBase = base.map(v => v === 0 ? 1 : v);
 
-    const perturbA = generatePerturbations(numSamples, numParams, paramUncertainty);
-	const perturbB = generatePerturbations(numSamples, numParams, paramUncertainty);
+    const perturbA = generatePerturbations(numSamples, numParams, activeUncertainty);
+	const perturbB = generatePerturbations(numSamples, numParams, activeUncertainty);
 
     const A = [], B = [];
 
@@ -1684,7 +1689,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       const samples = new Float64Array(numSamples);
       for (let k = 0; k < numSamples; k++) {
         const params = [...normBase];
-		params[j] *= 1 + (Math.random() - 0.5) * 2 * paramUncertainty[j];
+		params[j] *= 1 + (Math.random() - 0.5) * 2 * activeUncertainty[j];
         samples[k] = evaluateCost(params, i);
       }
       const mean = samples.reduce((s, v) => s + v, 0) / numSamples;
@@ -1854,6 +1859,32 @@ window.results.forEach((gpu, i) => {
   Plotly.newPlot(chartDiv.id, [traceElasticity, traceSobol, traceMC], layout);
 });
 
+document.getElementById("uncertaintyMode").addEventListener("change", e => {
+  activeUncertainty =
+    e.target.value === "uniform"
+      ? uniformUncertainty
+      : realisticUncertainty;
+
+  // Recompute sensitivities
+  sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
+  monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
+
+  // Rebuild heatmap Z arrays
+  const zSobolNew = makePlainArray(
+    normalizeAcrossDimension(makePlainArray(sobolIndicesOptimized))
+  );
+  const zMonteCarloNew = makePlainArray(
+    normalizeAcrossDimension(makePlainArray(monteCarloParamResults))
+  );
+
+  // Update Plotly heatmaps
+  Plotly.restyle("sensitivityHeatmaps", {
+    z: [null, zSobolNew, zMonteCarloNew]
+  });
+
+  // Optional: console trace for transparency
+  console.log("Uncertainty model changed:", e.target.value);
+});
 
 // ---------- Print sensitivities in HTML table ----------
 function getHeatmapColor(value, maxAbs) {
