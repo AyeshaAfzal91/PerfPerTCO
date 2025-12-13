@@ -1516,6 +1516,25 @@ const elasticityLabels = [
   'Depreciation cost (€/year)', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
+// ---------- Parameter-specific uncertainty ranges (± fraction) ----------
+const paramUncertainty = [
+  0.10, // GPU (€)
+  0.15, // Node Server (€)
+  0.15, // Node Infrastructure (€)
+  0.15, // Node Facility (€)
+  0.10, // Software (€)
+  0.25, // Electricity (€/kWh)
+  0.60, // Heat Reuse Revenue (€/kWh)
+  0.08, // PUE
+  0.30, // Node Maintenance (€/year)
+  0.20, // System Usage (hrs/year)
+  0.30, // System Lifetime (years)
+  0.10, // Node Baseline Power w/o GPUs (W)
+  0.20, // Depreciation cost (€/year)
+  0.05, // Software Subscription (€/year)
+  0.25  // Utilization Inefficiency (€/year)
+];
+
 // ---------- Elasticity (% form) ----------
 const elasticities = window.results.map((r, i) => {
   const gpu = GPU_data[r.originalGPUIndex];
@@ -1581,11 +1600,17 @@ function computeTotalOrderSobolNormalized(numSamples = 2000) {
   const numParams = 15;
   const sobolResults = new Array(numGPUs);
 
-  function generatePerturbations(N, k) {
-    const p = new Float64Array(N * k);
-    for (let i = 0; i < N * k; i++) p[i] = (Math.random() - 0.5) * 0.2 * 2; // uniform [0,1] shifts to [-0.5, 0.5] and then scales to [-0.2, 0.2], i.e., ±20%
-    return p;
+function generatePerturbations(N, k, ranges) {
+  const p = new Float64Array(N * k);
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < k; j++) {
+      const r = ranges[j];
+      p[i * k + j] = (Math.random() - 0.5) * 2 * r; // uniform [0,1] shifts to [-0.5, 0.5] and then scales to [-r, r], i.e., ±r*100%
+    }
   }
+  return p;
+}
+
 
   for (let g = 0; g < numGPUs; g++) {
     const gpu = GPU_data[window.results[g].originalGPUIndex];
@@ -1598,8 +1623,9 @@ function computeTotalOrderSobolNormalized(numSamples = 2000) {
     // Normalize to ~1
     const normBase = base.map(v => v === 0 ? 1 : v);
 
-    const perturbA = generatePerturbations(numSamples, numParams);
-    const perturbB = generatePerturbations(numSamples, numParams);
+    const perturbA = generatePerturbations(numSamples, numParams, paramUncertainty);
+	const perturbB = generatePerturbations(numSamples, numParams, paramUncertainty);
+
     const A = [], B = [];
 
     for (let i = 0; i < numSamples; i++) {
@@ -1658,7 +1684,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       const samples = new Float64Array(numSamples);
       for (let k = 0; k < numSamples; k++) {
         const params = [...normBase];
-        params[j] *= 1 + (Math.random() - 0.5) * 2 * perturbation;
+		params[j] *= 1 + (Math.random() - 0.5) * 2 * paramUncertainty[j];
         samples[k] = evaluateCost(params, i);
       }
       const mean = samples.reduce((s, v) => s + v, 0) / numSamples;
