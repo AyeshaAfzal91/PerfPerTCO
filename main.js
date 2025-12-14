@@ -994,6 +994,13 @@ console.log("DEBUG sliders:", {
   F_heatreuse
 });
 
+console.log("GPU sanity check:", GPU_data.map(g => ({
+  name: g.name,
+  per_node: g.per_node,
+  hasPerf: !!g.perf,
+  hasPower: !!g.power
+})));
+
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
