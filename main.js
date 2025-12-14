@@ -1945,68 +1945,6 @@ window.results.forEach((gpu, i) => {
   Plotly.newPlot(chartDiv.id, [traceElasticity, traceSobol, traceMC], layout);
 });
 
-// ---------- Print sensitivities in HTML table ----------
-function getHeatmapColor(value, maxAbs) {
-  const intensity = Math.min(Math.abs(value) / maxAbs, 1); // normalize [0,1]
-  if (value >= 0) {
-    // Green positive: from white to green
-    return `rgba(102, 204, 102, ${intensity})`;
-  } else {
-    // Red negative: from white to red
-    return `rgba(255, 77, 77, ${intensity})`;
-  }
-}
-
-function renderElasticityTableWithColors() {
-  const capitalLabels = elasticityLabels.slice(0, 5);
-  const operationalLabels = elasticityLabels.slice(5);
-
-  // Find maximum absolute elasticity for scaling color intensity
-  const maxAbsElasticity = Math.max(...elasticities.flat().map(Math.abs));
-
-  let tableHTML = "<h3>Normalized Sensitivities for Capital Cost Parameters</h3>";
-  tableHTML += `<table border="1" cellpadding="6"><thead><tr><th>GPU</th>`;
-  capitalLabels.forEach(label => {
-    tableHTML += `<th>${label}</th>`;
-  });
-  tableHTML += "</tr></thead><tbody>";
-
-  elasticities.forEach((gpuElasticity, i) => {
-    tableHTML += `<tr><td>${window.results[i].name}</td>`;
-    for (let j = 0; j < 5; j++) {
-      const val = gpuElasticity[j];
-      const bgColor = getHeatmapColor(val, maxAbsElasticity);
-      tableHTML += `<td style="background-color:${bgColor}">${val.toFixed(2)}</td>`;
-    }
-    tableHTML += "</tr>";
-  });
-
-  tableHTML += "</tbody></table>";
-
-  tableHTML += `<hr><h3>Normalized Sensitivities for Operational Cost Parameters</h3>`;
-  tableHTML += `<table border="1" cellpadding="6"><thead><tr><th>GPU</th>`;
-  operationalLabels.forEach(label => {
-    tableHTML += `<th>${label}</th>`;
-  });
-  tableHTML += "</tr></thead><tbody>";
-
-  elasticities.forEach((gpuElasticity, i) => {
-    tableHTML += `<tr><td>${window.results[i].name}</td>`;
-    for (let j = 5; j < elasticityLabels.length; j++) {
-      const val = gpuElasticity[j];
-      const bgColor = getHeatmapColor(val, maxAbsElasticity);
-      tableHTML += `<td style="background-color:${bgColor}">${val.toFixed(2)}</td>`;
-    }
-    tableHTML += "</tr>";
-  });
-
-  tableHTML += "</tbody></table>";
-
-  document.getElementById("elasticityTableContainer").innerHTML = tableHTML;
-}
-
-renderElasticityTableWithColors();
-
 document.getElementById("download-elasticity-csv").addEventListener("click", () => {
   const headers = ["GPU", ...elasticityLabels];
   const rows = elasticities.map((row, i) => [
