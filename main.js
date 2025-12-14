@@ -1017,8 +1017,6 @@ if (mode === "budget") {
         return n_gpu;
     });
 }
-
-
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
@@ -1028,11 +1026,6 @@ GPU_data.forEach((gpu, i) => {
 
   let n_gpu = n_gpu_list[i];
   if (n_gpu === 0) return;
-
-  // Ensure same_n_gpu is applied properly
-  if (same_n_gpu) {
-    n_gpu = min_valid_n_gpu;
-  }
 
 if (!gpu.per_node || gpu.per_node <= 0) {
   console.error(`Invalid per_node for GPU ${gpu.name}`, gpu);
