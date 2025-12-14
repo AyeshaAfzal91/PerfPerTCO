@@ -1091,7 +1091,6 @@ comparisonMessageContainer.innerHTML = comparisonMessage;
 
 // Download CSV
 document.getElementById('download-csv').style.display = 'block';
-document.getElementById('download-elasticity-csv').style.display = 'block';
 
 function downloadCSV2(data, filename = "gpu_tco_results.csv") {
   if (!Array.isArray(data) || data.length === 0) {
