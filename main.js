@@ -1516,28 +1516,80 @@ const elasticityLabels = [
   'Depreciation cost (€/year)', 'Software Subscription (€/year)', 'Utilization Inefficiency (€/year)'
 ];
 
-const uniformUncertainty = new Array(15).fill(0.20);
-
-const realisticUncertainty = [
-  0.10, // GPU (€)
-  0.15, // Node Server (€)
-  0.15, // Node Infrastructure (€)
-  0.15, // Node Facility (€)
-  0.10, // Software (€)
-  0.25, // Electricity (€/kWh)
-  0.60, // Heat Reuse Revenue (€/kWh)
-  0.08, // PUE
-  0.30, // Node Maintenance (€/year)
-  0.20, // System Usage (hrs/year)
-  0.30, // System Lifetime (years)
-  0.10, // Node Baseline Power w/o GPUs (W)
-  0.20, // Depreciation cost (€/year)
-  0.05, // Software Subscription (€/year)
-  0.25  // Utilization Inefficiency (€/year)
+// Parameter order MUST match your base[] vector
+const uncertaintyParamIds = [
+  "GPU_cost",              // placeholder (GPU handled separately)
+  "C_node_server",
+  "C_node_infra",
+  "C_node_facility",
+  "C_software",
+  "C_electricity",
+  "C_heatreuseperkWh",
+  "C_PUE",
+  "C_maintenance",
+  "system_usage",
+  "lifetime",
+  "W_node_baseline",
+  "C_depreciation",
+  "C_subscription",
+  "C_uefficiency"
 ];
 
-// Active uncertainty model (default realistic)
-let activeUncertainty = realisticUncertainty;
+// Default realistic fallback (used only if sliders missing)
+const defaultRealisticUncertainty = [
+  0.10, 0.15, 0.15, 0.15, 0.10,
+  0.25, 0.60, 0.08, 0.30, 0.20,
+  0.30, 0.10, 0.20, 0.05, 0.25
+];
+
+
+function getActiveUncertaintyVector() {
+  const globalSlider = document.getElementById("globalUncertainty");
+  const globalVal = globalSlider ? parseFloat(globalSlider.value) / 100 : 0;
+
+  const ranges = new Array(15);
+
+  if (globalVal > 0) {
+    // GLOBAL MODE → uniform ±%
+    ranges.fill(globalVal);
+
+    // Disable individual sliders
+    document.querySelectorAll(".paramUncertainty").forEach(sl => {
+      sl.disabled = true;
+    });
+  } else {
+    // INDIVIDUAL MODE
+    document.querySelectorAll(".paramUncertainty").forEach(sl => {
+      sl.disabled = false;
+    });
+
+    ranges[0] = defaultRealisticUncertainty[0]; // GPU cost (no slider)
+
+    for (let i = 1; i < uncertaintyParamIds.length; i++) {
+      const paramId = uncertaintyParamIds[i];
+      const slider = document.querySelector(
+        `.paramUncertainty[data-param="${paramId}"]`
+      );
+
+      ranges[i] = slider
+        ? parseFloat(slider.value) / 100
+        : defaultRealisticUncertainty[i];
+    }
+  }
+
+  return ranges;
+}
+
+document.addEventListener("input", e => {
+  if (e.target.classList.contains("paramUncertainty")) {
+    const span = e.target.parentElement.querySelector(".uncValue");
+    if (span) span.innerText = e.target.value;
+  }
+
+  if (e.target.id === "globalUncertainty") {
+    document.getElementById("v_globalUncertainty").innerText = e.target.value;
+  }
+});
 
 
 // ---------- Elasticity (% form) ----------
@@ -1628,7 +1680,8 @@ function generatePerturbations(N, k, ranges) {
     // Normalize to ~1
     const normBase = base.map(v => v === 0 ? 1 : v);
 
-    const perturbA = generatePerturbations(numSamples, numParams, activeUncertainty);
+	const activeUncertainty = getActiveUncertaintyVector();
+	const perturbA = generatePerturbations(numSamples, numParams, activeUncertainty);
 	const perturbB = generatePerturbations(numSamples, numParams, activeUncertainty);
 
     const A = [], B = [];
@@ -1689,6 +1742,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       const samples = new Float64Array(numSamples);
       for (let k = 0; k < numSamples; k++) {
         const params = [...normBase];
+		const activeUncertainty = getActiveUncertaintyVector();
 		params[j] *= 1 + (Math.random() - 0.5) * 2 * activeUncertainty[j];
         samples[k] = evaluateCost(params, i);
       }
@@ -1857,33 +1911,6 @@ window.results.forEach((gpu, i) => {
   chartDiv.id = `tornado-${gpuName.replace(/\s+/g, '-')}`;
   tornadoContainer.appendChild(chartDiv);
   Plotly.newPlot(chartDiv.id, [traceElasticity, traceSobol, traceMC], layout);
-});
-
-document.getElementById("uncertaintyMode").addEventListener("change", e => {
-  activeUncertainty =
-    e.target.value === "uniform"
-      ? uniformUncertainty
-      : realisticUncertainty;
-
-  // Recompute sensitivities
-  sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
-  monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
-
-  // Rebuild heatmap Z arrays
-  const zSobolNew = makePlainArray(
-    normalizeAcrossDimension(makePlainArray(sobolIndicesOptimized))
-  );
-  const zMonteCarloNew = makePlainArray(
-    normalizeAcrossDimension(makePlainArray(monteCarloParamResults))
-  );
-
-  // Update Plotly heatmaps
-  Plotly.restyle("sensitivityHeatmaps", {
-    z: [null, zSobolNew, zMonteCarloNew]
-  });
-
-  // Optional: console trace for transparency
-  console.log("Uncertainty model changed:", e.target.value);
 });
 
 // ---------- Print sensitivities in HTML table ----------
