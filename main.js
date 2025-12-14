@@ -1161,7 +1161,6 @@ const maxGPUs = Math.max(...window.results.map(r => r.n_gpu)); // Find the max n
 
 // Create the table HTML dynamically
 const tableHTML = `
-  <h3>Performance Per Total Cost of Ownership (TCO)</h3>
   <table border="1" cellpadding="6">
     <thead>
       <tr>
