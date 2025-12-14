@@ -129,9 +129,15 @@
     <span id="v_perf">1e9</span>
   </div>
 
-  <label for="sameGpuCheckbox">
-    <input type="checkbox" id="sameGpuCheckbox" onchange="updateAITip()"> Use same number of GPUs for all GPU types
+  <div class="mode-option">
+  <label>
+    <input type="radio" name="calculationMode" value="gpu">
+    Fix GPU Count
   </label>
+  <input type="range" id="fixed_gpu" min="1" max="1024" value="16" step="1"
+         oninput="updateValue('v_fixed_gpu', this.value); updateAITip()">
+  <span id="v_fixed_gpu">16</span>
+</div>
 </fieldset>
 
 	  <fieldset>
