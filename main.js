@@ -748,7 +748,6 @@ function resetForm() {
   document.getElementById("elasticityTableContainer").innerHTML = "";
   document.getElementById("blogOutput").value = "";
   document.getElementById("download-csv").style.display = "none";
-  document.getElementById("download-elasticity-csv").style.display = "none";
   document.getElementById("gpuPerfPowerHeatmap").innerHTML = "";
 
 
@@ -1091,7 +1090,6 @@ comparisonMessageContainer.innerHTML = comparisonMessage;
 
 // Download CSV
 document.getElementById('download-csv').style.display = 'block';
-document.getElementById('download-elasticity-csv').style.display = 'block';
 
 function downloadCSV2(data, filename = "gpu_tco_results.csv") {
   if (!Array.isArray(data) || data.length === 0) {
@@ -1943,16 +1941,6 @@ window.results.forEach((gpu, i) => {
   chartDiv.id = `tornado-${gpuName.replace(/\s+/g, '-')}`;
   tornadoContainer.appendChild(chartDiv);
   Plotly.newPlot(chartDiv.id, [traceElasticity, traceSobol, traceMC], layout);
-});
-
-document.getElementById("download-elasticity-csv").addEventListener("click", () => {
-  const headers = ["GPU", ...elasticityLabels];
-  const rows = elasticities.map((row, i) => [
-    window.results[i].name,
-    ...row.map(val => val.toFixed(2))
-  ]);
-  const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
-  downloadCSV(csvContent, "cost_elasticities.csv");
 });
 
 // downloadCSV
