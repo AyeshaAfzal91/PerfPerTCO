@@ -91,6 +91,20 @@
             <p id="uploadStatusMain" style="margin-top: 10px;"></p>
 
           </section>
+		  <label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
+    Node Baseline Power w/o GPUs (W):
+    <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5"
+           oninput="updateValue('v_baseline', this.value); updateAITip()">
+    <span id="v_baseline">500</span>
+
+    <br>
+    <small>
+      Uncertainty ±%
+      <input type="range" class="paramUncertainty" data-param="W_node_baseline"
+             min="0" max="100" step="1" value="10">
+      <span class="uncValue">10</span>%
+    </small>
+  </label>
     </fieldset>
 
 <fieldset>
@@ -295,21 +309,6 @@
       <input type="range" class="paramUncertainty" data-param="lifetime"
              min="0" max="100" step="1" value="30">
       <span class="uncValue">30</span>%
-    </small>
-  </label>
-
-  <label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
-    Node Baseline Power w/o GPUs (W):
-    <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5"
-           oninput="updateValue('v_baseline', this.value); updateAITip()">
-    <span id="v_baseline">500</span>
-
-    <br>
-    <small>
-      Uncertainty ±%
-      <input type="range" class="paramUncertainty" data-param="W_node_baseline"
-             min="0" max="100" step="1" value="10">
-      <span class="uncValue">10</span>%
     </small>
   </label>
 
