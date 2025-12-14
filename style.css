@@ -463,25 +463,61 @@ body.dark .main-chart-title {
 }
 
 /* DARK MODE STYLES */
+/* =========================
+   DARK MODE STYLES
+   ========================= */
 body.dark {
   background-color: #1c1c1c;
-  color: white; /* Set default text color to white */
+  color: #f4f4f4;
 }
 
+/* Main containers */
 body.dark #about,
 body.dark #leftColumn,
 body.dark #rightColumn,
 body.dark #output,
 body.dark #resultsTable {
   background-color: #2a2a2a;
-  color: white; /* Ensure text color is white in these areas */
+  color: #f4f4f4;
   box-shadow: none;
 }
 
+/* General text */
 body.dark label,
-body.dark th,
-body.dark td {
-  color: white; /* Force text color to white in these elements */
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark p {
+  color: #f4f4f4;
+}
+
+/* =========================
+   TABLE (Results Table)
+   ========================= */
+body.dark #resultsTable table {
+  color: #f4f4f4;
+}
+
+body.dark #resultsTable th,
+body.dark #resultsTable td {
+  color: #f4f4f4;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+/* Table header */
+body.dark #resultsTable thead th {
+  background-color: #000;
+  border-bottom: 2px solid #555;
+}
+
+/* Row striping */
+body.dark #resultsTable tbody tr:nth-child(even) {
+  background-color: #2f2f2f;
+}
+
+/* Hover */
+body.dark #resultsTable tbody tr:hover {
+  background-color: #3a3a3a;
 }
 
 body.dark .medium-button {
