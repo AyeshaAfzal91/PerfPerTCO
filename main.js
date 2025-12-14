@@ -908,7 +908,7 @@ const mode = document.querySelector('input[name="calculationMode"]:checked').val
 let n_gpu_list = [];
 if (mode === "budget") {
 // ---------- Compute n_gpu ----------
-const n_gpu_list = GPU_data.map((gpu, i) => {
+ n_gpu_list = GPU_data.map((gpu, i) => {
   const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
   const power = gpu.power[workload][benchmarkId];
   if (perf === 0 || power === 0) return 0;
@@ -970,33 +970,6 @@ const n_gpu_list = GPU_data.map((gpu, i) => {
         return n_gpu;
     });
 }
-
-// ---------- Disable “Max Total Power” slider if the user selects Fix Budget and vice versa ----------
-document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
-    el.addEventListener('change', () => {
-        const mode = el.value;
-        document.getElementById("total_budget").disabled = (mode === "power");
-        document.getElementById("max_total_power").disabled = (mode === "budget");
-    });
-});
-
-console.log("DEBUG sliders:", {
-  C_electricity,
-  PUE,
-  C_maintenance,
-  system_usage,
-  lifetime,
-  W_node_baseline,
-  C_depreciation,
-  C_subscription,
-  C_uefficiency,
-  C_heatreuseperkWh,
-  F_heatreuse,
-  C_node_server,
-  C_node_infra,
-  C_node_facility,
-  C_software
-});
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
@@ -1631,6 +1604,15 @@ if (!document.getElementById('download-pie-btn')) {
   });
 }
 
+// ---------- Disable “Max Total Power” slider if the user selects Fix Budget and vice versa ----------
+document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
+    el.addEventListener('change', () => {
+        const mode = el.value;
+        document.getElementById("total_budget").disabled = (mode === "power");
+        document.getElementById("max_total_power").disabled = (mode === "budget");
+    });
+});
+	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
   'GPU (€)', 'Node Server (€)', 'Node Infrastructure (€)', 'Node Facility (€)', 'Software (€)',
