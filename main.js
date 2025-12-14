@@ -1049,6 +1049,17 @@ function getHeatmapColor(value, maxValue) {
   return `rgb(${red}, ${green}, 0)`;
 }
 
+function getHeatmapColor(value, maxAbs) {
+  const intensity = Math.min(Math.abs(value) / maxAbs, 1); // normalize [0,1]
+  if (value >= 0) {
+    // Green positive: from white to green
+    return `rgba(102, 204, 102, ${intensity})`;
+  } else {
+    // Red negative: from white to red
+    return `rgba(255, 77, 77, ${intensity})`;
+  }
+}
+	
 // Sort the results by Performance per TCO
 window.results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
 
