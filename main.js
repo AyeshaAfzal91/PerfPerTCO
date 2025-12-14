@@ -980,6 +980,20 @@ document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
     });
 });
 
+console.log("DEBUG sliders:", {
+  C_electricity,
+  PUE,
+  C_maintenance,
+  system_usage,
+  lifetime,
+  W_node_baseline,
+  C_depreciation,
+  C_subscription,
+  C_uefficiency,
+  C_heatreuseperkWh,
+  F_heatreuse
+});
+
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
