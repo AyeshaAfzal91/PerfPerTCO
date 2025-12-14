@@ -904,6 +904,8 @@ const operational_components = [];
 
 let min_valid_n_gpu = Infinity;
 
+const mode = document.querySelector('input[name="calculationMode"]:checked').value;
+if (mode === "budget") {
 // ---------- Compute n_gpu ----------
 const n_gpu_list = GPU_data.map((gpu, i) => {
   const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
@@ -947,7 +949,27 @@ const n_gpu_list = GPU_data.map((gpu, i) => {
   console.log(`GPU: ${gpu.name}, A: ${A}, B: ${B}, n_gpu: ${n_gpu}`);
   return n_gpu;
 });
+} else if (mode === "power") {
+	const maxPower = getSliderValue("max_total_power") * 1000; // convert kW to W
+    n_gpu_list = GPU_data.map(gpu => {
+        const power = gpu.power[workload][benchmarkId];
+        if (power === 0) return 0;
 
+        const per_node = gpu.per_node;
+        let n_gpu = Math.floor(maxPower / power);
+        n_gpu = Math.floor(n_gpu / per_node) * per_node;
+
+        if (n_gpu < per_node) return 0;
+
+        if (same_n_gpu) {
+            min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
+            min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node;
+        }
+
+        return n_gpu;
+    });
+}
+	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
   const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
