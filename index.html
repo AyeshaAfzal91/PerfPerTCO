@@ -93,20 +93,29 @@
           </section>
     </fieldset>
 
-    <fieldset>
-      <legend>Initial Setup</legend>
+<fieldset>
+  <legend>Initial Setup</legend>
 
-      <label for="total_budget" data-tooltip="Set the total available budget for your project in EUR.">
-        Total Budget (€):
-        <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100" 
-               oninput="updateValue('v_budget', this.value); updateAITip()">
-        <span id="v_budget">10000000</span>
-      </label>    
+  <label for="total_budget" data-tooltip="Set the total available budget for your project in EUR.">
+    Total Budget (€):
+    <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100" 
+           oninput="updateValue('v_budget', this.value); updateAITip()">
+    <span id="v_budget">10000000</span>
+  </label>    
 
-      <label for="sameGpuCheckbox">
-        <input type="checkbox" id="sameGpuCheckbox" onchange="updateAITip()"> Use same number of GPUs for all GPU types
-      </label>
-    </fieldset>
+  <label for="sameGpuCheckbox">
+    <input type="checkbox" id="sameGpuCheckbox" onchange="updateAITip()"> Use same number of GPUs for all GPU types
+  </label>
+
+  <!-- Global Uncertainty -->
+  <label>
+    Global Uncertainty (Uniform ±%):
+    <input type="range" id="globalUncertainty" min="0" max="50" step="1" value="20">
+    <span id="v_globalUncertainty">20</span>%
+    <span id="globalLockIcon" style="margin-left:10px; font-size:1.2em; display:none;">🔒</span>
+  </label>
+</fieldset>
+
 
     <fieldset>
   <legend>Capital Cost Parameters</legend>
