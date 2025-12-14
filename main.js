@@ -1373,15 +1373,6 @@ document.getElementById('gpu-download-btn').addEventListener('click', () => {
   });
 });
 
-const chartContainer = document.getElementById('gpu-chart').parentElement;
-if (!document.getElementById('chart-title-perf-tco')) {
-  const chartTitleDiv = document.createElement('div');
-  chartTitleDiv.id = 'chart-title-perf-tco';
-  chartTitleDiv.classList.add('chart-title');
-  chartTitleDiv.innerHTML = 'Performance per TCO and GPU Count by GPU Type';
-  chartContainer.insertBefore(chartTitleDiv, document.getElementById('gpu-chart'));
-}
-	
 /// ---------- Plotly Stacked TCO Chart ----------
 
 // Prepare the data for the TCO Breakdown
