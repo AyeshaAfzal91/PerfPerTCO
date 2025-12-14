@@ -468,9 +468,12 @@
   <div id="resultsTable"></div>
   <button id="download-csv" style="display: none;">Download CSV</button>
   <div id="comparison-message-container" class="comparison-message"></div>
-  <div id="gpu-chart"></div>
-<div id="power-chart"></div>
-<div id="perf-watt-chart"></div>
+
+	<div id="charts-container" style="display: flex; gap: 20px; justify-content: space-between;">
+  <div id="gpu-chart" style="flex: 1; min-width: 300px;"></div>
+  <div id="power-chart" style="flex: 1; min-width: 300px;"></div>
+  <div id="perf-watt-chart" style="flex: 1; min-width: 300px;"></div>
+</div>
 
   
 <div id="tco-chart-container" style="display: flex; flex-direction: row; gap: 0px; flex-wrap: nowrap; justify-content: space-between; align-items: flex-start; margin-top: 40px;"> 
