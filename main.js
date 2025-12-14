@@ -1591,6 +1591,40 @@ document.addEventListener("input", e => {
   }
 });
 
+const globalSlider = document.getElementById("globalUncertainty");
+const globalLockIcon = document.getElementById("globalLockIcon");
+
+// Whenever the global slider changes:
+globalSlider.addEventListener("input", () => {
+  const globalVal = parseFloat(globalSlider.value);
+
+  // Update displayed value
+  document.getElementById("v_globalUncertainty").innerText = globalVal;
+
+  if (globalVal > 0) {
+    // Show lock icon
+    globalLockIcon.style.display = "inline";
+
+    // Disable individual sliders and move them to global value
+    document.querySelectorAll(".paramUncertainty").forEach(slider => {
+      slider.disabled = true;
+      slider.value = globalVal;
+      // Update the % span next to each slider
+      const span = slider.parentElement.querySelector(".uncValue");
+      if (span) span.innerText = globalVal;
+    });
+  } else {
+    // Hide lock icon
+    globalLockIcon.style.display = "none";
+
+    // Enable individual sliders
+    document.querySelectorAll(".paramUncertainty").forEach(slider => {
+      slider.disabled = false;
+      // Keep current value (do not reset)
+    });
+  }
+});
+
 
 // ---------- Elasticity (% form) ----------
 const elasticities = window.results.map((r, i) => {
