@@ -1580,50 +1580,45 @@ function getActiveUncertaintyVector() {
   return ranges;
 }
 
+const globalSlider = document.getElementById("globalUncertainty");
+const globalLockIcon = document.getElementById("globalLockIcon");
+
+// Sync sliders with display and handle lock icon
+function updateSlidersFromGlobal() {
+  const globalVal = parseFloat(globalSlider.value);
+  const isGlobal = globalVal > 0;
+
+  // Show/hide lock
+  globalLockIcon.style.display = isGlobal ? "inline" : "none";
+
+  document.querySelectorAll(".paramUncertainty").forEach(slider => {
+    if (isGlobal) {
+      slider.disabled = true;
+      slider.value = globalVal;
+      const span = slider.parentElement.querySelector(".uncValue");
+      if (span) span.innerText = globalVal;
+    } else {
+      slider.disabled = false;
+      const span = slider.parentElement.querySelector(".uncValue");
+      if (span) span.innerText = slider.value;
+    }
+  });
+
+  // Update global value display
+  document.getElementById("v_globalUncertainty").innerText = globalVal;
+}
+
+// Listen for global slider changes
+globalSlider.addEventListener("input", updateSlidersFromGlobal);
+
+// Listen for individual sliders to update their displayed value dynamically
 document.addEventListener("input", e => {
   if (e.target.classList.contains("paramUncertainty")) {
     const span = e.target.parentElement.querySelector(".uncValue");
     if (span) span.innerText = e.target.value;
   }
-
-  if (e.target.id === "globalUncertainty") {
-    document.getElementById("v_globalUncertainty").innerText = e.target.value;
-  }
 });
 
-const globalSlider = document.getElementById("globalUncertainty");
-const globalLockIcon = document.getElementById("globalLockIcon");
-
-// Whenever the global slider changes:
-globalSlider.addEventListener("input", () => {
-  const globalVal = parseFloat(globalSlider.value);
-
-  // Update displayed value
-  document.getElementById("v_globalUncertainty").innerText = globalVal;
-
-  if (globalVal > 0) {
-    // Show lock icon
-    globalLockIcon.style.display = "inline";
-
-    // Disable individual sliders and move them to global value
-    document.querySelectorAll(".paramUncertainty").forEach(slider => {
-      slider.disabled = true;
-      slider.value = globalVal;
-      // Update the % span next to each slider
-      const span = slider.parentElement.querySelector(".uncValue");
-      if (span) span.innerText = globalVal;
-    });
-  } else {
-    // Hide lock icon
-    globalLockIcon.style.display = "none";
-
-    // Enable individual sliders
-    document.querySelectorAll(".paramUncertainty").forEach(slider => {
-      slider.disabled = false;
-      // Keep current value (do not reset)
-    });
-  }
-});
 
 
 // ---------- Elasticity (% form) ----------
