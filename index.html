@@ -97,7 +97,7 @@
   <legend>Deployment Scenarios for the Limiting Factors</legend>
 
   <!-- Fix Budget -->
-  <label>
+  <label data-tooltip="Limit the deployment based on a fixed total budget. The number of GPUs will adjust according to cost constraints.">
     <input type="radio" name="calculationMode" value="budget" checked>
     Fix Budget (€)
   </label>
@@ -108,7 +108,7 @@
   </div>
 
   <!-- Fix Total Power -->
-  <label>
+  <label data-tooltip="Limit the deployment based on total power consumption. The number of GPUs will adjust to stay under the specified power limit.">
     <input type="radio" name="calculationMode" value="power">
     Fix Total Power (kW)
   </label>
@@ -119,7 +119,7 @@
   </div>
 
   <!-- Fix Performance -->
-  <label>
+  <label data-tooltip="Set a target performance (ns/day). The number of GPUs will adjust to meet this performance goal, considering efficiency and other parameters.">
     <input type="radio" name="calculationMode" value="performance">
     Fix Total Performance (ns/day)
   </label>
@@ -129,7 +129,8 @@
     <span id="v_perf">1e9</span>
   </div>
 
-  <label>
+  <!-- Fix GPU Count -->
+  <label data-tooltip="Deploy a fixed number of GPUs. Other parameters like total cost, power, and performance will adjust based on this GPU count.">
     <input type="radio" name="calculationMode" value="gpu">
     Fix GPU Count
   </label>
@@ -139,6 +140,7 @@
     <span id="v_same_n_gpu">240</span>
   </div>
 </fieldset>
+
 
 	  <fieldset>
   <legend>Initial Setup</legend>
