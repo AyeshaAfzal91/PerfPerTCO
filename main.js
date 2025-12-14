@@ -1300,6 +1300,81 @@ if (!document.getElementById('chart-title-perf-tco')) {
   chartContainer.insertBefore(chartTitleDiv, document.getElementById('gpu-chart'));
 }
 
+// ---------- Plotly Bar Chart: Power per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
+const powerPerTCOTrace = {
+  x: barLabels,
+  y: nonzeroResults.map(result => result.power_per_tco),
+  type: 'bar',
+  name: 'Power per TCO',
+  marker: { color: 'rgba(255, 165, 0, 0.6)', line: { color: 'orange', width: 1 } },
+  yaxis: 'y1'
+};
+
+const gpuTrace2 = {
+  x: barLabels,
+  y: gpuCounts,
+  type: 'scatter',
+  mode: 'lines+markers+text',
+  name: '#GPUs',
+  yaxis: 'y2',
+  line: { color: 'red', width: 2 },
+  marker: { color: 'red', size: 6 },
+  text: gpuCounts.map(String),
+  textposition: 'top center',
+  textfont: { color: 'red', size: 12 }
+};
+
+const powerLayout = {
+  title: '',
+  barmode: 'group',
+  xaxis: { title: 'GPU Type', tickangle: -45 },
+  yaxis: { title: 'Power per TCO (W/€)', rangemode: 'tozero', showgrid: true },
+  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red' },
+  legend: { orientation: 'h', y: -0.2 },
+  height: 500,
+  margin: { t: 60, b: 100, l: 80, r: 80 }
+};
+
+Plotly.newPlot('power-chart', [powerPerTCOTrace, gpuTrace2], powerLayout, { displayModeBar: true });
+
+// ---------- Plotly Bar Chart: Perf per Watt per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
+const perfPerWattTrace = {
+  x: barLabels,
+  y: nonzeroResults.map(result => result.perf_per_watt_per_tco),
+  type: 'bar',
+  name: 'Perf/Watt per TCO',
+  marker: { color: 'rgba(0, 200, 200, 0.6)', line: { color: 'teal', width: 1 } },
+  yaxis: 'y1'
+};
+
+const gpuTrace3 = {
+  x: barLabels,
+  y: gpuCounts,
+  type: 'scatter',
+  mode: 'lines+markers+text',
+  name: '#GPUs',
+  yaxis: 'y2',
+  line: { color: 'red', width: 2 },
+  marker: { color: 'red', size: 6 },
+  text: gpuCounts.map(String),
+  textposition: 'top center',
+  textfont: { color: 'red', size: 12 }
+};
+
+// Layout
+const perfWattLayout = {
+  title: '',
+  barmode: 'group',
+  xaxis: { title: 'GPU Type', tickangle: -45 },
+  yaxis: { title: 'Perf/Watt per TCO (ns/day*atoms/kW/€)', rangemode: 'tozero', showgrid: true },
+  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red' },
+  legend: { orientation: 'h', y: -0.2 },
+  height: 500,
+  margin: { t: 60, b: 100, l: 80, r: 80 }
+};
+
+Plotly.newPlot('perf-watt-chart', [perfPerWattTrace, gpuTrace3], perfWattLayout, { displayModeBar: true });
+
 
 /// ---------- Plotly Stacked TCO Chart ----------
 
