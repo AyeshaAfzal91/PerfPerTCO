@@ -710,7 +710,7 @@ function resetForm() {
     C_node_server: 10000, C_node_infra: 5000, C_node_facility: 0, C_software: 5000,
     C_electricity: 0.21, C_PUE: 1.2, C_maintenance: 200, system_usage: 8760, lifetime: 5,
     W_node_baseline: 500, C_depreciation: 0, C_subscription: 0, C_uefficiency: 0,
-    C_heatreuseperkWh: 0, Factor_heatreuse: 0
+    C_heatreuseperkWh: 0.01, Factor_heatreuse: 0
   };
 
   const spanMap = {
