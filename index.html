@@ -135,7 +135,7 @@
     </small>
   </label>
 
-  <label for="C_node_infra" data-tooltip="Cost for cooling and power distribution units.">
+  <label for="C_node_infra" data-tooltip="Set the cost for cooling and power distribution units.">
     Node Infrastructure (€):
     <input type="range" id="C_node_infra" min="0" max="25000" value="5000" step="5"
            oninput="updateValue('v_node_infra', this.value); updateAITip()">
@@ -201,7 +201,7 @@
     </small>
   </label>
 
-  <label for="C_PUE" data-tooltip="Set the weighted average Power usage effectiveness (PUE).">
+  <label for="C_PUE" data-tooltip="Set the weighted average Power usage effectiveness (PUE) between water cooling PUE and air cooling PUE.">
     PUE:
     <input type="range" id="C_PUE" min="1" max="5" value="1.2" step="0.01"
            oninput="updateValue('v_PUE', this.value); updateAITip()">
@@ -216,7 +216,7 @@
     </small>
   </label>
 
-  <label for="C_maintenance" data-tooltip="Set the maintenance cost per node per year.">
+  <label for="C_maintenance" data-tooltip="Set the maintenance and support cost per node in EUR per year, including warranty, repairs, and system management.">
     Node Maintenance (€/year):
     <input type="range" id="C_maintenance" min="0" max="5000" value="200" step="5"
            oninput="updateValue('v_maintenance', this.value); updateAITip()">
@@ -231,7 +231,7 @@
     </small>
   </label>
 
-  <label for="system_usage" data-tooltip="Set the total hours of system use per year.">
+  <label for="system_usage" data-tooltip="Set the total hours of system use per year (max. 24/7 operation).">
     System Usage (hrs/year):
     <input type="range" id="system_usage" min="0" max="8760" value="8760" step="5"
            oninput="updateValue('v_usage', this.value); updateAITip()">
@@ -261,7 +261,7 @@
     </small>
   </label>
 
-  <label for="W_node_baseline" data-tooltip="Set the power consumption per node.">
+  <label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
     Node Baseline Power w/o GPUs (W):
     <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5"
            oninput="updateValue('v_baseline', this.value); updateAITip()">
@@ -276,7 +276,7 @@
     </small>
   </label>
 
-  <label for="C_depreciation">
+  <label for="C_depreciation" data-tooltip="Set the depreciation cost over time in EUR per year, if applicable.">
     Depreciation (€/year):
     <input type="range" id="C_depreciation" min="0" max="25000" value="0" step="5"
            oninput="updateValue('v_depreciation', this.value); updateAITip()">
@@ -291,7 +291,7 @@
     </small>
   </label>
 
-  <label for="C_subscription">
+  <label for="C_subscription" data-tooltip="Set the recurring software subscription costs in EUR per year.">
     Software Subscription (€/year):
     <input type="range" id="C_subscription" min="0" max="25000" value="0" step="5"
            oninput="updateValue('v_subscription', this.value); updateAITip()">
@@ -306,7 +306,7 @@
     </small>
   </label>
 
-  <label for="C_uefficiency">
+  <label for="C_uefficiency" data-tooltip="Set the cost due to underutilization of GPU units and inefficiency in EUR per year.">
     Utilization Inefficiency (€/year):
     <input type="range" id="C_uefficiency" min="0" max="25000" value="0" step="5"
            oninput="updateValue('v_uefficiency', this.value); updateAITip()">
@@ -321,7 +321,7 @@
     </small>
   </label>
 
-  <label for="C_heatreuseperkWh">
+  <label for="C_heatreuseperkWh" data-tooltip="Set the revenue generated from heat reuse in EUR per kWh (e.g., district heating revenue).">
     Heat Reuse Revenue (€/kWh):
     <input type="range" id="C_heatreuseperkWh" min="0" max="5" value="0" step="0.1"
            oninput="updateValue('v_heatreuseperkWh', this.value); updateAITip()">
