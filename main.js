@@ -969,6 +969,16 @@ const n_gpu_list = GPU_data.map((gpu, i) => {
         return n_gpu;
     });
 }
+
+// ---------- Disable “Max Total Power” slider if the user selects Fix Budget and vice versa ----------
+document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
+    el.addEventListener('change', () => {
+        const mode = el.value;
+        document.getElementById("total_budget").disabled = (mode === "power");
+        document.getElementById("max_total_power").disabled = (mode === "budget");
+    });
+});
+
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
