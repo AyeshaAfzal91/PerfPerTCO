@@ -969,7 +969,7 @@ if (mode === "budget") {
 
         return n_gpu;
     });
-} } else if (mode === "performance") {
+} else if (mode === "performance") {
 
   const targetPerf = getSliderValue("target_performance");
 
