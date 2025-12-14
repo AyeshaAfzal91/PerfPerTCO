@@ -938,12 +938,6 @@ if (mode === "budget") {
     return 0;
   }
 
-  // Update min_valid_n_gpu if same_n_gpu is true
-  if (same_n_gpu) {
-    min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
-    min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node; // Ensure min_valid_n_gpu is valid multiple of per_node
-  }
-
   console.log(`GPU: ${gpu.name}, A: ${A}, B: ${B}, n_gpu: ${n_gpu}`);
   return n_gpu;
 });
@@ -958,11 +952,6 @@ if (mode === "budget") {
         n_gpu = Math.floor(n_gpu / per_node) * per_node;
 
         if (n_gpu < per_node) return 0;
-
-        if (same_n_gpu) {
-            min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
-            min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node;
-        }
 
         return n_gpu;
     });
@@ -996,12 +985,6 @@ if (mode === "budget") {
 
     if (gpu_cost_total > total_budget) {
       console.warn(`${gpu.name} exceeds available budget for target performance.`);
-    }
-
-    // same_n_gpu logic
-    if (same_n_gpu) {
-      min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
-      min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node;
     }
 
     return n_gpu;
