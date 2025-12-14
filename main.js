@@ -1656,6 +1656,7 @@ function computeTotalOrderSobolNormalized(numSamples = 2000) {
   const numGPUs = window.results.length;
   const numParams = 15;
   const sobolResults = new Array(numGPUs);
+  const activeUncertainty = getActiveUncertaintyVector();
 
 function generatePerturbations(N, k, ranges) {
   const p = new Float64Array(N * k);
@@ -1668,7 +1669,6 @@ function generatePerturbations(N, k, ranges) {
   return p;
 }
 
-
   for (let g = 0; g < numGPUs; g++) {
     const gpu = GPU_data[window.results[g].originalGPUIndex];
     const base = [
@@ -1680,7 +1680,6 @@ function generatePerturbations(N, k, ranges) {
     // Normalize to ~1
     const normBase = base.map(v => v === 0 ? 1 : v);
 
-	const activeUncertainty = getActiveUncertaintyVector();
 	const perturbA = generatePerturbations(numSamples, numParams, activeUncertainty);
 	const perturbB = generatePerturbations(numSamples, numParams, activeUncertainty);
 
@@ -1725,6 +1724,7 @@ const sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
 function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) {
   const results = [];
   const numParams = 15;
+  const activeUncertainty = getActiveUncertaintyVector();
 
   for (let i = 0; i < window.results.length; i++) {
     const gpu = GPU_data[window.results[i].originalGPUIndex];
@@ -1742,7 +1742,6 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       const samples = new Float64Array(numSamples);
       for (let k = 0; k < numSamples; k++) {
         const params = [...normBase];
-		const activeUncertainty = getActiveUncertaintyVector();
 		params[j] *= 1 + (Math.random() - 0.5) * 2 * activeUncertainty[j];
         samples[k] = evaluateCost(params, i);
       }
