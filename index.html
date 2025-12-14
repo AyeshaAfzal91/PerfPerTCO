@@ -96,31 +96,34 @@
 <fieldset>
   <legend>Initial Setup and Scenarios of Limiting Factors</legend>
 
-  <div class="mode-option">
-    <label>
-      <input type="radio" name="calculationMode" value="budget" checked>
-      Fix Budget
-    </label>
+  <!-- Fix Budget -->
+  <label>
+    <input type="radio" name="calculationMode" value="budget" checked>
+    Fix Budget
+  </label>
+  <div class="mode-slider" id="slider_budget">
     <input type="range" id="total_budget" min="0" max="100000000" value="10000000" step="100"
            oninput="updateValue('v_budget', this.value); updateAITip()">
     <span id="v_budget">10000000</span>
   </div>
 
-  <div class="mode-option">
-    <label>
-      <input type="radio" name="calculationMode" value="power">
-      Fix Total Power
-    </label>
+  <!-- Fix Total Power -->
+  <label>
+    <input type="radio" name="calculationMode" value="power">
+    Fix Total Power
+  </label>
+  <div class="mode-slider" id="slider_power">
     <input type="range" id="max_total_power" min="0" max="5000" value="1000" step="10"
            oninput="updateValue('v_max_power', this.value); updateAITip()">
     <span id="v_max_power">1000</span>
   </div>
 
-  <div class="mode-option">
-    <label>
-      <input type="radio" name="calculationMode" value="performance">
-      Fix Total Performance
-    </label>
+  <!-- Fix Performance -->
+  <label>
+    <input type="radio" name="calculationMode" value="performance">
+    Fix Total Performance
+  </label>
+  <div class="mode-slider" id="slider_performance">
     <input type="range" id="target_performance" min="1e6" max="1e10" value="1e9" step="1e6"
            oninput="updateValue('v_perf', this.value); updateAITip()">
     <span id="v_perf">1e9</span>
