@@ -1592,7 +1592,7 @@ function updateSlidersFromGlobal() {
   document.getElementById("v_globalUncertainty").innerText = globalVal;
 
   // Show/hide lock
-  globalLockIcon.style.display = isGlobal ? "inline" : "none";
+globalLockIcon.style.display = isGlobal ? "inline-block" : "none";
 
   // Update individual sliders
   document.querySelectorAll(".paramUncertainty").forEach(slider => {
