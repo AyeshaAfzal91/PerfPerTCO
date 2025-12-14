@@ -1596,17 +1596,16 @@ function updateSlidersFromGlobal() {
 
   // Update individual sliders
   document.querySelectorAll(".paramUncertainty").forEach(slider => {
+    const span = slider.parentElement.querySelector(".uncValue");
     if (isGlobal) {
       slider.disabled = true;
-      slider.value = globalVal;
+      slider.value = Math.round(globalVal);  // <-- ensure integer 0-100
+      if (span) span.innerText = slider.value;
     } else {
       slider.disabled = false;
-      // keep current value
+      // Do NOT overwrite value in individual mode
+      if (span) span.innerText = slider.value;
     }
-
-    // Update the span next to the slider
-    const span = slider.parentElement.querySelector(".uncValue");
-    if (span) span.innerText = slider.value;
   });
 }
 
