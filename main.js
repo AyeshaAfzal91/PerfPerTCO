@@ -872,7 +872,6 @@ console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.nam
 
   const workload = document.getElementById("workload").value;
   const benchmarkId = parseInt(document.getElementById("benchmarkId").value); // Get benchmarkId
-  const same_n_gpu = getSliderValue("same_n_gpu");
   const C_node_server = getSliderValue("C_node_server");
   const C_node_infra = getSliderValue("C_node_infra");
   const C_node_facility = getSliderValue("C_node_facility");
@@ -1007,6 +1006,16 @@ if (mode === "budget") {
 
     return n_gpu;
   });
+} else if (mode === "gpu") {
+    const fixedGpu = getSliderValue("same_n_gpu");
+
+    n_gpu_list = GPU_data.map(gpu => {
+        const per_node = gpu.per_node;
+        // Round to nearest multiple of per_node
+        let n_gpu = Math.floor(fixedGpu / per_node) * per_node;
+        if (n_gpu < per_node) n_gpu = per_node;
+        return n_gpu;
+    });
 }
 
 
