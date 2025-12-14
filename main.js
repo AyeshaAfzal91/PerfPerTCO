@@ -1647,19 +1647,26 @@ if (!document.getElementById('download-pie-btn')) {
 }
 
 // ---------- Disable other sliders if the user selects Fix Budget and vice versa ----------
+function toggleSliders() {
+  const mode = document.querySelector('input[name="calculationMode"]:checked').value;
+
+  // Show/hide slider containers
+  document.getElementById("budget_slider").style.display = (mode === "budget") ? "block" : "none";
+  document.getElementById("power_slider").style.display = (mode === "power") ? "block" : "none";
+  document.getElementById("performance_slider").style.display = (mode === "performance") ? "block" : "none";
+
+  // Enable/disable sliders
+  document.getElementById("total_budget").disabled = (mode !== "budget");
+  document.getElementById("max_total_power").disabled = (mode !== "power");
+  document.getElementById("target_performance").disabled = (mode !== "performance");
+}
+
+// Call once to initialize on page load
+toggleSliders();
+
+// Update when mode changes
 document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
-  el.addEventListener('change', () => {
-    const mode = el.value;
-
-    document.getElementById("total_budget").disabled =
-      (mode !== "budget");
-
-    document.getElementById("max_total_power").disabled =
-      (mode !== "power");
-
-    document.getElementById("target_performance").disabled =
-      (mode !== "performance");
-  });
+  el.addEventListener('change', toggleSliders);
 });
 
 	
