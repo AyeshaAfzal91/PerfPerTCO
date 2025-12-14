@@ -771,7 +771,6 @@ function resetForm() {
   document.querySelectorAll(".chart-title").forEach(el => {
     if ([
       "Heatmap: Sensitivity of Parameters across GPUs",
-      "Performance per TCO and GPU Count by GPU Type",
       "TCO Breakdown (Capital vs Operational costs)"
     ].includes(el.innerText.trim())) {
       el.remove();
