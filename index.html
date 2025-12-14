@@ -335,6 +335,21 @@
       <span class="uncValue">60</span>%
     </small>
   </label>
+
+	<label for="Factor_heatreuse" data-tooltip="Set the factor of the heat that goes to district heating system.">
+  Heat Reuse Factor:
+  <input type="range" id="Factor_heatreuse" min="0" max="1" value="0" step="0.1"
+         oninput="updateValue('v_Factor_heatreuse', this.value); updateAITip()">
+  <span id="v_Factor_heatreuse">0</span>
+    <br>
+    <small>
+      Uncertainty ±%
+      <input type="range" class="paramUncertainty" data-param="Factor_heatreuse"
+             min="0" max="100" step="1" value="60">
+      <span class="uncValue">60</span>%
+	</small>
+	
+</label>
 </fieldset>
   </div>
 </div>
