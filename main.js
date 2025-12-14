@@ -969,7 +969,30 @@ if (mode === "budget") {
 
         return n_gpu;
     });
+} else if (mode === "performance") {
+
+  const targetPerf = getSliderValue("target_performance");
+
+  n_gpu_list = GPU_data.map(gpu => {
+    const perf = gpu.perf[workload][benchmarkId];
+    if (!perf || perf <= 0) return 0;
+
+    const per_node = gpu.per_node;
+
+    let n_gpu = Math.ceil(targetPerf / perf);
+    n_gpu = Math.ceil(n_gpu / per_node) * per_node;
+
+    if (n_gpu < per_node) return 0;
+
+    if (same_n_gpu) {
+      min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
+      min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node;
+    }
+
+    return n_gpu;
+  });
 }
+
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
@@ -1604,14 +1627,22 @@ if (!document.getElementById('download-pie-btn')) {
   });
 }
 
-// ---------- Disable “Max Total Power” slider if the user selects Fix Budget and vice versa ----------
+// ---------- Disable other sliders if the user selects Fix Budget and vice versa ----------
 document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
-    el.addEventListener('change', () => {
-        const mode = el.value;
-        document.getElementById("total_budget").disabled = (mode === "power");
-        document.getElementById("max_total_power").disabled = (mode === "budget");
-    });
+  el.addEventListener('change', () => {
+    const mode = el.value;
+
+    document.getElementById("total_budget").disabled =
+      (mode !== "budget");
+
+    document.getElementById("max_total_power").disabled =
+      (mode !== "power");
+
+    document.getElementById("target_performance").disabled =
+      (mode !== "performance");
+  });
 });
+
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
