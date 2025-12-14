@@ -1268,38 +1268,6 @@ const barLayout = {
   margin: { t: 60, b: 100, l: 80, r: 80 }
 };
 
-Plotly.newPlot('gpu-chart', [perfTrace, gpuTrace], barLayout, { displayModeBar: true });
-
-// Add a button to download the GPU chart as PNG or SVG with high resolution
-const gpuDownloadDiv = document.createElement('div');
-gpuDownloadDiv.classList.add('download-btn-container');
-gpuDownloadDiv.innerHTML = `<button id="gpu-download-btn">Download Performance per TCO Chart (High Resolution)</button>`;
-document.getElementById('gpu-chart').parentElement.insertBefore(gpuDownloadDiv, document.getElementById('gpu-chart'));
-
-// Add event listener for GPU chart download
-document.getElementById('gpu-download-btn').addEventListener('click', () => {
-  Plotly.toImage('gpu-chart', {
-    format: 'png',   // or 'svg'
-    height: 800,
-    width: 1200,
-    scale: 2
-  }).then(function (url) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'gpu_chart_high_res.png';
-    link.click();
-  });
-});
-
-const chartContainer = document.getElementById('gpu-chart').parentElement;
-if (!document.getElementById('chart-title-perf-tco')) {
-  const chartTitleDiv = document.createElement('div');
-  chartTitleDiv.id = 'chart-title-perf-tco';
-  chartTitleDiv.classList.add('chart-title');
-  chartTitleDiv.innerHTML = 'Performance per TCO and GPU Count by GPU Type';
-  chartContainer.insertBefore(chartTitleDiv, document.getElementById('gpu-chart'));
-}
-
 // ---------- Plotly Bar Chart: Power per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
 const powerPerTCOTrace = {
   x: barLabels,
@@ -1334,8 +1302,6 @@ const powerLayout = {
   height: 500,
   margin: { t: 60, b: 100, l: 80, r: 80 }
 };
-
-Plotly.newPlot('power-chart', [powerPerTCOTrace, gpuTrace2], powerLayout, { displayModeBar: true });
 
 // ---------- Plotly Bar Chart: Perf per Watt per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
 const perfPerWattTrace = {
@@ -1373,9 +1339,55 @@ const perfWattLayout = {
   margin: { t: 60, b: 100, l: 80, r: 80 }
 };
 
-Plotly.newPlot('perf-watt-chart', [perfPerWattTrace, gpuTrace3], perfWattLayout, { displayModeBar: true });
+function renderCharts() {
+  if (!document.getElementById('power-chart')) {
+    console.error("Power chart div not found!");
+    return;
+  }
 
+  // GPU chart
+  Plotly.newPlot('gpu-chart', [perfTrace, gpuTrace], barLayout, { displayModeBar: true });
 
+  // Power chart
+  Plotly.newPlot('power-chart', [powerPerTCOTrace, gpuTrace2], powerLayout, { displayModeBar: true });
+
+  // Perf/Watt chart
+  Plotly.newPlot('perf-watt-chart', [perfPerWattTrace, gpuTrace3], perfWattLayout, { displayModeBar: true });
+}
+
+// Call this after your nonzeroResults is ready
+renderCharts();
+
+// Add a button to download the GPU chart as PNG or SVG with high resolution
+const gpuDownloadDiv = document.createElement('div');
+gpuDownloadDiv.classList.add('download-btn-container');
+gpuDownloadDiv.innerHTML = `<button id="gpu-download-btn">Download Performance per TCO Chart (High Resolution)</button>`;
+document.getElementById('gpu-chart').parentElement.insertBefore(gpuDownloadDiv, document.getElementById('gpu-chart'));
+
+// Add event listener for GPU chart download
+document.getElementById('gpu-download-btn').addEventListener('click', () => {
+  Plotly.toImage('gpu-chart', {
+    format: 'png',   // or 'svg'
+    height: 800,
+    width: 1200,
+    scale: 2
+  }).then(function (url) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'gpu_chart_high_res.png';
+    link.click();
+  });
+});
+
+const chartContainer = document.getElementById('gpu-chart').parentElement;
+if (!document.getElementById('chart-title-perf-tco')) {
+  const chartTitleDiv = document.createElement('div');
+  chartTitleDiv.id = 'chart-title-perf-tco';
+  chartTitleDiv.classList.add('chart-title');
+  chartTitleDiv.innerHTML = 'Performance per TCO and GPU Count by GPU Type';
+  chartContainer.insertBefore(chartTitleDiv, document.getElementById('gpu-chart'));
+}
+	
 /// ---------- Plotly Stacked TCO Chart ----------
 
 // Prepare the data for the TCO Breakdown
