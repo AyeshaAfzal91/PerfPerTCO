@@ -1648,26 +1648,34 @@ if (!document.getElementById('download-pie-btn')) {
 
 // ---------- Disable other sliders if the user selects Fix Budget and vice versa ----------
 function toggleSliders() {
-  const mode = document.querySelector('input[name="calculationMode"]:checked').value;
+  const checkedRadio = document.querySelector('input[name="calculationMode"]:checked');
+  if (!checkedRadio) return; // prevent null error
 
-  // Show/hide slider containers
-  document.getElementById("budget_slider").style.display = (mode === "budget") ? "block" : "none";
-  document.getElementById("power_slider").style.display = (mode === "power") ? "block" : "none";
-  document.getElementById("performance_slider").style.display = (mode === "performance") ? "block" : "none";
+  const mode = checkedRadio.value;
 
-  // Enable/disable sliders
-  document.getElementById("total_budget").disabled = (mode !== "budget");
-  document.getElementById("max_total_power").disabled = (mode !== "power");
-  document.getElementById("target_performance").disabled = (mode !== "performance");
+  // Loop through each .mode-option
+  document.querySelectorAll('.mode-option').forEach(div => {
+    const radio = div.querySelector('input[type="radio"]');
+    const slider = div.querySelector('input[type="range"]');
+
+    if (radio.value === mode) {
+      div.style.display = "flex"; // show selected
+      slider.disabled = false;
+    } else {
+      div.style.display = "none"; // hide others
+      slider.disabled = true;
+    }
+  });
 }
 
-// Call once to initialize on page load
-toggleSliders();
+// Initialize after DOM is ready
+window.addEventListener('DOMContentLoaded', toggleSliders);
 
-// Update when mode changes
+// Update when user changes mode
 document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
   el.addEventListener('change', toggleSliders);
 });
+
 
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
