@@ -1004,6 +1004,14 @@ GPU_data.forEach((gpu, i) => {
   const power = gpu.power[workload][benchmarkId];
   if (perf === 0 || power === 0) return;
 
+	console.log("POWER DEBUG", {
+  gpu: gpu.name,
+  power,
+  n_gpu,
+  total_power
+});
+
+
   let n_gpu = n_gpu_list[i];
   if (n_gpu === 0) return;
 
