@@ -969,7 +969,7 @@ if (mode === "budget") {
 
         return n_gpu;
     });
-} else if (mode === "performance") {
+} } else if (mode === "performance") {
 
   const targetPerf = getSliderValue("target_performance");
 
@@ -984,6 +984,24 @@ if (mode === "budget") {
 
     if (n_gpu < per_node) return 0;
 
+    // --- NEW: budget feasibility check ---
+    const W_gpu_total = gpu.power[workload][benchmarkId] * system_usage * lifetime;
+    const W_node_baseline_total = W_node_baseline * system_usage * lifetime;
+
+    const gpu_cost_total = 
+      gpu.cost * n_gpu +
+      ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * (W_gpu_total * n_gpu + W_node_baseline_total * n_gpu) / 1000) +
+      C_node_server * (n_gpu / per_node) +
+      C_node_infra * (n_gpu / per_node) +
+      C_node_facility * (n_gpu / per_node) +
+      lifetime * C_maintenance * (n_gpu / per_node) +
+      C_software + lifetime * (C_depreciation + C_subscription + C_uefficiency);
+
+    if (gpu_cost_total > total_budget) {
+      console.warn(`${gpu.name} exceeds available budget for target performance.`);
+    }
+
+    // same_n_gpu logic
     if (same_n_gpu) {
       min_valid_n_gpu = Math.min(min_valid_n_gpu, n_gpu);
       min_valid_n_gpu = Math.floor(min_valid_n_gpu / per_node) * per_node;
@@ -992,6 +1010,7 @@ if (mode === "budget") {
     return n_gpu;
   });
 }
+
 
 	
 // ---------- Compute cost breakdowns ----------
