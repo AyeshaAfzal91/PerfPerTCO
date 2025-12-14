@@ -1649,24 +1649,27 @@ if (!document.getElementById('download-pie-btn')) {
 // ---------- Disable other sliders if the user selects Fix Budget and vice versa ----------
 function toggleSliders() {
   const checkedRadio = document.querySelector('input[name="calculationMode"]:checked');
-  if (!checkedRadio) return; // prevent null error
+  if (!checkedRadio) return;
 
   const mode = checkedRadio.value;
 
-  // Loop through each .mode-option
-  document.querySelectorAll('.mode-option').forEach(div => {
-    const radio = div.querySelector('input[type="radio"]');
-    const slider = div.querySelector('input[type="range"]');
-
-    if (radio.value === mode) {
-      div.style.display = "flex"; // show selected
-      slider.disabled = false;
-    } else {
-      div.style.display = "none"; // hide others
-      slider.disabled = true;
-    }
+  document.querySelectorAll('.mode-slider').forEach(sliderDiv => {
+    sliderDiv.style.display = 'none'; // hide all sliders
   });
+
+  // show only the selected slider
+  const activeSlider = document.getElementById(`slider_${mode}`);
+  if (activeSlider) activeSlider.style.display = 'block';
 }
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', toggleSliders);
+
+// Update when mode changes
+document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
+  el.addEventListener('change', toggleSliders);
+});
+
 
 // Initialize after DOM is ready
 window.addEventListener('DOMContentLoaded', toggleSliders);
