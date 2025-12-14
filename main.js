@@ -1734,7 +1734,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
     ];
 
-    const normBase = base.map(v => v === 0 ? 1 : v);
+    const normBase = base.map(v => v === 0 ? 0.001 : v); // numerical safeguard only: zero baselines are replaced with a small value 0.001 to prevent zero variance, which would otherwise make Sobol indices meaningless and the Monte Carlo standard deviation zero.
     const baseCost = evaluateCost(normBase, i);
     const stds = new Float64Array(numParams);
 
