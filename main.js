@@ -768,14 +768,6 @@ function resetForm() {
     }
   });
 
-  document.querySelectorAll(".chart-title").forEach(el => {
-    if ([
-      "Heatmap: Sensitivity of Parameters across GPUs"
-    ].includes(el.innerText.trim())) {
-      el.remove();
-    }
-  });
-
 document.getElementById("scenario-comparison").innerHTML = "";
 localStorage.removeItem("scenario1");
 localStorage.removeItem("scenario2");
