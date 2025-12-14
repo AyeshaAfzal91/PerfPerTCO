@@ -1344,15 +1344,9 @@ function renderCharts() {
     console.error("Power chart div not found!");
     return;
   }
-
-  // GPU chart
-  Plotly.newPlot('gpu-chart', [perfTrace, gpuTrace], barLayout, { displayModeBar: true });
-
-  // Power chart
-  Plotly.newPlot('power-chart', [powerPerTCOTrace, gpuTrace2], powerLayout, { displayModeBar: true });
-
-  // Perf/Watt chart
-  Plotly.newPlot('perf-watt-chart', [perfPerWattTrace, gpuTrace3], perfWattLayout, { displayModeBar: true });
+	Plotly.newPlot('gpu-chart', [perfTrace, gpuTrace], barLayout, { responsive: true });
+	Plotly.newPlot('power-chart', [powerPerTCOTrace, gpuTrace2], powerLayout, { responsive: true });
+	Plotly.newPlot('perf-watt-chart', [perfPerWattTrace, gpuTrace3], perfWattLayout, { responsive: true });
 }
 
 // Call this after your nonzeroResults is ready
