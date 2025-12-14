@@ -1016,12 +1016,6 @@ if (!gpu.per_node || gpu.per_node <= 0) {
   console.error(`Invalid per_node for GPU ${gpu.name}`, gpu);
   return;
 }
-	console.log("POWER DEBUG", {
-  gpu: gpu.name,
-  power,
-  n_gpu,
-  total_power
-});
 	
   const per_node = gpu.per_node;
   const n_nodes = n_gpu / per_node;
@@ -1053,6 +1047,13 @@ if (!gpu.per_node || gpu.per_node <= 0) {
   const power_per_tco = total_power / used_budget;
   const perf_per_watt_per_tco = total_perf / (total_power / 1000) / used_budget;
 
+	console.log("POWER DEBUG", {
+  gpu: gpu.name,
+  power,
+  n_gpu,
+  total_power
+});
+	
   // Initialize baseline_perf_tco with the first valid perf_per_tco
   if (baseline_perf_tco === 0) baseline_perf_tco = perf_per_tco;
 
