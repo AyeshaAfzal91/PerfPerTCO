@@ -1678,7 +1678,7 @@ function generatePerturbations(N, k, ranges) {
     ];
 
     // Normalize to ~1
-    const normBase = base.map(v => v === 0 ? 1 : v);
+    const normBase = base.map(v => v === 0 ? 0.001 : v); // numerical safeguard only: Zero baselines are replaced with a small value 0.001 to prevent zero variance, which would otherwise make Sobol indices meaningless and the Monte Carlo standard deviation zero.
 
 	const perturbA = generatePerturbations(numSamples, numParams, activeUncertainty);
 	const perturbB = generatePerturbations(numSamples, numParams, activeUncertainty);
