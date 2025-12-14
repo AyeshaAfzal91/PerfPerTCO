@@ -110,22 +110,23 @@
   <span id="v_max_power">1000</span>
 </label>
 
-<label>
-  Fixed Performance Target:
-  <input type="range" id="target_performance"
-         min="1e6" max="1e10" step="1e6"
-         value="1e9"
-         oninput="updateValue('v_perf', this.value)">
+	<label for="target_performance" data-tooltip="Set the maximum total performance for your GPU deployment in ns/day*atoms.">
+ Fixed Performance Target (ns/day*atoms):
+  <input type="range" id="target_performance" min="1e6" max="1e10" value="1e9" step="1e6" 
+         oninput="updateValue('v_perf', this.value); updateAITip()">
   <span id="v_perf">1e9</span>
 </label>
-
+<label>
+  
 <label>
   <input type="radio" name="calculationMode" value="budget" checked onchange="updateAITip()"> Fix Budget
 </label>
 <label>
   <input type="radio" name="calculationMode" value="power" onchange="updateAITip()"> Fix Total Power
 </label>
-
+<label>
+  <input type="radio" name="calculationMode" value="performance" onchange="updateAITip()"> Fix Total Performance
+</label>
   <label for="sameGpuCheckbox">
     <input type="checkbox" id="sameGpuCheckbox" onchange="updateAITip()"> Use same number of GPUs for all GPU types
   </label>
