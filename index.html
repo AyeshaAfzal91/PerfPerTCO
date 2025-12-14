@@ -471,11 +471,16 @@
 
 <div style="text-align: center;">
   <h2>Output by GPU Type: GPU Count, Performance per TCO, Power per TCO, Performance per watt per TCO </h2>
-  <div id="charts-container" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-    <div id="gpu-chart" style="flex: 1 1 300px; min-width: 300px; max-width: 400px;"></div>
-    <div id="power-chart" style="flex: 1 1 300px; min-width: 300px; max-width: 400px;"></div>
-    <div id="perf-watt-chart" style="flex: 1 1 300px; min-width: 300px; max-width: 400px;"></div>
-  </div>
+  <div class="chart-wrapper">
+  <div id="gpu-chart"></div>
+</div>
+<div class="chart-wrapper">
+  <div id="power-chart"></div>
+</div>
+<div class="chart-wrapper">
+  <div id="perf-watt-chart"></div>
+</div>
+
 </div>
   
 <div id="tco-chart-container" style="display: flex; flex-direction: row; gap: 0px; flex-wrap: nowrap; justify-content: space-between; align-items: flex-start; margin-top: 40px;"> 
