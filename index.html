@@ -225,13 +225,17 @@
   </div>
 </div>
 
-<div style="margin-bottom:10px;">
-  <label for="uncertaintyMode"><strong>Uncertainty model:</strong></label>
-  <select id="uncertaintyMode">
-    <option value="uniform">Uniform ±20%</option>
-    <option value="realistic" selected>Realistic (parameter-specific)</option>
-  </select>
-</div>
+<fieldset>
+  <legend>Uncertainty Assumptions</legend>
+
+  <label>
+    Global Uncertainty (Uniform ±%):
+    <input type="range" id="globalUncertainty"
+           min="0" max="50" step="1" value="20">
+    <span id="v_globalUncertainty">20</span>%
+  </label>
+</fieldset>
+
 	
 <div id="aiTips" class="ai-tips">
   <h3>Smart Strategy Tip 💡</h3>
