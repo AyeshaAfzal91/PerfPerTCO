@@ -905,6 +905,7 @@ const operational_components = [];
 let min_valid_n_gpu = Infinity;
 
 const mode = document.querySelector('input[name="calculationMode"]:checked').value;
+let n_gpu_list = [];
 if (mode === "budget") {
 // ---------- Compute n_gpu ----------
 const n_gpu_list = GPU_data.map((gpu, i) => {
