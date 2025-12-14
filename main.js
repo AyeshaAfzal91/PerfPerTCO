@@ -1009,6 +1009,11 @@ GPU_data.forEach((gpu, i) => {
     n_gpu = min_valid_n_gpu;
   }
 
+if (!gpu.per_node || gpu.per_node <= 0) {
+  console.error(`Invalid per_node for GPU ${gpu.name}`, gpu);
+  return;
+}
+	
   const per_node = gpu.per_node;
   const n_nodes = n_gpu / per_node;
 
