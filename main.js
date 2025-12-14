@@ -692,7 +692,7 @@ function resetForm() {
   previousState = {};  // Clear previous state
 
   const allInputs = [
-    "workload", "benchmarkId", "total_budget", "sameGpuCheckbox",
+    "workload", "benchmarkId", "total_budget", "same_n_gpu",
     "C_node_server", "C_node_infra", "C_node_facility", "C_software",
     "C_electricity", "C_PUE", "C_maintenance", "system_usage", "lifetime",
     "W_node_baseline", "C_depreciation", "C_subscription", "C_uefficiency",
@@ -706,7 +706,7 @@ function resetForm() {
   });
 
   const defaultValues = {
-    workload: "GROMACS", benchmarkId: 4, total_budget: 10000000, sameGpuCheckbox: false,
+    workload: "GROMACS", benchmarkId: 4, total_budget: 10000000, same_n_gpu: 240,
     C_node_server: 10000, C_node_infra: 5000, C_node_facility: 0, C_software: 5000,
     C_electricity: 0.21, C_PUE: 1.2, C_maintenance: 200, system_usage: 8760, lifetime: 5,
     W_node_baseline: 500, C_depreciation: 0, C_subscription: 0, C_uefficiency: 0,
@@ -745,7 +745,6 @@ function resetForm() {
   document.getElementById("pie-tco-chart").innerHTML = "";
   document.getElementById("gpuTornadoPlots").innerHTML = "";
   document.getElementById("sensitivityHeatmap").innerHTML = "";
-  document.getElementById("elasticityTableContainer").innerHTML = "";
   document.getElementById("blogOutput").value = "";
   document.getElementById("download-csv").style.display = "none";
   document.getElementById("gpuPerfPowerHeatmap").innerHTML = "";
@@ -872,9 +871,8 @@ function calculate() {
 console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.name));
 
   const workload = document.getElementById("workload").value;
-  const same_n_gpu = document.getElementById("sameGpuCheckbox").checked;
   const benchmarkId = parseInt(document.getElementById("benchmarkId").value); // Get benchmarkId
-
+  const same_n_gpu = getSliderValue("same_n_gpu");
   const C_node_server = getSliderValue("C_node_server");
   const C_node_infra = getSliderValue("C_node_infra");
   const C_node_facility = getSliderValue("C_node_facility");
@@ -1653,31 +1651,28 @@ function toggleSliders() {
 
   const mode = checkedRadio.value;
 
+  // Hide all slider containers
   document.querySelectorAll('.mode-slider').forEach(sliderDiv => {
-    sliderDiv.style.display = 'none'; // hide all sliders
+    sliderDiv.style.display = 'none';
   });
 
-  // show only the selected slider
+  // Show only the slider corresponding to the selected mode
   const activeSlider = document.getElementById(`slider_${mode}`);
   if (activeSlider) activeSlider.style.display = 'block';
 }
 
-// Initialize on page load
-window.addEventListener('DOMContentLoaded', toggleSliders);
+// Initialize on page load and when mode changes
+function initSliderToggle() {
+  toggleSliders(); // initial setup
 
-// Update when mode changes
-document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
-  el.addEventListener('change', toggleSliders);
-});
+  document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
+    el.addEventListener('change', toggleSliders);
+  });
+}
 
+// Run initialization after DOM is ready
+window.addEventListener('DOMContentLoaded', initSliderToggle);
 
-// Initialize after DOM is ready
-window.addEventListener('DOMContentLoaded', toggleSliders);
-
-// Update when user changes mode
-document.querySelectorAll('input[name="calculationMode"]').forEach(el => {
-  el.addEventListener('change', toggleSliders);
-});
 
 
 	
