@@ -721,3 +721,8 @@ td strong {
     opacity: 0.8;
 }
 
+#budget_slider, #power_slider, #performance_slider {
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
