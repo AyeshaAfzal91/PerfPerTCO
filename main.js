@@ -1583,29 +1583,31 @@ function getActiveUncertaintyVector() {
 const globalSlider = document.getElementById("globalUncertainty");
 const globalLockIcon = document.getElementById("globalLockIcon");
 
-// Sync sliders with display and handle lock icon
+// Central function to sync sliders and lock icon
 function updateSlidersFromGlobal() {
   const globalVal = parseFloat(globalSlider.value);
   const isGlobal = globalVal > 0;
 
+  // Update global display
+  document.getElementById("v_globalUncertainty").innerText = globalVal;
+
   // Show/hide lock
   globalLockIcon.style.display = isGlobal ? "inline" : "none";
 
+  // Update individual sliders
   document.querySelectorAll(".paramUncertainty").forEach(slider => {
     if (isGlobal) {
       slider.disabled = true;
       slider.value = globalVal;
-      const span = slider.parentElement.querySelector(".uncValue");
-      if (span) span.innerText = globalVal;
     } else {
       slider.disabled = false;
-      const span = slider.parentElement.querySelector(".uncValue");
-      if (span) span.innerText = slider.value;
+      // keep current value
     }
-  });
 
-  // Update global value display
-  document.getElementById("v_globalUncertainty").innerText = globalVal;
+    // Update the span next to the slider
+    const span = slider.parentElement.querySelector(".uncValue");
+    if (span) span.innerText = slider.value;
+  });
 }
 
 // Listen for global slider changes
@@ -1618,6 +1620,9 @@ document.addEventListener("input", e => {
     if (span) span.innerText = e.target.value;
   }
 });
+
+// Initialize sliders on page load
+updateSlidersFromGlobal();
 
 
 
