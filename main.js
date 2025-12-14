@@ -1004,14 +1004,6 @@ GPU_data.forEach((gpu, i) => {
   const power = gpu.power[workload][benchmarkId];
   if (perf === 0 || power === 0) return;
 
-	console.log("POWER DEBUG", {
-  gpu: gpu.name,
-  power,
-  n_gpu,
-  total_power
-});
-
-
   let n_gpu = n_gpu_list[i];
   if (n_gpu === 0) return;
 
@@ -1024,6 +1016,12 @@ if (!gpu.per_node || gpu.per_node <= 0) {
   console.error(`Invalid per_node for GPU ${gpu.name}`, gpu);
   return;
 }
+	console.log("POWER DEBUG", {
+  gpu: gpu.name,
+  power,
+  n_gpu,
+  total_power
+});
 	
   const per_node = gpu.per_node;
   const n_nodes = n_gpu / per_node;
