@@ -103,6 +103,20 @@
     <span id="v_budget">10000000</span>
   </label>    
 
+	<label for="max_total_power" data-tooltip="Set the maximum total power for your GPU deployment in kW.">
+  Max Total Power (kW):
+  <input type="range" id="max_total_power" min="0" max="5000" value="1000" step="10" 
+         oninput="updateValue('v_max_power', this.value); updateAITip()">
+  <span id="v_max_power">1000</span>
+</label>
+
+<label>
+  <input type="radio" name="calculationMode" value="budget" checked onchange="updateAITip()"> Fix Budget
+</label>
+<label>
+  <input type="radio" name="calculationMode" value="power" onchange="updateAITip()"> Fix Total Power
+</label>
+
   <label for="sameGpuCheckbox">
     <input type="checkbox" id="sameGpuCheckbox" onchange="updateAITip()"> Use same number of GPUs for all GPU types
   </label>
