@@ -770,8 +770,7 @@ function resetForm() {
 
   document.querySelectorAll(".chart-title").forEach(el => {
     if ([
-      "Heatmap: Sensitivity of Parameters across GPUs",
-      "TCO Breakdown (Capital vs Operational costs)"
+      "Heatmap: Sensitivity of Parameters across GPUs"
     ].includes(el.innerText.trim())) {
       el.remove();
     }
@@ -1477,15 +1476,6 @@ legend: {
 
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
-
-// Add the chart title if it doesn't exist already
-if (!document.getElementById('chart-title')) {
-  const chartTitleDiv = document.createElement('div');
-  chartTitleDiv.id = 'chart-title-tco-breakdown';  // Give it an ID to avoid duplication
-  chartTitleDiv.classList.add('chart-title');
-  chartTitleDiv.innerHTML = 'TCO Breakdown (Capital vs Operational costs)';
-  document.getElementById('stacked-tco-chart').parentElement.insertBefore(chartTitleDiv, document.getElementById('stacked-tco-chart'));
-}
 
 // Add a button to download the plot as PNG or SVG with high resolution
 const downloadButtonDiv = document.createElement('div');
