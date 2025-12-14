@@ -111,6 +111,15 @@
 </label>
 
 <label>
+  Fixed Performance Target:
+  <input type="range" id="target_performance"
+         min="1e6" max="1e10" step="1e6"
+         value="1e9"
+         oninput="updateValue('v_perf', this.value)">
+  <span id="v_perf">1e9</span>
+</label>
+
+<label>
   <input type="radio" name="calculationMode" value="budget" checked onchange="updateAITip()"> Fix Budget
 </label>
 <label>
