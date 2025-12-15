@@ -1836,9 +1836,17 @@ ACTIVE_METRICS.forEach(metric => {
         return dTCO.map((d, idx) => metric === "tco" ? 100 * (baseValues[idx] / TCO) * d : -100 * (baseValues[idx] / TCO) * d);
     }).filter(Boolean);
 
-    allElasticities[metric] = elasticities.length ? makePlainArray(safeTranspose(elasticities)) : [];
-    allSobol[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(computeTotalOrderSobolNormalized(2000, metric))));
-    allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000, metric))));
+    // Safe helpers
+const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
+const safeMakePlainArray = arr => arr && arr.length ? arr.map(row => Array.from(row)) : [];
+const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossDimension(arr) : [];
+
+// Updated assignments
+allElasticities[metric] = elasticities.length ? safeMakePlainArray(safeTranspose(elasticities)) : [];
+const sobolRaw = computeTotalOrderSobolNormalized(2000, metric) || [];
+allSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolRaw));
+const monteCarloRaw = monteCarloUncertaintyNormalized(2000, metric) || [];
+allMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloRaw));
 
     console.log('Elasticities for metric', metric, elasticities.length);
 });
