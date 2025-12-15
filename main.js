@@ -2031,16 +2031,23 @@ const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
 
 // ---------- Prepare Heatmap Data ----------
 // Elasticity: keep as before (Transposed: Parameters x GPUs)
-const zElasticity = safeMakePlainArray(transpose(elasticities));
+const zElasticity = {}; // store per metric
 
-// Sobol: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
-// Normalize across all GPUs for each parameter to make differences visible
-const zSobol = safeMakePlainArray(normalizeAcrossDimension(safeMakePlainArray(sobolIndicesOptimized)));
+ACTIVE_METRICS.forEach(metric => {
+    zElasticity[metric] = allElasticities[metric]; // already safeTransposed
+});
 
-// Monte Carlo: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
-// Normalize across all GPUs for each parameter
-const zMonteCarlo = safeMakePlainArray(normalizeAcrossDimension(safeMakePlainArray(monteCarloParamResults)));
+// Sobol
+const zSobol = {};
+ACTIVE_METRICS.forEach(metric => {
+    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolIndicesOptimized[metric]));
+});
 
+// Monte Carlo
+const zMonteCarlo = {};
+ACTIVE_METRICS.forEach(metric => {
+    zMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloParamResults[metric]));
+});
 
 // Compute global max for scaling
 const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
@@ -2056,9 +2063,9 @@ ACTIVE_METRICS.forEach((metric, mIdx) => {
     heatmapData.push(
         // Elasticity
         {
-            z: allElasticities[metric],
-            x: window.results.map(r => r.name),
-            y: elasticityLabels,
+            z: zElasticity[metric],
+        	x: window.results.map(r => r.name),
+        	y: elasticityLabels,
             type: "heatmap",
             colorscale: [[0,"rgb(0,0,255)"], [0.5,"rgb(255,255,255)"], [1,"rgb(255,0,0)"]],
             zmin: -Math.max(...flatten2D(allElasticities[metric]).map(Math.abs),1),
@@ -2069,7 +2076,7 @@ ACTIVE_METRICS.forEach((metric, mIdx) => {
         },
         // Sobol
         {
-            z: allSobol[metric],
+            z: zSobol[metric],
             x: window.results.map(r => r.name),
             y: elasticityLabels,
             type: "heatmap",
@@ -2082,7 +2089,7 @@ ACTIVE_METRICS.forEach((metric, mIdx) => {
         },
         // Monte Carlo
         {
-            z: allMonteCarlo[metric],
+            z: zMonteCarlo[metric],
             x: window.results.map(r => r.name),
             y: elasticityLabels,
             type: "heatmap",
