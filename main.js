@@ -2145,43 +2145,43 @@ console.log("Heatmap sizes:", Object.values(zElasticity).map(z => z.length), win
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
-	// ---------- Tornado Charts with Metric Toggle (also in %) ----------
+// ---------- Tornado Charts (also in %) (with metric toggle) ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
 tornadoContainer.innerHTML = "";
 
-// Loop over GPUs
+const DEFAULT_METRIC = ACTIVE_METRICS[0];
+
 window.results.forEach((gpu, i) => {
   const gpuName = gpu.name;
 
-  // Prepare traces for each metric
+  // Build traces: 3 per metric (Elasticity, Sobol, MC)
   const traces = ACTIVE_METRICS.flatMap(metric => [
     {
-      x: zElasticity[metric].map(row => Math.abs(row[i])), // column i for this GPU
+      x: allElasticities[metric].map(row => Math.abs(row[i])),
       y: elasticityLabels,
-      name: `Elasticity (%) - ${metric}`,
+      name: "Elasticity (%)",
       type: "bar",
       orientation: "h",
-      visible: metric === ACTIVE_METRICS[0] // first metric visible
+      visible: metric === DEFAULT_METRIC
     },
     {
-      x: zSobol[metric].map(row => row[i]),
+      x: allSobol[metric].map(row => row[i]),
       y: elasticityLabels,
-      name: `Sobol (%) - ${metric}`,
+      name: "Sobol (%)",
       type: "bar",
       orientation: "h",
-      visible: false
+      visible: metric === DEFAULT_METRIC
     },
     {
-      x: zMonteCarlo[metric].map(row => row[i]),
+      x: allMonteCarlo[metric].map(row => row[i]),
       y: elasticityLabels,
-      name: `Monte Carlo (%) - ${metric}`,
+      name: "Monte Carlo (%)",
       type: "bar",
       orientation: "h",
-      visible: false
+      visible: metric === DEFAULT_METRIC
     }
   ]);
 
-  // Layout with dropdown
   const layout = {
     title: `${gpuName} – % Uncertainty Contribution`,
     barmode: "group",
@@ -2190,6 +2190,7 @@ window.results.forEach((gpu, i) => {
     width: 600,
     xaxis: { title: "% Uncertainty Contribution", automargin: true },
     yaxis: { automargin: true },
+
     updatemenus: [
       {
         type: "dropdown",
@@ -2197,36 +2198,26 @@ window.results.forEach((gpu, i) => {
         y: 0.8,
         xanchor: "left",
         yanchor: "middle",
-        buttons: ACTIVE_METRICS.flatMap((metric, idx) => [
-          {
-            label: `Elasticity - ${metric}`,
-            method: "update",
-            args: [{ visible: traces.map((_, i) => i === idx * 3) }]
-          },
-          {
-            label: `Sobol - ${metric}`,
-            method: "update",
-            args: [{ visible: traces.map((_, i) => i === idx * 3 + 1) }]
-          },
-          {
-            label: `Monte Carlo - ${metric}`,
-            method: "update",
-            args: [{ visible: traces.map((_, i) => i === idx * 3 + 2) }]
-          }
-        ])
+        buttons: ACTIVE_METRICS.map((metric, idx) => ({
+          label: metric,
+          method: "update",
+          args: [{
+            visible: traces.map((_, tIdx) =>
+              tIdx >= idx * 3 && tIdx < idx * 3 + 3
+            )
+          }]
+        }))
       }
     ],
+
     annotations: [
       {
-        text: "Select Metric:",
+        text: "Select Output Metric:",
         x: 1.25,
-        y: 0.75,
+        y: 0.74,
         xref: "paper",
         yref: "paper",
-        xanchor: "left",
-        yanchor: "bottom",
-        showarrow: false,
-        font: { size: 14 }
+        showarrow: false
       }
     ]
   };
@@ -2237,7 +2228,6 @@ window.results.forEach((gpu, i) => {
 
   Plotly.newPlot(chartDiv.id, traces, layout);
 });
-
 
 
 // downloadCSV
