@@ -1779,12 +1779,12 @@ updateSlidersFromGlobal();
 const ACTIVE_METRICS = ["tco", "perf_per_tco", "power_per_tco", "perf_per_watt_per_tco"];
 
 // ---------- Compute Sensitivities for all metrics ----------
+const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
+const safeMakePlainArray = arr => arr && arr.length ? arr.map(row => Array.from(row)) : [];
+const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossDimension(arr) : [];
 const allElasticities = {};
 const allSobol = {};
 const allMonteCarlo = {};
-
-const safeTranspose = m => m.length ? m[0].map((_, i) => m.map(row => row[i])) : [];
-const makePlainArray = arr => arr.map(row => Array.from(row));
 
 ACTIVE_METRICS.forEach(metric => {
     // Elasticity
@@ -1802,7 +1802,6 @@ ACTIVE_METRICS.forEach(metric => {
         const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
         const TCO = r.total_cost;
 
-        // Metric value
         let metricValue;
         switch (metric) {
             case "tco": metricValue = TCO; break;
@@ -1836,21 +1835,15 @@ ACTIVE_METRICS.forEach(metric => {
         return dTCO.map((d, idx) => metric === "tco" ? 100 * (baseValues[idx] / TCO) * d : -100 * (baseValues[idx] / TCO) * d);
     }).filter(Boolean);
 
-    // Safe helpers
-const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
-const safeMakePlainArray = arr => arr && arr.length ? arr.map(row => Array.from(row)) : [];
-const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossDimension(arr) : [];
-
-// Updated assignments
-allElasticities[metric] = elasticities.length ? safeMakePlainArray(safeTranspose(elasticities)) : [];
-const sobolRaw = computeTotalOrderSobolNormalized(2000, metric) || [];
-allSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolRaw));
-const monteCarloRaw = monteCarloUncertaintyNormalized(2000, metric) || [];
-allMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloRaw));
+    // Safe assignments
+    allElasticities[metric] = elasticities.length ? safeMakePlainArray(safeTranspose(elasticities)) : [];
+    const sobolRaw = computeTotalOrderSobolNormalized(2000, metric) || [];
+    allSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolRaw));
+    const monteCarloRaw = monteCarloUncertaintyNormalized(2000, metric) || [];
+    allMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloRaw));
 
     console.log('Elasticities for metric', metric, elasticities.length);
 });
-
 
 // ---------- Shared Cost Evaluation Function ----------
 function evaluateMetric(params, gpuIndex, metricKey) {
