@@ -1833,8 +1833,8 @@ ACTIVE_METRICS.forEach(metric => {
     }).filter(Boolean);
 
     allElasticities[metric] = makePlainArray(transpose(elasticities));
-    allSobol[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(computeTotalOrderSobolNormalized(2000))));
-    allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000))));
+    allSobol[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(computeTotalOrderSobolNormalized(2000, metric))));
+    allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000, metric))));
 });
 
 console.log('Elasticities for metric', metric, elasticities);
@@ -1899,7 +1899,7 @@ function evaluateMetric(params, gpuIndex, metricKey) {
 
 
 // ---------- Sobol Total-Order Sensitivity (robust) ----------
-function computeTotalOrderSobolNormalized(numSamples = 2000) {
+function computeTotalOrderSobolNormalized(numSamples = 2000, metric) {
   const numGPUs = window.results.length;
   const numParams = 15;
   const sobolResults = new Array(numGPUs);
@@ -1968,7 +1968,7 @@ const sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
 
 
 // ---------- Monte Carlo (% std / base cost) ----------
-function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) {
+function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation = 0.2) {
   const results = [];
   const numParams = 15;
   const activeUncertainty = getActiveUncertaintyVector();
@@ -1990,7 +1990,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       for (let k = 0; k < numSamples; k++) {
         const params = [...normBase];
 		params[j] *= 1 + (Math.random() - 0.5) * 2 * activeUncertainty[j];
-        samples[k] = evaluateMetric(params, i, ACTIVE_METRIC);
+        samples[k] = evaluateMetric(params, i, metric);
       }
       const mean = samples.reduce((s, v) => s + v, 0) / numSamples;
       const variance = samples.reduce((s, v) => s + (v - mean) ** 2, 0) / (numSamples - 1);
