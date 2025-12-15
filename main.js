@@ -2016,27 +2016,25 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation
 
   return results;
 }
-
+	
 const sobolIndicesOptimized = {};
 const monteCarloParamResults = {};
 
-// --- Compute Sobol for TCO exactly as Version A ---
-sobolIndicesOptimized["tco"] = computeTotalOrderSobolNormalized(2000, "tco") || [];
-monteCarloParamResults["tco"] = monteCarloUncertaintyNormalized(2000, "tco") || [];
+// --- Compute TCO exactly as Version A ---
+window.results.forEach((r, g) => {
+    const gpu = GPU_data[r.originalGPUIndex];
 
-// --- For other metrics, reuse TCO Sobol if you want exact same scaling ---
-ACTIVE_METRICS.forEach(metric => {
-    if (metric !== "tco") {
-        // Option 1: Copy TCO Sobol (exact match)
-        sobolIndicesOptimized[metric] = JSON.parse(JSON.stringify(sobolIndicesOptimized["tco"]));
-        monteCarloParamResults[metric] = JSON.parse(JSON.stringify(monteCarloParamResults["tco"]));
+    const base = [
+        gpu.cost, r.C_node_server, r.C_node_infra, r.C_node_facility, r.C_software,
+        r.C_electricity, r.C_heatreuseperkWh, r.PUE, r.C_maintenance, r.system_usage,
+        r.lifetime, r.W_node_baseline, r.C_depreciation, r.C_subscription, r.C_uefficiency
+    ];
 
-        // Option 2: Or, uncomment to compute metric-specific Sobol (will differ)
-        // sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
-        // monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
-    }
+    const activeUncertainty = defaultRealisticUncertainty; // Use same fixed uncertainties as Version A
+
+    sobolIndicesOptimized["tco"] = computeTotalOrderSobolNormalized(2000, "tco", base, activeUncertainty);
+    monteCarloParamResults["tco"] = monteCarloUncertaintyNormalized(2000, "tco", base, activeUncertainty);
 });
-
 
 
 // ---------- Helper Function ----------
