@@ -2146,6 +2146,10 @@ console.log("Heatmap sizes:", Object.values(zElasticity).map(z => z.length), win
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
 // ---------- Tornado Charts (also in %) (with metric toggle) ----------
+function getGPUVector(matrix, gpuIndex) {
+  // matrix is [parameter][gpu]
+  return matrix.map(row => row[gpuIndex]);
+}
 function renderTornadoPlots(metric) {
   const tornadoContainer = document.getElementById("gpuTornadoPlots");
   tornadoContainer.innerHTML = "";
@@ -2153,8 +2157,12 @@ function renderTornadoPlots(metric) {
   window.results.forEach((gpu, i) => {
     const gpuName = gpu.name;
 
+    const elasticityVec = getGPUVector(allElasticities[metric], i);
+    const sobolVec      = getGPUVector(allSobol[metric], i);
+    const mcVec         = getGPUVector(allMonteCarlo[metric], i);
+
     const traceElasticity = {
-      x: allElasticities[metric][i].map(Math.abs),
+      x: elasticityVec.map(Math.abs),
       y: elasticityLabels,
       name: "Elasticity (%)",
       type: "bar",
@@ -2162,7 +2170,7 @@ function renderTornadoPlots(metric) {
     };
 
     const traceSobol = {
-      x: allSobol[metric][i],
+      x: sobolVec,
       y: elasticityLabels,
       name: "Sobol (%)",
       type: "bar",
@@ -2170,7 +2178,7 @@ function renderTornadoPlots(metric) {
     };
 
     const traceMC = {
-      x: allMonteCarlo[metric][i],
+      x: mcVec,
       y: elasticityLabels,
       name: "Monte Carlo (%)",
       type: "bar",
@@ -2194,6 +2202,7 @@ function renderTornadoPlots(metric) {
     Plotly.newPlot(chartDiv, [traceElasticity, traceSobol, traceMC], layout);
   });
 }
+	
 renderTornadoPlots("tco");
 
 document
