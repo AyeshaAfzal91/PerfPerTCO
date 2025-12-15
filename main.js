@@ -1837,6 +1837,8 @@ ACTIVE_METRICS.forEach(metric => {
     allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000))));
 });
 
+console.log('Elasticities for metric', metric, elasticities);
+
 // ---------- Shared Cost Evaluation Function ----------
 function evaluateMetric(params, gpuIndex, metricKey) {
   const r = window.results[gpuIndex];
@@ -1941,7 +1943,7 @@ function generatePerturbations(N, k, ranges) {
       B.push(rowB);
     }
 
-    const Y_A = A.map(a => evaluateMetric(a, g, ACTIVE_METRIC)); // calls evaluateCost on each row of A, producing a number for each sample. After this, Y_A = [y_1, y_2, ..., y_N], just numbers.
+    const Y_A = A.map(a => evaluateMetric(a, g, metric)); // calls evaluateCost on each row of A, producing a number for each sample. After this, Y_A = [y_1, y_2, ..., y_N], just numbers.
     const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples; // sums the numbers in Y_A as a = the running sum and b = the current element of the array. After summing, we divide by numSamples.
     const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1); // s = the accumulator (sum of squared differences), y = the current element of Y_A. (y - meanYA) ** 2 = the squared deviation of the element from the mean. After summing all squared deviations, we divide by (numSamples - 1) to get the sample variance.
     const S_T = new Float64Array(numParams);
@@ -1951,7 +1953,7 @@ function generatePerturbations(N, k, ranges) {
       for (let i = 0; i < numSamples; i++) {
         const hybrid = new Float64Array(A[i]);
         hybrid[j] = B[i][j];
-        sumSqDiff += (Y_A[i] - evaluateMetric(hybrid, g, ACTIVE_METRIC)) ** 2;
+        sumSqDiff += (Y_A[i] - evaluateMetric(hybrid, g, metric)) ** 2;
       }
       S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); // % of total variance
     }
@@ -1980,7 +1982,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
     ];
 
     const normBase = base.map(v => v === 0 ? 0.001 : v); // numerical safeguard only: zero baselines are replaced with a small value 0.001 to prevent zero variance, which would otherwise make Sobol indices meaningless and the Monte Carlo standard deviation zero.
-    const baseMetric = evaluateMetric(normBase, i, ACTIVE_METRIC);
+    const baseMetric = evaluateMetric(normBase, i, metric);
     const stds = new Float64Array(numParams);
 
     for (let j = 0; j < numParams; j++) {
