@@ -2022,28 +2022,8 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation
 
 const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 
-// ---------- Helper Functions ----------
+// ---------- Helper Function ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
-
-// Function to normalize values across a dimension (e.g., across all GPUs for one parameter)
-const normalizeAcrossDimension = arr => {
-    // 1. Transpose to group by parameter (rows are parameters, columns are GPUs)
-    // The input 'arr' here is expected to be an array of arrays (e.g., [[p1_g1, p2_g1...], [p1_g2, p2_g2...]])
-    const transposed = transpose(arr);
-    
-    // 2. Normalize each parameter row based on its max value across all GPUs
-    const normalizedTransposed = transposed.map(row => {
-        // Ensure 'row' is a standard array for .map() and Math.max() to work correctly
-        const plainRow = Array.from(row);
-        
-        const maxVal = Math.max(...plainRow.map(Math.abs));
-        if (maxVal < 1e-6) return plainRow.map(() => 0); // Avoid division by zero/tiny numbers
-        return plainRow.map(v => (v / maxVal) * 100);
-    });
-    
-    // 3. The result is already correctly shaped for Plotly (Parameters x GPUs)
-    return normalizedTransposed;
-};
 
 // ---------- Prepare Heatmap Data ----------
 // Elasticity: keep as before (Transposed: Parameters x GPUs)
