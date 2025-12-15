@@ -2031,15 +2031,15 @@ const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
 
 // ---------- Prepare Heatmap Data ----------
 // Elasticity: keep as before (Transposed: Parameters x GPUs)
-const zElasticity = makePlainArray(transpose(elasticities));
+const zElasticity = SafeMakePlainArray(transpose(elasticities));
 
 // Sobol: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
 // Normalize across all GPUs for each parameter to make differences visible
-const zSobol = makePlainArray(normalizeAcrossDimension(makePlainArray(sobolIndicesOptimized)));
+const zSobol = SafeMakePlainArray(normalizeAcrossDimension(makePlainArray(sobolIndicesOptimized)));
 
 // Monte Carlo: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
 // Normalize across all GPUs for each parameter
-const zMonteCarlo = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloParamResults)));
+const zMonteCarlo = SafeMakePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloParamResults)));
 
 
 // Compute global max for scaling
