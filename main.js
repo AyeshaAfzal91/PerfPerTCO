@@ -2157,9 +2157,10 @@ function renderTornadoPlots(metric) {
   window.results.forEach((gpu, i) => {
     const gpuName = gpu.name;
 
+    // ✅ RAW (not normalized)
     const elasticityVec = getGPUVector(allElasticities[metric], i);
-    const sobolVec      = getGPUVector(allSobol[metric], i);
-    const mcVec         = getGPUVector(allMonteCarlo[metric], i);
+    const sobolVec = sobolIndicesOptimized[metric][i];
+    const mcVec = monteCarloParamResults[metric][i];
 
     const traceElasticity = {
       x: elasticityVec.map(Math.abs),
@@ -2191,7 +2192,11 @@ function renderTornadoPlots(metric) {
       margin: { l: 200, r: 40, t: 50, b: 30 },
       height: 500,
       width: 600,
-      xaxis: { title: "% Uncertainty Contribution", automargin: true },
+      xaxis: {
+        title: "% Uncertainty Contribution",
+        automargin: true,
+        rangemode: "tozero"
+      },
       yaxis: { automargin: true }
     };
 
