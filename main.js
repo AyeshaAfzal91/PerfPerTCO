@@ -2028,31 +2028,33 @@ ACTIVE_METRICS.forEach(metric => {
 
 // ---------- Helper Function ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
+const flatten2D = arr => Array.isArray(arr) ? arr.reduce((acc, row) => acc.concat(row), []) : [];
 
 // ---------- Prepare Heatmap Data ----------
 // Elasticity: keep as before (Transposed: Parameters x GPUs)
 const zElasticity = {}; // store per metric
 
 ACTIVE_METRICS.forEach(metric => {
-    zElasticity[metric] = allElasticities[metric]; // already safeTransposed
+    zElasticity[metric] = allElasticities[metric] || [[]]; // fallback to empty 2D array
 });
 
 // Sobol
 const zSobol = {};
 ACTIVE_METRICS.forEach(metric => {
-    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolIndicesOptimized[metric]));
+    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolIndicesOptimized[metric] || [[]]));
 });
 
 // Monte Carlo
 const zMonteCarlo = {};
 ACTIVE_METRICS.forEach(metric => {
-    zMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloParamResults[metric]));
+    zMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloParamResults[metric] || [[]]));
 });
 
-// Compute global max for scaling
-const flatten2D = arr => arr.reduce((acc, row) => acc.concat(row), []);
-// For normalized data, max is 100. For elasticity, calculate max.
-const zMaxElasticity = Math.max(...flatten2D(zElasticity).map(Math.abs), 1);
+// Compute global max for scaling per metric
+const zMaxElasticity = {};
+ACTIVE_METRICS.forEach(metric => {
+    zMaxElasticity[metric] = Math.max(...flatten2D(zElasticity[metric]).map(Math.abs), 1);
+});
 const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
@@ -2060,18 +2062,19 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 const heatmapData = [];
 
 ACTIVE_METRICS.forEach((metric, mIdx) => {
+    const maxElastic = zMaxElasticity[metric];
     heatmapData.push(
         // Elasticity
         {
             z: zElasticity[metric],
-        	x: window.results.map(r => r.name),
-        	y: elasticityLabels,
+            x: window.results.map(r => r.name),
+            y: elasticityLabels,
             type: "heatmap",
             colorscale: [[0,"rgb(0,0,255)"], [0.5,"rgb(255,255,255)"], [1,"rgb(255,0,0)"]],
-            zmin: -Math.max(...flatten2D(allElasticities[metric]).map(Math.abs),1),
-            zmax: Math.max(...flatten2D(allElasticities[metric]).map(Math.abs),1),
+            zmin: -maxElastic,
+            zmax: maxElastic,
             colorbar: { title: `Elasticity (%) - ${metric}` },
-            visible: mIdx===0, // only first metric visible initially
+            visible: mIdx===0,
             hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Elasticity: %{z:.2f}%<extra></extra>'
         },
         // Sobol
@@ -2102,7 +2105,6 @@ ACTIVE_METRICS.forEach((metric, mIdx) => {
         }
     );
 });
-
 
 // ---------- Heatmap Layout ----------
 const heatmapLayout = {
@@ -2137,9 +2139,12 @@ const heatmapLayout = {
         font: { size: 14 }
     }]
 };
-console.log(zElasticity.length, elasticityLabels.length, zElasticity[0].length, window.results.length);
+
+console.log("Elasticity Metrics:", Object.keys(zElasticity));
+console.log("Heatmap sizes:", Object.values(zElasticity).map(z => z.length), window.results.length);
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 // ---------- Tornado Charts (also in %) ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
