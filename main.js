@@ -1794,8 +1794,8 @@ const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossD
 const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
 const safeMakePlainArray = arr => arr && arr.length ? arr.map(row => Array.from(row)) : [];
 const allElasticities = {};
-const allSobol = {};
-const allMonteCarlo = {};
+const sobolIndicesOptimized = {};
+const monteCarloParamResults = {};
 
 ACTIVE_METRICS.forEach(metric => {
     // Elasticity
@@ -1847,6 +1847,7 @@ ACTIVE_METRICS.forEach(metric => {
     }).filter(Boolean);
 
     // Safe assignments
+	allElasticities[metric] = elasticities.length ? safeMakePlainArray(safeTranspose(elasticities)) : [];
 	sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
 	monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
 	console.log('Elasticities for metric', metric, elasticities.length);	
@@ -2012,9 +2013,6 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation
 
   return results;
 }
-	
-const sobolIndicesOptimized = {};
-const monteCarloParamResults = {};
 
 // ---------- Helper Function ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
