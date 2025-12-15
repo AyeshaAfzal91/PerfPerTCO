@@ -468,6 +468,7 @@
 </fieldset>
 </form>
 <div style="text-align: center; margin-top: 20px;">
+  <h3>📊 Results </h3>
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()"> 🧮 Calculate</button>
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()"> 🔄 Reset All</button> 
   <button id="shareBtn" type="button" class="medium-button">🔗 Share Results</button>
@@ -476,8 +477,26 @@
 </div>
 
 <div style="text-align: center; margin-top: 20px;">
-  <h3>📊 Models</h3>
-  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
+  <h3>📊 Show Models</h3>
+  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show TCO Model</button>
+  <div id="password-prompt" style="display: none; margin-top: 10px;">
+  <label for="password">Enter Password:</label>
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="validatePassword()">Submit</button>
+  <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
+  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Performance Model</button>
+  <div id="password-prompt" style="display: none; margin-top: 10px;">
+  <label for="password">Enter Password:</label>
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="validatePassword()">Submit</button>
+  <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
+	<button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Power Model</button>
+  <div id="password-prompt" style="display: none; margin-top: 10px;">
+  <label for="password">Enter Password:</label>
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="validatePassword()">Submit</button>
+  <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
+  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Sensitivity and Uncertainty Model</button>
   <div id="password-prompt" style="display: none; margin-top: 10px;">
   <label for="password">Enter Password:</label>
   <input type="password" id="password" placeholder="Password">
