@@ -2060,90 +2060,95 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const heatmapData = [];
+const metrics = ACTIVE_METRICS; // 4 metrics
 
-ACTIVE_METRICS.forEach((metric, mIdx) => {
-    const maxElastic = zMaxElasticity[metric];
-    heatmapData.push(
-        // Elasticity
-        {
-            z: zElasticity[metric],
-            x: window.results.map(r => r.name),
-            y: elasticityLabels,
-            type: "heatmap",
-            colorscale: [[0,"rgb(0,0,255)"], [0.5,"rgb(255,255,255)"], [1,"rgb(255,0,0)"]],
-            zmin: -maxElastic,
-            zmax: maxElastic,
-            colorbar: { title: `Elasticity (%) - ${metric}` },
-            visible: mIdx===0,
-            hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Elasticity: %{z:.2f}%<extra></extra>'
-        },
-        // Sobol
-        {
-            z: zSobol[metric],
-            x: window.results.map(r => r.name),
-            y: elasticityLabels,
-            type: "heatmap",
-            colorscale: "Viridis",
-            zmin: 0,
-            zmax: 100,
-            colorbar: { title: `Sobol (Rel. %) - ${metric}` },
-            visible: false,
-            hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Sobol: %{z:.2f}%<extra></extra>'
-        },
-        // Monte Carlo
-        {
-            z: zMonteCarlo[metric],
-            x: window.results.map(r => r.name),
-            y: elasticityLabels,
-            type: "heatmap",
-            colorscale: "Cividis",
-            zmin: 0,
-            zmax: 100,
-            colorbar: { title: `Monte Carlo (Rel. %) - ${metric}` },
-            visible: false,
-            hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>MC: %{z:.2f}%<extra></extra>'
-        }
-    );
+const methods = [
+  { key: "elasticity", title: "Elasticity (%)" },
+  { key: "sobol", title: "Sobol (Rel. %)" },
+  { key: "mc", title: "Monte Carlo (Rel. %)" }
+];
+
+methods.forEach((method, methodIdx) => {
+  metrics.forEach((metric, metricIdx) => {
+    let z, zmin, zmax, colorscale;
+
+    if (method.key === "elasticity") {
+      z = zElasticity[metric];
+      zmin = -zMaxElasticity[metric];
+      zmax = zMaxElasticity[metric];
+      colorscale = [[0,"rgb(0,0,255)"], [0.5,"rgb(255,255,255)"], [1,"rgb(255,0,0)"]];
+    } else if (method.key === "sobol") {
+      z = zSobol[metric];
+      zmin = 0;
+      zmax = 100;
+      colorscale = "Viridis";
+    } else {
+      z = zMonteCarlo[metric];
+      zmin = 0;
+      zmax = 100;
+      colorscale = "Cividis";
+    }
+
+    heatmapData.push({
+      z,
+      x: window.results.map(r => r.name),
+      y: elasticityLabels,
+      type: "heatmap",
+      colorscale,
+      zmin,
+      zmax,
+      visible: methodIdx === 0, // show Elasticity by default
+      showscale: metricIdx === metrics.length - 1, // one colorbar per row
+      colorbar: metricIdx === metrics.length - 1
+        ? { title: `${method.title}` }
+        : undefined,
+      hovertemplate:
+        `Metric: ${metric}<br>GPU: %{x}<br>Parameter: %{y}<br>Value: %{z:.2f}%<extra></extra>`,
+      xaxis: `x${metricIdx + 1}`,
+      yaxis: `y${metricIdx + 1}`
+    });
+  });
 });
 
-// ---------- Heatmap Layout ----------
 const heatmapLayout = {
-    title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
-    xaxis: { title: "GPU type" },
-    yaxis: { title: "Parameter", automargin: true, tickmode: 'array', tickvals: elasticityLabels, ticktext: elasticityLabels },
-    margin: { t: 60, l: 160, r: 260, b: 60 },
-    height: 600,
-    width: 950,
-    updatemenus: [{
-        type: "dropdown",
-        direction: "down",
-        x: 1.25,
-        y: 0.8,
-        xanchor: "left",
-        yanchor: "middle",
-        buttons: ACTIVE_METRICS.flatMap((metric, idx) => ([
-            { label: `Elasticity - ${metric}`, method: "update", args: [{ visible: heatmapData.map((_, i) => i===idx*3) }] },
-            { label: `Sobol - ${metric}`, method: "update", args: [{ visible: heatmapData.map((_, i) => i===idx*3+1) }] },
-            { label: `Monte Carlo - ${metric}`, method: "update", args: [{ visible: heatmapData.map((_, i) => i===idx*3+2) }] }
-        ]))
-    }],
-    annotations: [{
-        text: "Select Heatmap:",
-        x: 1.25,
-        y: 0.52,
-        xref: "paper",
-        yref: "paper",
-        xanchor: "left",
-        yanchor: "bottom",
-        showarrow: false,
-        font: { size: 14 }
-    }]
+  title: "Parameter Sensitivity Heatmaps",
+  grid: {
+    rows: 1,
+    columns: 4,
+    pattern: "independent"
+  },
+  height: 650,
+  width: 1200,
+  margin: { t: 80, l: 160, r: 80, b: 80 },
+
+  updatemenus: [{
+    type: "dropdown",
+    x: 1.05,
+    y: 0.9,
+    buttons: methods.map((method, mIdx) => ({
+      label: method.title,
+      method: "update",
+      args: [{
+        visible: heatmapData.map((_, i) =>
+          Math.floor(i / metrics.length) === mIdx
+        )
+      }]
+    }))
+  }],
+
+  annotations: metrics.map((metric, i) => ({
+    text: metric,
+    xref: `x${i + 1} domain`,
+    yref: "paper",
+    x: 0.5,
+    y: 1.08,
+    showarrow: false,
+    font: { size: 14 }
+  }))
 };
 
-console.log("Elasticity Metrics:", Object.keys(zElasticity));
-console.log("Heatmap sizes:", Object.values(zElasticity).map(z => z.length), window.results.length);
-
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 // ---------- Tornado Charts (also in %) (with metric toggle) ----------
 function getGPUVector(matrix, gpuIndex) {
