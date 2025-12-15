@@ -2145,9 +2145,7 @@ console.log("Heatmap sizes:", Object.values(zElasticity).map(z => z.length), win
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
-
-// ---------- Tornado Charts (also in %) ----------
-// ---------- Tornado Charts (also in %) ----------
+	// ---------- Tornado Charts with Metric Toggle (also in %) ----------
 const tornadoContainer = document.getElementById("gpuTornadoPlots");
 tornadoContainer.innerHTML = "";
 
@@ -2155,31 +2153,35 @@ tornadoContainer.innerHTML = "";
 window.results.forEach((gpu, i) => {
   const gpuName = gpu.name;
 
-  // For Elasticity: gather values for this GPU across metrics
-  const traceElasticity = {
-    x: ACTIVE_METRICS.map(metric => zElasticity[metric][i]), // zElasticity[metric] is param x GPU
-    y: elasticityLabels,
-    name: "Elasticity (%)",
-    type: "bar",
-    orientation: "h"
-  };
+  // Prepare traces for each metric
+  const traces = ACTIVE_METRICS.flatMap(metric => [
+    {
+      x: zElasticity[metric].map(row => Math.abs(row[i])), // column i for this GPU
+      y: elasticityLabels,
+      name: `Elasticity (%) - ${metric}`,
+      type: "bar",
+      orientation: "h",
+      visible: metric === ACTIVE_METRICS[0] // first metric visible
+    },
+    {
+      x: zSobol[metric].map(row => row[i]),
+      y: elasticityLabels,
+      name: `Sobol (%) - ${metric}`,
+      type: "bar",
+      orientation: "h",
+      visible: false
+    },
+    {
+      x: zMonteCarlo[metric].map(row => row[i]),
+      y: elasticityLabels,
+      name: `Monte Carlo (%) - ${metric}`,
+      type: "bar",
+      orientation: "h",
+      visible: false
+    }
+  ]);
 
-  const traceSobol = {
-    x: ACTIVE_METRICS.map(metric => zSobol[metric][i]),
-    y: elasticityLabels,
-    name: "Sobol (%)",
-    type: "bar",
-    orientation: "h"
-  };
-
-  const traceMC = {
-    x: ACTIVE_METRICS.map(metric => zMonteCarlo[metric][i]),
-    y: elasticityLabels,
-    name: "Monte Carlo (%)",
-    type: "bar",
-    orientation: "h"
-  };
-
+  // Layout with dropdown
   const layout = {
     title: `${gpuName} – % Uncertainty Contribution`,
     barmode: "group",
@@ -2187,15 +2189,55 @@ window.results.forEach((gpu, i) => {
     height: 500,
     width: 600,
     xaxis: { title: "% Uncertainty Contribution", automargin: true },
-    yaxis: { automargin: true }
+    yaxis: { automargin: true },
+    updatemenus: [
+      {
+        type: "dropdown",
+        x: 1.25,
+        y: 0.8,
+        xanchor: "left",
+        yanchor: "middle",
+        buttons: ACTIVE_METRICS.flatMap((metric, idx) => [
+          {
+            label: `Elasticity - ${metric}`,
+            method: "update",
+            args: [{ visible: traces.map((_, i) => i === idx * 3) }]
+          },
+          {
+            label: `Sobol - ${metric}`,
+            method: "update",
+            args: [{ visible: traces.map((_, i) => i === idx * 3 + 1) }]
+          },
+          {
+            label: `Monte Carlo - ${metric}`,
+            method: "update",
+            args: [{ visible: traces.map((_, i) => i === idx * 3 + 2) }]
+          }
+        ])
+      }
+    ],
+    annotations: [
+      {
+        text: "Select Metric:",
+        x: 1.25,
+        y: 0.75,
+        xref: "paper",
+        yref: "paper",
+        xanchor: "left",
+        yanchor: "bottom",
+        showarrow: false,
+        font: { size: 14 }
+      }
+    ]
   };
 
   const chartDiv = document.createElement("div");
   chartDiv.id = `tornado-${gpuName.replace(/\s+/g, '-')}`;
   tornadoContainer.appendChild(chartDiv);
 
-  Plotly.newPlot(chartDiv.id, [traceElasticity, traceSobol, traceMC], layout);
+  Plotly.newPlot(chartDiv.id, traces, layout);
 });
+
 
 
 // downloadCSV
