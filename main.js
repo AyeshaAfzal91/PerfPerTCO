@@ -2020,10 +2020,23 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation
 const sobolIndicesOptimized = {};
 const monteCarloParamResults = {};
 
+// --- Compute Sobol for TCO exactly as Version A ---
+sobolIndicesOptimized["tco"] = computeTotalOrderSobolNormalized(2000, "tco") || [];
+monteCarloParamResults["tco"] = monteCarloUncertaintyNormalized(2000, "tco") || [];
+
+// --- For other metrics, reuse TCO Sobol if you want exact same scaling ---
 ACTIVE_METRICS.forEach(metric => {
-    sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
-    monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
+    if (metric !== "tco") {
+        // Option 1: Copy TCO Sobol (exact match)
+        sobolIndicesOptimized[metric] = JSON.parse(JSON.stringify(sobolIndicesOptimized["tco"]));
+        monteCarloParamResults[metric] = JSON.parse(JSON.stringify(monteCarloParamResults["tco"]));
+
+        // Option 2: Or, uncomment to compute metric-specific Sobol (will differ)
+        // sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
+        // monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
+    }
 });
+
 
 
 // ---------- Helper Function ----------
@@ -2041,7 +2054,9 @@ ACTIVE_METRICS.forEach(metric => {
 // Sobol
 const zSobol = {};
 ACTIVE_METRICS.forEach(metric => {
-    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolIndicesOptimized[metric] || [[]]));
+	zSobol[metric] = metric === "tco"
+    ? safeMakePlainArray(sobolIndicesOptimized[metric] || [[]])
+    : safeMakePlainArray(safeNormalizeAcrossDimension(sobolIndicesOptimized[metric] || [[]]));
 });
 
 // Monte Carlo
