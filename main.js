@@ -1784,6 +1784,7 @@ const allSobol = {};
 const allMonteCarlo = {};
 
 const safeTranspose = m => m.length ? m[0].map((_, i) => m.map(row => row[i])) : [];
+const makePlainArray = arr => arr.map(row => Array.from(row));
 
 ACTIVE_METRICS.forEach(metric => {
     // Elasticity
@@ -1808,8 +1809,9 @@ ACTIVE_METRICS.forEach(metric => {
             case "perf_per_tco": metricValue = total_perf / TCO; break;
             case "power_per_tco": metricValue = total_power / TCO; break;
             case "perf_per_watt_per_tco": metricValue = total_perf / (total_power / 1000) / TCO; break;
+            default: metricValue = undefined;
         }
-        if (metricValue === 0) return null;
+        if (metricValue === undefined || metricValue === 0) return null;
 
         const baseValues = [
             gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
@@ -1838,8 +1840,7 @@ ACTIVE_METRICS.forEach(metric => {
     allSobol[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(computeTotalOrderSobolNormalized(2000, metric))));
     allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000, metric))));
 
-	console.log('Elasticities for metric', metric, elasticities);
-
+    console.log('Elasticities for metric', metric, elasticities.length);
 });
 
 
