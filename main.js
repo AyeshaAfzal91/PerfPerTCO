@@ -1783,6 +1783,8 @@ const allElasticities = {};
 const allSobol = {};
 const allMonteCarlo = {};
 
+const safeTranspose = m => m.length ? m[0].map((_, i) => m.map(row => row[i])) : [];
+
 ACTIVE_METRICS.forEach(metric => {
     // Elasticity
     const elasticities = window.results.map((r, i) => {
@@ -1832,12 +1834,14 @@ ACTIVE_METRICS.forEach(metric => {
         return dTCO.map((d, idx) => metric === "tco" ? 100 * (baseValues[idx] / TCO) * d : -100 * (baseValues[idx] / TCO) * d);
     }).filter(Boolean);
 
-    allElasticities[metric] = makePlainArray(transpose(elasticities));
+    allElasticities[metric] = elasticities.length ? makePlainArray(safeTranspose(elasticities)) : [];
     allSobol[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(computeTotalOrderSobolNormalized(2000, metric))));
     allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000, metric))));
+
+	console.log('Elasticities for metric', metric, elasticities);
+
 });
 
-console.log('Elasticities for metric', metric, elasticities);
 
 // ---------- Shared Cost Evaluation Function ----------
 function evaluateMetric(params, gpuIndex, metricKey) {
