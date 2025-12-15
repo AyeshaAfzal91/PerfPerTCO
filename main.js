@@ -2012,7 +2012,6 @@ const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
 
 // ---------- Helper Functions ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
-const makePlainArray = arr => arr.map(row => Array.from(row));
 
 // Function to normalize values across a dimension (e.g., across all GPUs for one parameter)
 const normalizeAcrossDimension = arr => {
