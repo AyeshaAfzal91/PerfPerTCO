@@ -2027,19 +2027,23 @@ ACTIVE_METRICS.forEach(metric => {
 });
 
 // Sobol
+// ---------- Prepare Heatmap Data (Sobol) ----------
 const zSobol = {};
+// Add a helper function here for safety, though safeTranspose is defined above
+const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
+
 ACTIVE_METRICS.forEach(metric => {
-    const raw = sobolIndicesOptimized[metric];
+    const raw = sobolIndicesOptimized[metric];
 
-    // Ensure 2D array
-    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
-        ? safeMakePlainArray(raw)
-        : Array.from({length: window.results.length}, () => Array(15).fill(0));
+    // Ensure 2D array: plain is in [GPU] x [Parameter] format
+    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
+        ? safeMakePlainArray(raw)
+        : Array.from({length: window.results.length}, () => Array(15).fill(0));
 
-    // Normalize only if not TCO
-    zSobol[metric] = metric === "tco"
-        ? plain
-        : safeMakePlainArray(safeNormalizeAcrossDimension(plain));
+    // Normalize only if not TCO, but ensure TCO is transposed to match the normalized format
+    zSobol[metric] = metric === "tco"
+        ? safeTranspose(plain) // ✅ FIX: Explicitly transpose TCO to [Parameter] x [GPU]
+        : safeMakePlainArray(safeNormalizeAcrossDimension(plain));
 });
 
 
