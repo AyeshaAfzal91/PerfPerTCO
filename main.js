@@ -2054,10 +2054,19 @@ ACTIVE_METRICS.forEach(metric => {
 // Sobol
 const zSobol = {};
 ACTIVE_METRICS.forEach(metric => {
-	zSobol[metric] = metric === "tco"
-    ? safeMakePlainArray(sobolIndicesOptimized[metric] || [[]])
-    : safeMakePlainArray(safeNormalizeAcrossDimension(sobolIndicesOptimized[metric] || [[]]));
+    const raw = sobolIndicesOptimized[metric];
+
+    // Ensure 2D array
+    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
+        ? safeMakePlainArray(raw)
+        : Array.from({length: window.results.length}, () => Array(15).fill(0));
+
+    // Normalize only if not TCO
+    zSobol[metric] = metric === "tco"
+        ? plain
+        : safeMakePlainArray(safeNormalizeAcrossDimension(plain));
 });
+
 
 // Monte Carlo
 const zMonteCarlo = {};
