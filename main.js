@@ -1779,9 +1779,20 @@ updateSlidersFromGlobal();
 const ACTIVE_METRICS = ["tco", "perf_per_tco", "power_per_tco", "perf_per_watt_per_tco"];
 
 // ---------- Compute Sensitivities for all metrics ----------
+const normalizeAcrossDimension = arr => {
+    const transposed = arr[0] ? arr[0].map((_, i) => arr.map(row => row[i])) : [];
+    const normalizedTransposed = transposed.map(row => {
+        const plainRow = Array.from(row);
+        const maxVal = Math.max(...plainRow.map(Math.abs));
+        if (maxVal < 1e-6) return plainRow.map(() => 0);
+        return plainRow.map(v => (v / maxVal) * 100);
+    });
+    return normalizedTransposed;
+};
+
+const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossDimension(arr) : [];
 const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
 const safeMakePlainArray = arr => arr && arr.length ? arr.map(row => Array.from(row)) : [];
-const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossDimension(arr) : [];
 const allElasticities = {};
 const allSobol = {};
 const allMonteCarlo = {};
