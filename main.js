@@ -2035,11 +2035,11 @@ const zElasticity = SafeMakePlainArray(transpose(elasticities));
 
 // Sobol: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
 // Normalize across all GPUs for each parameter to make differences visible
-const zSobol = SafeMakePlainArray(normalizeAcrossDimension(makePlainArray(sobolIndicesOptimized)));
+const zSobol = SafeMakePlainArray(normalizeAcrossDimension(SafeMakePlainArray(sobolIndicesOptimized)));
 
 // Monte Carlo: FIX APPLIED HERE. We ensure the input is a plain array before normalization.
 // Normalize across all GPUs for each parameter
-const zMonteCarlo = SafeMakePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloParamResults)));
+const zMonteCarlo = SafeMakePlainArray(normalizeAcrossDimension(SafeMakePlainArray(monteCarloParamResults)));
 
 
 // Compute global max for scaling
