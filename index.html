@@ -470,17 +470,20 @@
 <div style="text-align: center; margin-top: 20px;">
   <button type="button" class="medium-button" onclick="calculate(); updateAITip()"> 🧮 Calculate</button>
   <button type="button" class="medium-button" onclick="resetForm(); updateAITip()"> 🔄 Reset All</button> 
-  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
   <button id="shareBtn" type="button" class="medium-button">🔗 Share Results</button>
   <button type="button" class="medium-button" onclick="generatePDFReport()">🖨️ Download PDF Summary Report</button>
+</div>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+  <h3>📊 Models</h3>
+  <button type="button" class="medium-button" onclick="promptPassword()">👁️‍🗨️Show Model</button>
   <div id="password-prompt" style="display: none; margin-top: 10px;">
   <label for="password">Enter Password:</label>
   <input type="password" id="password" placeholder="Password">
   <button onclick="validatePassword()">Submit</button>
   <p id="error-message" style="color: red; display: none;">Incorrect password. Try again.</p>
 </div>
-</div>
-
 
 <div style="text-align: center; margin-top: 20px;">
   <h3>📊 Scenario Comparison (What-if Simulation)</h3>
@@ -495,7 +498,7 @@
 <div id="input" style="text-align: center; margin-top: 20px;">
   <h3>🔥 Benchmark × GPU Performance and Power</h3>
   <button type="button" class="medium-button" onclick="renderPerfPowerHeatmaps()"> 🔘 Display Heatmaps</button>
-  <div id="gpuPerfPowerHeatmap"></div> <!-- changed ID -->
+  <div id="gpuPerfPowerHeatmap"></div> 
 </div>
 
 <!-- In the output section -->
