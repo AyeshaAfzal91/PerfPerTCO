@@ -2130,6 +2130,7 @@ const heatmapLayout = {
         font: { size: 14 }
     }]
 };
+console.log(zElasticity.length, elasticityLabels.length, zElasticity[0].length, window.results.length);
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
