@@ -1847,13 +1847,9 @@ ACTIVE_METRICS.forEach(metric => {
     }).filter(Boolean);
 
     // Safe assignments
-    allElasticities[metric] = elasticities.length ? safeMakePlainArray(safeTranspose(elasticities)) : [];
-    const sobolRaw = computeTotalOrderSobolNormalized(2000, metric) || [];
-    allSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(sobolRaw));
-    const monteCarloRaw = monteCarloUncertaintyNormalized(2000, metric) || [];
-    allMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloRaw));
-
-    console.log('Elasticities for metric', metric, elasticities.length);
+	sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
+	monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
+	console.log('Elasticities for metric', metric, elasticities.length);	
 });
 
 // ---------- Shared Cost Evaluation Function ----------
@@ -2019,23 +2015,6 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation
 	
 const sobolIndicesOptimized = {};
 const monteCarloParamResults = {};
-
-// --- Compute TCO exactly as Version A ---
-window.results.forEach((r, g) => {
-    const gpu = GPU_data[r.originalGPUIndex];
-
-    const base = [
-        gpu.cost, r.C_node_server, r.C_node_infra, r.C_node_facility, r.C_software,
-        r.C_electricity, r.C_heatreuseperkWh, r.PUE, r.C_maintenance, r.system_usage,
-        r.lifetime, r.W_node_baseline, r.C_depreciation, r.C_subscription, r.C_uefficiency
-    ];
-
-    const activeUncertainty = defaultRealisticUncertainty; // Use same fixed uncertainties as Version A
-
-    sobolIndicesOptimized["tco"] = computeTotalOrderSobolNormalized(2000, "tco", base, activeUncertainty);
-    monteCarloParamResults["tco"] = monteCarloUncertaintyNormalized(2000, "tco", base, activeUncertainty);
-});
-
 
 // ---------- Helper Function ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
