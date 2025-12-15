@@ -1776,106 +1776,66 @@ document.addEventListener("input", e => {
 // Initialize sliders on page load
 updateSlidersFromGlobal();
 
-// Pick one of:
-// "tco"
-// "perf_per_tco"
-// "power_per_tco"
-// "perf_per_watt_per_tco"
-const ACTIVE_METRIC = "tco";
+const ACTIVE_METRICS = ["tco", "perf_per_tco", "power_per_tco", "perf_per_watt_per_tco"];
 
-// ---------- Elasticity (% form) ----------
-const elasticities = window.results.map((r, i) => {
-  const gpu = GPU_data[r.originalGPUIndex];
-  if (!gpu) return null;
+// ---------- Compute Sensitivities for all metrics ----------
+const allElasticities = {};
+const allSobol = {};
+const allMonteCarlo = {};
 
-  const n_gpu = r.n_gpu;
-  const n_nodes = n_gpu / gpu.per_node;
+ACTIVE_METRICS.forEach(metric => {
+    // Elasticity
+    const elasticities = window.results.map((r, i) => {
+        const gpu = GPU_data[r.originalGPUIndex];
+        if (!gpu) return null;
 
-  const perf = gpu.perf[workload][benchmarkId];
-  const power = gpu.power[workload][benchmarkId];
+        const n_gpu = r.n_gpu;
+        const n_nodes = n_gpu / gpu.per_node;
+        const perf = gpu.perf[workload][benchmarkId];
+        const power = gpu.power[workload][benchmarkId];
+        const total_perf = perf * n_gpu;
+        const total_power = power * n_gpu;
+        const W_gpu_total = (power * system_usage * lifetime * n_gpu) / 1000;
+        const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+        const TCO = r.total_cost;
 
-  const total_perf = perf * n_gpu;
-  const total_power = power * n_gpu;
+        // Metric value
+        let metricValue;
+        switch (metric) {
+            case "tco": metricValue = TCO; break;
+            case "perf_per_tco": metricValue = total_perf / TCO; break;
+            case "power_per_tco": metricValue = total_power / TCO; break;
+            case "perf_per_watt_per_tco": metricValue = total_perf / (total_power / 1000) / TCO; break;
+        }
+        if (metricValue === 0) return null;
 
-  const W_gpu_total = (power * system_usage * lifetime * n_gpu) / 1000;
-  const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+        const baseValues = [
+            gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
+            C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
+            lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
+        ];
 
-  const TCO = r.total_cost;
+        const dTCO = [
+            n_gpu,
+            n_nodes, n_nodes, n_nodes,
+            1,
+            PUE * (W_node_total + W_gpu_total),
+            -PUE * (W_node_total + W_gpu_total),
+            (C_electricity - (F_heatreuse * C_heatreuseperkWh)) * (W_node_total + W_gpu_total),
+            n_nodes * lifetime,
+            (C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * lifetime * n_nodes) + (power * lifetime * n_gpu)) / 1000,
+            ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * system_usage * n_nodes) + (power * system_usage * n_gpu)) / 1000) + (C_maintenance * n_nodes) + C_depreciation + C_subscription + C_uefficiency,
+            ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * system_usage * lifetime * n_nodes) / 1000,
+            lifetime, lifetime, lifetime
+        ];
 
-  // ---------- Metric value ----------
-  let metricValue;
-  switch (ACTIVE_METRIC) {
-    case "tco":
-      metricValue = TCO;
-      break;
-    case "perf_per_tco":
-      metricValue = total_perf / TCO;
-      break;
-    case "power_per_tco":
-      metricValue = total_power / TCO;
-      break;
-    case "perf_per_watt_per_tco":
-      metricValue = total_perf / (total_power / 1000) / TCO;
-      break;
-    default:
-      throw new Error("Unknown ACTIVE_METRIC");
-  }
+        return dTCO.map((d, idx) => metric === "tco" ? 100 * (baseValues[idx] / TCO) * d : -100 * (baseValues[idx] / TCO) * d);
+    }).filter(Boolean);
 
-  if (metricValue === 0) return null;
-
-  // ---------- Base parameter values ----------
-  const baseValues = [
-    gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
-    C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
-    lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
-  ];
-
-  // ---------- Analytic dTCO/dθ (UNCHANGED logic) ----------
-  const dTCO = [
-    n_gpu,
-    n_nodes,
-    n_nodes,
-    n_nodes,
-    1,
-    PUE * (W_node_total + W_gpu_total),
-    -PUE * (W_node_total + W_gpu_total),
-    (C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
-      (W_node_total + W_gpu_total),
-    n_nodes * lifetime,
-    (C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
-      PUE *
-      ((W_node_baseline * lifetime * n_nodes) +
-       (power * lifetime * n_gpu)) / 1000,
-    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
-      PUE *
-      ((W_node_baseline * system_usage * n_nodes) +
-       (power * system_usage * n_gpu)) / 1000)
-      + (C_maintenance * n_nodes)
-      + C_depreciation
-      + C_subscription
-      + C_uefficiency,
-    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
-      PUE * system_usage * lifetime * n_nodes) / 1000,
-    lifetime,
-    lifetime,
-    lifetime
-  ];
-
-  // ---------- Elasticity mapping ----------
-  return dTCO.map((dTCO_dθ, idx) => {
-    const θ = baseValues[idx];
-
-    if (ACTIVE_METRIC === "tco") {
-      // E = (θ / TCO) * dTCO/dθ
-      return 100 * (θ / TCO) * dTCO_dθ;
-    } else {
-      // For all efficiency metrics: M = K / TCO
-      // E = −(θ / TCO) * dTCO/dθ
-      return -100 * (θ / TCO) * dTCO_dθ;
-    }
-  });
-}).filter(Boolean);
-
+    allElasticities[metric] = makePlainArray(transpose(elasticities));
+    allSobol[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(computeTotalOrderSobolNormalized(2000))));
+    allMonteCarlo[metric] = makePlainArray(normalizeAcrossDimension(makePlainArray(monteCarloUncertaintyNormalized(2000))));
+});
 
 // ---------- Shared Cost Evaluation Function ----------
 function evaluateMetric(params, gpuIndex, metricKey) {
@@ -2088,58 +2048,58 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-const heatmapData = [
-    {
-        z: zElasticity,
-        x: window.results.map(r => r.name),
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0, "rgb(0,0,255)"], [0.5, "rgb(255,255,255)"], [1, "rgb(255,0,0)"]],
-        zmin: -zMaxElasticity,
-        zmax: zMaxElasticity,
-        colorbar: { title: "Elasticity (%)" },
-        visible: true,
-        // Add text on hover to see actual values
-        hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Elasticity: %{z:.2f}%<extra></extra>'
-    },
-    {
-        z: zSobol,
-        x: window.results.map(r => r.name),
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: "Viridis",
-        zmin: 0,
-        zmax: zMaxSobol,
-        colorbar: { title: "Sobol (Rel. %)" }, // Added "Rel." to indicate relative normalization
-        visible: false,
-        hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Sobol: %{z:.2f}% (Rel.)<extra></extra>'
-    },
-    {
-        z: zMonteCarlo,
-        x: window.results.map(r => r.name),
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: "Cividis",
-        zmin: 0,
-        zmax: zMaxMonteCarlo,
-        colorbar: { title: "Monte Carlo (Rel. %)" }, // Added "Rel."
-        visible: false,
-        hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>MC: %{z:.2f}% (Rel.)<extra></extra>'
-    }
-];
+const heatmapData = [];
+
+ACTIVE_METRICS.forEach((metric, mIdx) => {
+    heatmapData.push(
+        // Elasticity
+        {
+            z: allElasticities[metric],
+            x: window.results.map(r => r.name),
+            y: elasticityLabels,
+            type: "heatmap",
+            colorscale: [[0,"rgb(0,0,255)"], [0.5,"rgb(255,255,255)"], [1,"rgb(255,0,0)"]],
+            zmin: -Math.max(...flatten2D(allElasticities[metric]).map(Math.abs),1),
+            zmax: Math.max(...flatten2D(allElasticities[metric]).map(Math.abs),1),
+            colorbar: { title: `Elasticity (%) - ${metric}` },
+            visible: mIdx===0, // only first metric visible initially
+            hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Elasticity: %{z:.2f}%<extra></extra>'
+        },
+        // Sobol
+        {
+            z: allSobol[metric],
+            x: window.results.map(r => r.name),
+            y: elasticityLabels,
+            type: "heatmap",
+            colorscale: "Viridis",
+            zmin: 0,
+            zmax: 100,
+            colorbar: { title: `Sobol (Rel. %) - ${metric}` },
+            visible: false,
+            hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>Sobol: %{z:.2f}%<extra></extra>'
+        },
+        // Monte Carlo
+        {
+            z: allMonteCarlo[metric],
+            x: window.results.map(r => r.name),
+            y: elasticityLabels,
+            type: "heatmap",
+            colorscale: "Cividis",
+            zmin: 0,
+            zmax: 100,
+            colorbar: { title: `Monte Carlo (Rel. %) - ${metric}` },
+            visible: false,
+            hovertemplate: 'GPU: %{x}<br>Parameter: %{y}<br>MC: %{z:.2f}%<extra></extra>'
+        }
+    );
+});
+
 
 // ---------- Heatmap Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps (% Uncertainty Contribution)",
     xaxis: { title: "GPU type" },
-    yaxis: {
-        title: "Parameter",
-        automargin: true,
-        // Force display of all 15 labels to fix the "missing parameter" issue
-        tickmode: 'array',
-        tickvals: elasticityLabels,
-        ticktext: elasticityLabels
-    },
+    yaxis: { title: "Parameter", automargin: true, tickmode: 'array', tickvals: elasticityLabels, ticktext: elasticityLabels },
     margin: { t: 60, l: 160, r: 260, b: 60 },
     height: 600,
     width: 950,
@@ -2150,11 +2110,11 @@ const heatmapLayout = {
         y: 0.8,
         xanchor: "left",
         yanchor: "middle",
-        buttons: [
-            { label: "Elasticity (%)", method: "update", args: [{ visible: [true, false, false] }] },
-            { label: "Sobol (Rel. %)", method: "update", args: [{ visible: [false, true, false] }] },
-            { label: "Monte Carlo (Rel. %)", method: "update", args: [{ visible: [false, false, true] }] }
-        ]
+        buttons: ACTIVE_METRICS.flatMap((metric, idx) => ([
+            { label: `Elasticity - ${metric}`, method: "update", args: [{ visible: heatmapData.map((_, i) => i===idx*3) }] },
+            { label: `Sobol - ${metric}`, method: "update", args: [{ visible: heatmapData.map((_, i) => i===idx*3+1) }] },
+            { label: `Monte Carlo - ${metric}`, method: "update", args: [{ visible: heatmapData.map((_, i) => i===idx*3+2) }] }
+        ]))
     }],
     annotations: [{
         text: "Select Heatmap:",
