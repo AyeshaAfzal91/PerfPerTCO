@@ -2028,18 +2028,17 @@ ACTIVE_METRICS.forEach(metric => {
 
 // Sobol
 const zSobol = {};
+
 ACTIVE_METRICS.forEach(metric => {
-    const raw = sobolIndicesOptimized[metric];
+    const raw = sobolIndicesOptimized[metric];
 
-    // Ensure 2D array: plain is in [GPU] x [Parameter] format
-    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
-        ? safeMakePlainArray(raw)
-        : Array.from({length: window.results.length}, () => Array(15).fill(0));
+    // Ensure 2D array: plain is in [GPU] x [Parameter] format
+    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
+        ? safeMakePlainArray(raw)
+        : Array.from({length: window.results.length}, () => Array(15).fill(0));
 
-    // Normalize only if not TCO, but ensure TCO is transposed to match the normalized format
-    zSobol[metric] = metric === "tco"
-        ? safeTranspose(plain) // Now correctly calls the existing function
-        : safeMakePlainArray(safeNormalizeAcrossDimension(plain));
+    // This correctly scales the largest Sobol index for any parameter across all GPUs to 100%.
+    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(plain));
 });
 
 
