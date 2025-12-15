@@ -1776,7 +1776,12 @@ document.addEventListener("input", e => {
 // Initialize sliders on page load
 updateSlidersFromGlobal();
 
-
+// Pick one of:
+// "tco"
+// "perf_per_tco"
+// "power_per_tco"
+// "perf_per_watt_per_tco"
+const ACTIVE_METRIC = "tco";
 
 // ---------- Elasticity (% form) ----------
 const elasticities = window.results.map((r, i) => {
@@ -1785,17 +1790,48 @@ const elasticities = window.results.map((r, i) => {
 
   const n_gpu = r.n_gpu;
   const n_nodes = n_gpu / gpu.per_node;
-  const W_gpu = gpu.power[workload][benchmarkId];
-  const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
+
+  const perf = gpu.perf[workload][benchmarkId];
+  const power = gpu.power[workload][benchmarkId];
+
+  const total_perf = perf * n_gpu;
+  const total_power = power * n_gpu;
+
+  const W_gpu_total = (power * system_usage * lifetime * n_gpu) / 1000;
   const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
 
+  const TCO = r.total_cost;
+
+  // ---------- Metric value ----------
+  let metricValue;
+  switch (ACTIVE_METRIC) {
+    case "tco":
+      metricValue = TCO;
+      break;
+    case "perf_per_tco":
+      metricValue = total_perf / TCO;
+      break;
+    case "power_per_tco":
+      metricValue = total_power / TCO;
+      break;
+    case "perf_per_watt_per_tco":
+      metricValue = total_perf / (total_power / 1000) / TCO;
+      break;
+    default:
+      throw new Error("Unknown ACTIVE_METRIC");
+  }
+
+  if (metricValue === 0) return null;
+
+  // ---------- Base parameter values ----------
   const baseValues = [
     gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
     C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
     lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
   ];
 
-  const vals = [
+  // ---------- Analytic dTCO/dθ (UNCHANGED logic) ----------
+  const dTCO = [
     n_gpu,
     n_nodes,
     n_nodes,
@@ -1803,39 +1839,102 @@ const elasticities = window.results.map((r, i) => {
     1,
     PUE * (W_node_total + W_gpu_total),
     -PUE * (W_node_total + W_gpu_total),
-    (C_electricity - (F_heatreuse * C_heatreuseperkWh)) * (W_node_total + W_gpu_total),
+    (C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
+      (W_node_total + W_gpu_total),
     n_nodes * lifetime,
-    (C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * lifetime * n_nodes) + (W_gpu * lifetime * n_gpu)) / 1000,
-    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * ((W_node_baseline * system_usage * n_nodes) + (W_gpu * system_usage * n_gpu)) / 1000)
-      + (C_maintenance * n_nodes) + C_depreciation + C_subscription + C_uefficiency,
-    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * system_usage * lifetime * n_nodes) / 1000,
-    lifetime, lifetime, lifetime
+    (C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
+      PUE *
+      ((W_node_baseline * lifetime * n_nodes) +
+       (power * lifetime * n_gpu)) / 1000,
+    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
+      PUE *
+      ((W_node_baseline * system_usage * n_nodes) +
+       (power * system_usage * n_gpu)) / 1000)
+      + (C_maintenance * n_nodes)
+      + C_depreciation
+      + C_subscription
+      + C_uefficiency,
+    ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) *
+      PUE * system_usage * lifetime * n_nodes) / 1000,
+    lifetime,
+    lifetime,
+    lifetime
   ];
 
-  // convert to % form
-  return vals.map((v, idx) => 100 * (v * baseValues[idx]) / r.total_cost);
+  // ---------- Elasticity mapping ----------
+  return dTCO.map((dTCO_dθ, idx) => {
+    const θ = baseValues[idx];
+
+    if (ACTIVE_METRIC === "tco") {
+      // E = (θ / TCO) * dTCO/dθ
+      return 100 * (θ / TCO) * dTCO_dθ;
+    } else {
+      // For all efficiency metrics: M = K / TCO
+      // E = −(θ / TCO) * dTCO/dθ
+      return -100 * (θ / TCO) * dTCO_dθ;
+    }
+  });
 }).filter(Boolean);
 
+
 // ---------- Shared Cost Evaluation Function ----------
-function evaluateCost(params, gpuIndex) {
+function evaluateMetric(params, gpuIndex, metricKey) {
   const r = window.results[gpuIndex];
   const gpu = GPU_data[r.originalGPUIndex];
+
   const n_gpu = r.n_gpu;
   const n_nodes = n_gpu / gpu.per_node;
-  const W_gpu = gpu.power[workload][benchmarkId];
-  const W_gpu_total = (W_gpu * system_usage * lifetime * n_gpu) / 1000;
-  const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
+  const perf = gpu.perf[workload][benchmarkId];
+  const power = gpu.power[workload][benchmarkId];
 
-  return n_gpu * params[0] +
-    n_nodes * (params[1] + params[2] + params[3]) +
-    params[4] +
-    params[5] * PUE * (W_node_total + W_gpu_total) +
-    params[6] * (-PUE * (W_node_total + W_gpu_total)) +
-    params[7] +
-    n_nodes * params[8] +
-    params[9] * ((W_node_baseline * lifetime * n_nodes + W_gpu * lifetime * n_gpu) / 1000) +
-    params[10] + params[11] + params[12] + params[13] + params[14];
+  const [
+    C_gpu,
+    C_node_server,
+    C_node_infra,
+    C_node_facility,
+    C_software,
+    C_electricity,
+    C_heatreuseperkWh,
+    PUE,
+    C_maintenance,
+    system_usage,
+    lifetime,
+    W_node_baseline,
+    C_depreciation,
+    C_subscription,
+    C_uefficiency
+  ] = params;
+
+  const W_gpu_total = power * system_usage * lifetime;
+  const W_node_total = W_node_baseline * system_usage * lifetime;
+
+  const TCO =
+    n_gpu * C_gpu +
+    n_nodes * (C_node_server + C_node_infra + C_node_facility) +
+    C_software +
+    (C_electricity - F_heatreuse * C_heatreuseperkWh) *
+      PUE *
+      ((W_node_total * n_nodes) + (W_gpu_total * n_gpu)) / 1000 +
+    n_nodes * C_maintenance * lifetime +
+    lifetime * (C_depreciation + C_subscription + C_uefficiency);
+
+  const total_perf = perf * n_gpu;
+  const total_power = power * n_gpu;
+
+  switch (metricKey) {
+    case "tco":
+      return TCO;
+    case "perf_per_tco":
+      return total_perf / TCO;
+    case "power_per_tco":
+      return total_power / TCO;
+    case "perf_per_watt_per_tco":
+      return total_perf / (total_power / 1000) / TCO;
+    default:
+      throw new Error("Unknown metric: " + metricKey);
+  }
 }
+
 
 // ---------- Sobol Total-Order Sensitivity (robust) ----------
 function computeTotalOrderSobolNormalized(numSamples = 2000) {
@@ -1882,7 +1981,7 @@ function generatePerturbations(N, k, ranges) {
       B.push(rowB);
     }
 
-    const Y_A = A.map(a => evaluateCost(a, g)); // calls evaluateCost on each row of A, producing a number for each sample. After this, Y_A = [y_1, y_2, ..., y_N], just numbers.
+    const Y_A = A.map(a => evaluateMetric(a, g, ACTIVE_METRIC)); // calls evaluateCost on each row of A, producing a number for each sample. After this, Y_A = [y_1, y_2, ..., y_N], just numbers.
     const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples; // sums the numbers in Y_A as a = the running sum and b = the current element of the array. After summing, we divide by numSamples.
     const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1); // s = the accumulator (sum of squared differences), y = the current element of Y_A. (y - meanYA) ** 2 = the squared deviation of the element from the mean. After summing all squared deviations, we divide by (numSamples - 1) to get the sample variance.
     const S_T = new Float64Array(numParams);
@@ -1892,7 +1991,7 @@ function generatePerturbations(N, k, ranges) {
       for (let i = 0; i < numSamples; i++) {
         const hybrid = new Float64Array(A[i]);
         hybrid[j] = B[i][j];
-        sumSqDiff += (Y_A[i] - evaluateCost(hybrid, g)) ** 2;
+        sumSqDiff += (Y_A[i] - evaluateMetric(hybrid, g, ACTIVE_METRIC)) ** 2;
       }
       S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); // % of total variance
     }
@@ -1921,7 +2020,7 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
     ];
 
     const normBase = base.map(v => v === 0 ? 0.001 : v); // numerical safeguard only: zero baselines are replaced with a small value 0.001 to prevent zero variance, which would otherwise make Sobol indices meaningless and the Monte Carlo standard deviation zero.
-    const baseCost = evaluateCost(normBase, i);
+    const baseMetric = evaluateMetric(normBase, i, ACTIVE_METRIC);
     const stds = new Float64Array(numParams);
 
     for (let j = 0; j < numParams; j++) {
@@ -1929,11 +2028,11 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, perturbation = 0.2) 
       for (let k = 0; k < numSamples; k++) {
         const params = [...normBase];
 		params[j] *= 1 + (Math.random() - 0.5) * 2 * activeUncertainty[j];
-        samples[k] = evaluateCost(params, i);
+        samples[k] = evaluateMetric(params, i, ACTIVE_METRIC);
       }
       const mean = samples.reduce((s, v) => s + v, 0) / numSamples;
       const variance = samples.reduce((s, v) => s + (v - mean) ** 2, 0) / (numSamples - 1);
-      stds[j] = 100 * (Math.sqrt(variance) / baseCost);
+      stds[j] = 100 * (Math.sqrt(variance) / Math.abs(baseMetric));
     }
 
     results.push(Array.from(stds));
