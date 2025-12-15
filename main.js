@@ -2060,92 +2060,110 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const heatmapData = [];
-const metrics = ACTIVE_METRICS; // 4 metrics
+const metricTitles = {
+  tco: "TCO",
+  perf_per_tco: "Perf / TCO",
+  power_per_tco: "Power / TCO",
+  perf_per_watt_per_tco: "Perf / Watt / TCO"
+};
 
-const methods = [
-  { key: "elasticity", title: "Elasticity (%)" },
-  { key: "sobol", title: "Sobol (Rel. %)" },
-  { key: "mc", title: "Monte Carlo (Rel. %)" }
-];
+ACTIVE_METRICS.forEach((metric, colIdx) => {
+  const xaxis = `x${colIdx + 1}`;
+  const yaxis = `y${colIdx + 1}`;
 
-methods.forEach((method, methodIdx) => {
-  metrics.forEach((metric, metricIdx) => {
-    let z, zmin, zmax, colorscale;
+  // ---------- Elasticity ----------
+  heatmapData.push({
+    z: zElasticity[metric],
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    zmin: -zMaxElasticity[metric],
+    zmax:  zMaxElasticity[metric],
+    colorbar: colIdx === ACTIVE_METRICS.length - 1 ? { title: "Elasticity (%)" } : undefined,
+    visible: true, // Elasticity default
+    xaxis,
+    yaxis,
+    name: `Elasticity-${metric}`
+  });
 
-    if (method.key === "elasticity") {
-      z = zElasticity[metric];
-      zmin = -zMaxElasticity[metric];
-      zmax = zMaxElasticity[metric];
-      colorscale = [[0,"rgb(0,0,255)"], [0.5,"rgb(255,255,255)"], [1,"rgb(255,0,0)"]];
-    } else if (method.key === "sobol") {
-      z = zSobol[metric];
-      zmin = 0;
-      zmax = 100;
-      colorscale = "Viridis";
-    } else {
-      z = zMonteCarlo[metric];
-      zmin = 0;
-      zmax = 100;
-      colorscale = "Cividis";
-    }
+  // ---------- Sobol (UNCHANGED) ----------
+  heatmapData.push({
+    z: zSobol[metric],
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: "Viridis",
+    zmin: 0,
+    zmax: 100,
+    colorbar: colIdx === ACTIVE_METRICS.length - 1 ? { title: "Sobol (%)" } : undefined,
+    visible: false,
+    xaxis,
+    yaxis,
+    name: `Sobol-${metric}`
+  });
 
-    heatmapData.push({
-      z,
-      x: window.results.map(r => r.name),
-      y: elasticityLabels,
-      type: "heatmap",
-      colorscale,
-      zmin,
-      zmax,
-      visible: methodIdx === 0, // show Elasticity by default
-      showscale: metricIdx === metrics.length - 1, // one colorbar per row
-      colorbar: metricIdx === metrics.length - 1
-        ? { title: `${method.title}` }
-        : undefined,
-      hovertemplate:
-        `Metric: ${metric}<br>GPU: %{x}<br>Parameter: %{y}<br>Value: %{z:.2f}%<extra></extra>`,
-      xaxis: `x${metricIdx + 1}`,
-      yaxis: `y${metricIdx + 1}`
-    });
+  // ---------- Monte Carlo (UNCHANGED) ----------
+  heatmapData.push({
+    z: zMonteCarlo[metric],
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: "Cividis",
+    zmin: 0,
+    zmax: 100,
+    colorbar: colIdx === ACTIVE_METRICS.length - 1 ? { title: "Monte Carlo (%)" } : undefined,
+    visible: false,
+    xaxis,
+    yaxis,
+    name: `MC-${metric}`
   });
 });
 
 const heatmapLayout = {
   title: "Parameter Sensitivity Heatmaps",
-  grid: {
-    rows: 1,
-    columns: 4,
-    pattern: "independent"
-  },
-  height: 650,
-  width: 1200,
-  margin: { t: 80, l: 160, r: 80, b: 80 },
+  grid: { rows: 1, columns: 4, pattern: "independent" },
+  height: 600,
+  width: 1400,
+  margin: { t: 80, l: 160, r: 80 },
 
-  updatemenus: [{
-    type: "dropdown",
-    x: 1.05,
-    y: 0.9,
-    buttons: methods.map((method, mIdx) => ({
-      label: method.title,
-      method: "update",
-      args: [{
-        visible: heatmapData.map((_, i) =>
-          Math.floor(i / metrics.length) === mIdx
-        )
-      }]
-    }))
-  }],
-
-  annotations: metrics.map((metric, i) => ({
-    text: metric,
-    xref: `x${i + 1} domain`,
+  // Titles per column
+  annotations: ACTIVE_METRICS.map((m, i) => ({
+    text: metricTitles[m],
+    xref: "paper",
     yref: "paper",
-    x: 0.5,
+    x: (i + 0.5) / ACTIVE_METRICS.length,
     y: 1.08,
     showarrow: false,
-    font: { size: 14 }
-  }))
+    font: { size: 14, weight: "bold" }
+  })),
+
+  updatemenus: [{
+    type: "buttons",
+    direction: "right",
+    x: 0.5,
+    y: 1.18,
+    xanchor: "center",
+    buttons: [
+      {
+        label: "Elasticity",
+        method: "update",
+        args: [{ visible: heatmapData.map((_, i) => i % 3 === 0) }]
+      },
+      {
+        label: "Sobol",
+        method: "update",
+        args: [{ visible: heatmapData.map((_, i) => i % 3 === 1) }]
+      },
+      {
+        label: "Monte Carlo",
+        method: "update",
+        args: [{ visible: heatmapData.map((_, i) => i % 3 === 2) }]
+      }
+    ]
+  }]
 };
+
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
