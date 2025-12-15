@@ -1981,9 +1981,6 @@ function generatePerturbations(N, k, ranges) {
   return sobolResults;
 }
 
-const sobolIndicesOptimized = computeTotalOrderSobolNormalized(2000);
-
-
 // ---------- Monte Carlo (% std / base cost) ----------
 function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation = 0.2) {
   const results = [];
@@ -2020,7 +2017,14 @@ function monteCarloUncertaintyNormalized(numSamples = 1000, metric, perturbation
   return results;
 }
 
-const monteCarloParamResults = monteCarloUncertaintyNormalized(2000);
+const sobolIndicesOptimized = {};
+const monteCarloParamResults = {};
+
+ACTIVE_METRICS.forEach(metric => {
+    sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
+    monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
+});
+
 
 // ---------- Helper Function ----------
 const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
