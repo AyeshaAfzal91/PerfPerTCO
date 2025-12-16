@@ -2165,10 +2165,10 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 // ---------- Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps",
-    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
+    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.04 }, // slightly more space between plots
     height: 600,
-    width: 1450,
-    margin: { t: 80, l: 160, r: 160 }, // center plots
+    width: 1400,
+    margin: { t: 80, l: 160, r: 180 }, // leave space on right for colorbars
 
     yaxis: { showticklabels: true },
     yaxis2: { showticklabels: false },
@@ -2178,9 +2178,9 @@ const heatmapLayout = {
     coloraxis: {
         colorbar: {
             title: "Elasticity (%)",
-            x: 1.02,
+            x: 1.01,       // slightly right of first plot
             xanchor: "left",
-            len: 0.9,
+            len: 0.9,      // full height
             y: 0.5
         }
     },
@@ -2191,10 +2191,10 @@ const heatmapLayout = {
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
-            title: "Sensitivity (%)", // give explicit title
+            title: "Sensitivity (%)", // explicit title
             x: 1.12,                 // move slightly right
             xanchor: "left",
-            len: 0.9,                // same as Elasticity
+            len: 0.9,                // same height as Elasticity
             y: 0.5
         }
     },
@@ -2205,6 +2205,7 @@ const heatmapLayout = {
         { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
     ]
 };
+
 
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
