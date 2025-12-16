@@ -104,7 +104,7 @@
            value="ref"
            checked
            onchange="toggleGPUFreqSlider()">
-    Use Reference GPU Frequency
+    Use Reference GPU Frequency (base)
   </label>
 
   <!-- Override frequency -->
@@ -113,7 +113,7 @@
            name="gpuFreqMode"
            value="custom"
            onchange="toggleGPUFreqSlider()">
-    Change GPU Graphics Frequency (DVFS)
+    Change GPU Graphics Frequency
   </label>
 
   <!-- Slider (only visible in custom mode) -->
@@ -237,7 +237,11 @@
 </fieldset>
 
 
-    <fieldset>
+  </div>
+
+  <div id="rightColumn">
+
+	   <fieldset>
   <legend>Capital Cost Parameters</legend>
 
   <label for="C_node_server" data-tooltip="Set the server cost per node.">
@@ -300,9 +304,7 @@
     </small>
   </label>
 </fieldset>
-  </div>
-
-  <div id="rightColumn">
+	  
     <fieldset>
   <legend>Operational Cost Parameters</legend>
 
