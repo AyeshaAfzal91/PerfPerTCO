@@ -2178,7 +2178,7 @@ const heatmapLayout = {
     coloraxis: {
         colorbar: {
             title: "Elasticity (%)",
-            x: 1.02,
+            x: 1.12,
             xanchor: "left",
             len: 0.9,
             y: 0.5
@@ -2192,9 +2192,9 @@ const heatmapLayout = {
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
             title: "Sensitivity (%)", // give explicit title
-            x: 1.12,                 // move slightly right
+            x: 1.28,                 // move slightly right
             xanchor: "left",
-            len: 0.9,                // same as Elasticity
+            len: 0.85,                // same as Elasticity
             y: 0.5
         }
     },
