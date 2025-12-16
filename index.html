@@ -539,9 +539,15 @@
 </div>
 </div>
 
-<div style="text-align: center;">
+<div id="sensitivityWrapper">
   <h2>Sensitivity and uncertainty modeling (cross-GPU view) </h2>
-  <div id="sensitivityHeatmaps" style="width:100%;"></div>
+  <select id="metricSelector" style="margin-bottom:10px;">
+  <option value="tco">TCO</option>
+  <option value="perf_per_tco">Perf / TCO</option>
+  <option value="power_per_tco">Power / TCO</option>
+  <option value="perf_per_watt_per_tco">Perf / Watt / TCO</option>
+</select>
+  <div id="sensitivityHeatmaps"></div>
 </div>
 
 <div style="text-align: center;">
