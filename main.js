@@ -2160,29 +2160,33 @@ ACTIVE_METRICS.forEach(metric => {
 // ---------- Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps",
+
     grid: {
         rows: 1,
         columns: 3,
         pattern: "independent",
-        xgap: 0.03   // 🔥 bring plots closer together
+        xgap: 0.03
     },
+
     height: 600,
     width: 1450,
-    margin: { t: 80, l: 160, r: 140 },
 
-    // Keep y labels only on first plot
+    // IMPORTANT: give room for colorbars
+    margin: { t: 80, l: 160, r: 220 },
+
+    // Y labels only on first plot
     yaxis:  { showticklabels: true },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
-    // Shared Sobol + Monte Carlo colorbar
+    // SHARED Sobol + Monte Carlo colorbar
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
-            title: "Sensitivity (%)",
-            x: 1.08,
+            title: "Sobol + Monte Carlo (%)",
+            x: 1.03,     
             len: 0.9
         }
     },
