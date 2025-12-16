@@ -107,18 +107,38 @@
   </label>
 
 <!-- GPU Frequency -->
-<label for="gpu_graphics_freq"
-       data-tooltip="Set the GPU graphics clock frequency in MHz.">
-  GPU Graphics Frequency (MHz):
-  <input type="range"
-         id="gpu_graphics_freq"
-         min="210"
-         max="4000"
-         step="15"
-         value="2490"
-         oninput="updateValue('v_gpu_graphics_freq', this.value); updateAITip()">
-  <span id="v_gpu_graphics_freq">1500</span>
-</label>
+  <legend>GPU Frequency Model</legend>
+
+  <!-- Use reference frequency -->
+  <label data-tooltip="Use vendor reference GPU frequency (no DVFS scaling).">
+    <input type="radio"
+           name="gpuFreqMode"
+           value="ref"
+           checked
+           onchange="toggleGPUFreqSlider()">
+    Use Reference GPU Frequency
+  </label>
+
+  <!-- Override frequency -->
+  <label data-tooltip="Override GPU graphics frequency and enable DVFS power scaling.">
+    <input type="radio"
+           name="gpuFreqMode"
+           value="custom"
+           onchange="toggleGPUFreqSlider()">
+    Change GPU Graphics Frequency (DVFS)
+  </label>
+
+  <!-- Slider (only visible in custom mode) -->
+  <div class="mode-slider" id="slider_gpu_freq" style="display:none;">
+    <input type="range"
+           id="gpu_graphics_freq"
+           min="210"
+           max="4000"
+           step="15"
+           value="2490"
+           oninput="updateValue('v_gpu_graphics_freq', this.value); updateAITip()">
+    <span id="v_gpu_graphics_freq">2490</span> MHz
+  </div>
 
 <!-- GPU Power Cap -->
 <label for="gpu_power_cap"
