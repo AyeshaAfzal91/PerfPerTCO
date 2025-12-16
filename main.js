@@ -1040,10 +1040,11 @@ if (!gpu.per_node || gpu.per_node <= 0) {
 
   const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
   const total_perf = perf * n_gpu;
-  const perf_per_tco = total_perf / used_budget;
+  const total_work = total_perf * system_usage * lifetime / 24;
+  const perf_per_tco = total_work / used_budget;
   const total_power = power * n_gpu;
   const power_per_tco = total_power / used_budget;
-  const perf_per_watt_per_tco = total_perf / (total_power / 1000) / used_budget;
+  const perf_per_watt_per_tco = total_work / total_power / used_budget;
 
 	console.log("POWER DEBUG", {
   gpu: gpu.name,
@@ -1163,9 +1164,9 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
 	"Total Perf (ns/day*atoms)",
 	"Total Power (W)",
     "Total TCO (€)",
-    "Perf/TCO (ns/day/€ * atoms)",
-    "Power/TCO (W/€)",
-    "Perf/Watt/TCO (ns/day/kW/€)",
+    "Work-per-TCO (ns/€ * atoms)",
+    "Power-per-TCO (W/€)",
+    "Work-per-watt-per-TCO (ns/W/€ * atoms)",
     "Baseline %"
   ];
 
@@ -1200,9 +1201,9 @@ console.table(window.results.map(r => ({
   'Total Perf (ns/day*atoms)': r.performance.toFixed(1),
   'Total Power (W)': r.power.toFixed(1),
   'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
-  'Perf/TCO (ns/day*atoms/€)': r.perf_per_tco.toFixed(1),
-  'Power/TCO (W/€)': r.power_per_tco.toFixed(1), 
-  'Perf/Power/TCO (ns/day*atoms/kW/€)': r.power_per_tco.toFixed(1), 
+  'Work-per-TCO (ns/€ * atoms)': r.perf_per_tco.toFixed(1),
+  'Power-per-TCO (W/€)': r.power_per_tco.toFixed(1), 
+  'Work-per-watt-per-TCO (ns/W/€ * atoms)': r.power_per_tco.toFixed(1), 
   'Baseline %': r.baseline_pct.toFixed(2)
 })));
 
@@ -1226,9 +1227,9 @@ const tableHTML = `
 		<th>Total Perf (ns/day*atoms)</th>      
     	<th>Total Power (W)</th> 
         <th>Total TCO (€)</th>
-        <th>Perf/TCO (ns/day*atoms/€)</th>
-		<th>Power/TCO (W/€)</th>
-        <th>Perf/Power/TCO (ns/day*atoms/kW/€)</th>
+        <th>Work-per-TCO (ns/€ * atoms)</th>
+		<th>Power-per-TCO (W/€)</th>
+        <th>Work-per-watt-per-TCO (ns/W/€ * atoms)</th>
         <th>Baseline (%)</th>
       </tr>
     </thead>
@@ -1308,7 +1309,7 @@ const barLayout = {
     tickangle: -45
   },
   yaxis: {
-    title: 'Performance per TCO (ns/day/€ * atoms)',
+    title: 'Work-per-TCO (ns/€ * atoms)',
     rangemode: 'tozero',
     showgrid: true
   },
@@ -1334,7 +1335,7 @@ const powerPerTCOTrace = {
   x: barLabels,
   y: nonzeroResults.map(result => result.power_per_tco),
   type: 'bar',
-  name: 'Power per TCO',
+  name: 'Power-per-TCO (W/€)',
   marker: { color: 'rgba(255, 165, 0, 0.6)', line: { color: 'orange', width: 1 } },
   yaxis: 'y1'
 };
@@ -1369,7 +1370,7 @@ const perfPerWattTrace = {
   x: barLabels,
   y: nonzeroResults.map(result => result.perf_per_watt_per_tco),
   type: 'bar',
-  name: 'Perf/Watt per TCO',
+  name: 'Work-per-watt-per-TCO (ns/W/€ * atoms)',
   marker: { color: 'rgba(0, 200, 200, 0.6)', line: { color: 'teal', width: 1 } },
   yaxis: 'y1'
 };
