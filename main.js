@@ -2164,51 +2164,61 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 
 // ---------- Layout ----------
 const heatmapLayout = {
-    title: "Parameter Sensitivity Heatmaps",
-    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.04 }, // slightly more space between plots
-    height: 600,
-    width: 1400,
-    margin: { t: 80, l: 160, r: 180 }, // leave space on right for colorbars
+  title: "Parameter Sensitivity Heatmaps",
+  height: 600,
+  width: 1450,
+  margin: { t: 80, l: 150, r: 220 },
 
-    yaxis: { showticklabels: true },
-    yaxis2: { showticklabels: false },
-    yaxis3: { showticklabels: false },
+  // Explicitly define x domains to center plots
+  xaxis: { domain: [0, 0.28] },
+  xaxis2: { domain: [0.36, 0.64] },
+  xaxis3: { domain: [0.72, 1] },
 
-    // Elasticity colorbar
-    coloraxis: {
-        colorbar: {
-            title: "Elasticity (%)",
-            x: 1.01,       // slightly right of first plot
-            xanchor: "left",
-            len: 0.9,      // full height
-            y: 0.5
-        }
-    },
+  yaxis: { showticklabels: true },
+  yaxis2: { showticklabels: false },
+  yaxis3: { showticklabels: false },
 
-    // Shared Sobol + Monte Carlo colorbar
-    coloraxisSM: {
-        cmin: 0,
-        cmax: 100,
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: {
-            title: "Sensitivity (%)", // explicit title
-            x: 1.12,                 // move slightly right
-            xanchor: "left",
-            len: 0.9,                // same height as Elasticity
-            y: 0.5
-        }
-    },
+  // Elasticity colorbar
+  coloraxis: {
+    colorbar: {
+      title: "Elasticity (%)",
+      len: 0.9,
+      y: 0.5,
+      x: 1.03,
+      xanchor: "left"
+    }
+  },
 
-    annotations: [
-        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
-    ]
+  // Shared Sobol + Monte Carlo colorbar
+  coloraxisSM: {
+    cmin: 0,
+    cmax: 100,
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    colorbar: {
+      title: "Sensitivity (%)",
+      len: 0.9,
+      y: 0.5,
+      x: 1.12,
+      xanchor: "left"
+    }
+  },
+
+  annotations: [
+    { text: "Elasticity", xref: "paper", yref: "paper", x: 0.14, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+    { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+    { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
+  ]
 };
 
-
+// Make sure only one trace has showscale true for shared colorbar
+heatmapData.forEach(trace => {
+  if (trace.coloraxis === "coloraxisSM") trace.showscale = false;
+});
+// Enable the colorbar on the first Sobol or Monte Carlo trace
+heatmapData.find(t => t.coloraxis === "coloraxisSM").showscale = true;
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 
 // ---------- Tornado Charts (also in %) (with metric toggle) ----------
