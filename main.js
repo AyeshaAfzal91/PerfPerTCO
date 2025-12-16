@@ -1027,7 +1027,7 @@ if (mode === "budget") {
  n_gpu_list = GPU_data.map((gpu, i) => {
   //const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
   //const power = gpu.power[workload][benchmarkId];
-  const gpuFreq = getEffectiveGPUFreq(gpu);  // returns slider value or reference frequency
+  const gpuFreq = getEffectiveGPUFreq(gpu);  
   const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
   const basePerf = gpu.perf[workload][benchmarkId];
   const perf = basePerf * (gpuFreq / gpu.f_ref);
@@ -1067,7 +1067,9 @@ if (mode === "budget") {
 } else if (mode === "power") {
 	const maxPower = getSliderValue("max_total_power") * 1000; // convert kW to W
     n_gpu_list = GPU_data.map(gpu => {
-        const power = gpu.power[workload][benchmarkId];
+        //const power = gpu.power[workload][benchmarkId];
+		const gpuFreq = getEffectiveGPUFreq(gpu);  
+  		const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
         if (power === 0) return 0;
 
         const per_node = gpu.per_node;
@@ -1083,7 +1085,12 @@ if (mode === "budget") {
   const targetPerf = getSliderValue("target_performance");
 
   n_gpu_list = GPU_data.map(gpu => {
-    const perf = gpu.perf[workload][benchmarkId];
+    //const perf = gpu.perf[workload][benchmarkId];
+	//const power = gpu.power[workload][benchmarkId];
+	const gpuFreq = getEffectiveGPUFreq(gpu);  
+  	const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
+  	const basePerf = gpu.perf[workload][benchmarkId];
+  	const perf = basePerf * (gpuFreq / gpu.f_ref);
     if (!perf || perf <= 0) return 0;
 
     const per_node = gpu.per_node;
@@ -1094,7 +1101,7 @@ if (mode === "budget") {
     if (n_gpu < per_node) return 0;
 
     // --- NEW: budget feasibility check ---
-    const W_gpu_total = gpu.power[workload][benchmarkId] * system_usage * lifetime;
+    const W_gpu_total = power * system_usage * lifetime;
     const W_node_baseline_total = W_node_baseline * system_usage * lifetime;
 
     const gpu_cost_total = 
@@ -1126,8 +1133,12 @@ if (mode === "budget") {
 	
 // ---------- Compute cost breakdowns ----------
 GPU_data.forEach((gpu, i) => {
-  const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
-  const power = gpu.power[workload][benchmarkId];
+  //const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
+  //const power = gpu.power[workload][benchmarkId];
+  const gpuFreq = getEffectiveGPUFreq(gpu);  
+  const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
+  const basePerf = gpu.perf[workload][benchmarkId];
+  const perf = basePerf * (gpuFreq / gpu.f_ref);
   if (perf === 0 || power === 0) return;
 
   let n_gpu = n_gpu_list[i];
@@ -1942,8 +1953,12 @@ ACTIVE_METRICS.forEach(metric => {
 
         const n_gpu = r.n_gpu;
         const n_nodes = n_gpu / gpu.per_node;
-        const perf = gpu.perf[workload][benchmarkId];
-        const power = gpu.power[workload][benchmarkId];
+        //const perf = gpu.perf[workload][benchmarkId];
+        //const power = gpu.power[workload][benchmarkId];
+		const gpuFreq = getEffectiveGPUFreq(gpu);  
+  		const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
+  		const basePerf = gpu.perf[workload][benchmarkId];
+  		const perf = basePerf * (gpuFreq / gpu.f_ref);
         const total_perf = perf * n_gpu;
         const total_power = power * n_gpu;
 		const total_work = total_perf * system_usage * lifetime / 24;
@@ -1998,8 +2013,12 @@ function evaluateMetric(params, gpuIndex, metricKey) {
 
   const n_gpu = r.n_gpu;
   const n_nodes = n_gpu / gpu.per_node;
-  const perf = gpu.perf[workload][benchmarkId];
-  const power = gpu.power[workload][benchmarkId];
+  //const perf = gpu.perf[workload][benchmarkId];
+  //const power = gpu.power[workload][benchmarkId];
+  const gpuFreq = getEffectiveGPUFreq(gpu);  
+  const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
+  const basePerf = gpu.perf[workload][benchmarkId];
+  const perf = basePerf * (gpuFreq / gpu.f_ref);
 
   const [
     C_gpu,
