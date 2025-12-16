@@ -1785,7 +1785,7 @@ const normalizeAcrossDimension = arr => {
         const plainRow = Array.from(row);
         const maxVal = Math.max(...plainRow.map(Math.abs));
         
-        // 🔑 FIX 1: Change safeguard from 1e-6 to 1e-15 to allow small values to be normalized
+        // ✅ CRITICAL FIX: Relax the numerical safeguard to prevent zeroing small Sobol values.
         if (maxVal < 1e-15) return plainRow.map(() => 0); 
         
         return plainRow.map(v => (v / maxVal) * 100);
@@ -2046,17 +2046,15 @@ ACTIVE_METRICS.forEach(metric => {
   zSobol[metric] = normalized.map(row => Array.from(row));
 });
 
-
 console.log(
   "Sobol raw max (TCO):",
-  Math.max(...sobolIndicesOptimized.tco.flat())
+  Math.max(...flatten2D(sobolIndicesOptimized.tco))
 );
 
 console.log(
   "Sobol heatmap max (TCO):",
-  Math.max(...zSobol.tco.flat())
+  Math.max(...flatten2D(zSobol.tco))
 );
-
 
 // Monte Carlo
 const zMonteCarlo = {};
