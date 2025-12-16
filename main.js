@@ -1821,9 +1821,18 @@ function showPowerModel() {
         const tdp_ref = GPU_TDP_REF[gpu.name] ?? "N/A";
         const dvfs = gpu.DVFS_PARAMS ?? {};
 
-        const dvfsContent = Object.entries(dvfs).map(([key, val]) => 
-            `<tr><td>${key}</td><td>${val}</td></tr>`
-        ).join("");
+        // Build a nested table of DVFS parameters per workload & benchmark
+        const dvfsContent = Object.entries(dvfs).map(([workload, benchmarks]) => {
+            const benchmarkRows = Object.entries(benchmarks).map(([benchmarkId, params]) => {
+                const paramStr = Object.entries(params).map(([k,v]) => `${k}: ${v}`).join(", ");
+                return `<tr>
+                            <td>${workload}</td>
+                            <td>${benchmarkId}</td>
+                            <td>${paramStr}</td>
+                        </tr>`;
+            }).join("");
+            return benchmarkRows;
+        }).join("");
 
         return `
         <tr>
@@ -1831,9 +1840,12 @@ function showPowerModel() {
             <td>${f_ref} MHz</td>
             <td>${tdp_ref} W</td>
             <td>
-                <button class="toggleDVFS" data-idx="${idx}">Show DVFS</button>
-                <table class="dvfsTable" id="dvfsTable${idx}" style="display:none; margin-top:10px; border-collapse: collapse;">
-                    <tr><th>Parameter</th><th>Value</th></tr>
+                <table style="width:100%; border-collapse: collapse;" border="1">
+                    <tr>
+                        <th>Workload</th>
+                        <th>Benchmark ID</th>
+                        <th>DVFS Parameters</th>
+                    </tr>
                     ${dvfsContent}
                 </table>
             </td>
@@ -1861,7 +1873,7 @@ function showPowerModel() {
                     <th>GPU</th>
                     <th>f_ref (MHz)</th>
                     <th>tdp_ref (W)</th>
-                    <th>DVFS Parameters</th>
+                    <th>DVFS Parameters per Workload/Benchmark</th>
                 </tr>
             </thead>
             <tbody>
@@ -1874,28 +1886,11 @@ function showPowerModel() {
 
     document.body.appendChild(modal);
 
-    // Add toggle functionality for DVFS tables
-    modal.querySelectorAll(".toggleDVFS").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const idx = btn.dataset.idx;
-            const dvfsTable = document.getElementById(`dvfsTable${idx}`);
-            if (dvfsTable.style.display === "none") {
-                dvfsTable.style.display = "table";
-                btn.textContent = "Hide DVFS";
-            } else {
-                dvfsTable.style.display = "none";
-                btn.textContent = "Show DVFS";
-            }
-        });
-    });
-
     // Close modal
     document.getElementById("closeModalBtn").addEventListener("click", () => {
         document.body.removeChild(modal);
     });
 }
-
-
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
