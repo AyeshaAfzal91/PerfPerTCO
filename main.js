@@ -2114,7 +2114,7 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         zmin: -zMaxElasticity[metric],
         zmax:  zMaxElasticity[metric],
-        colorbar: { title: "Elasticity (%)", x: 0.15 },
+        colorbar: { title: "Elasticity (%)", x: 0.3 },
         visible: metric === "tco", // default metric visible
         name: `Elasticity-${metric}`,
         xaxis: "x1",
@@ -2130,7 +2130,7 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
         colorscale: "Viridis",
         zmin: 0,
         zmax: 100,
-        colorbar: { title: "Sobol (%)", x: 0.55 },
+        colorbar: { title: "Sobol (%)", x: 0.6 },
         visible: metric === "tco",
         name: `Sobol-${metric}`,
         xaxis: "x2",
@@ -2146,7 +2146,7 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
         colorscale: "Cividis",
         zmin: 0,
         zmax: 100,
-        colorbar: { title: "Monte Carlo (%)", x: 1.05 },
+        colorbar: { title: "Monte Carlo (%)", x: 1 },
         visible: metric === "tco",
         name: `MC-${metric}`,
         xaxis: "x3",
@@ -2162,10 +2162,14 @@ const heatmapLayout = {
     width: 1400,
     margin: { t: 80, l: 160, r: 80 },
 
+    yaxis:  { showticklabels: true },
+    yaxis2: { showticklabels: false },
+    yaxis3: { showticklabels: false },
+
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
+        { text: "Sobol",      xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Monte Carlo",xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
     ],
 
     updatemenus: [{
