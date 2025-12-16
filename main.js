@@ -774,6 +774,11 @@ const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
   };
 });
 
+GPU_data.forEach(gpu => {
+    const dvfs = DVFS_PARAMS_GPU.find(d => d.name === gpu.name);
+    if (dvfs) gpu.DVFS_PARAMS = dvfs.DVFS_PARAMS;
+});
+
 function dvfsScaling(f_norm, params) {
   const { f_t, b1, c1, a2, b2, c2 } = params;
 
@@ -1810,7 +1815,6 @@ function initSliderToggle() {
 window.addEventListener('DOMContentLoaded', initSliderToggle);
 
 // ---------- Show Power Model ----------
-// ---------- Show Power Model ----------
 document.getElementById("showPowerModelBtn").addEventListener("click", () => {
     showPowerModel();
 });
@@ -1819,16 +1823,30 @@ function showPowerModel() {
     const rows = GPU_data.map(gpu => {
         const f_ref = GPU_F_REF[gpu.name] ?? "N/A";
         const tdp_ref = GPU_TDP_REF[gpu.name] ?? "N/A";
-        const dvfs = gpu.DVFS_PARAMS ?? {};
+        const dvfs = gpu.DVFS_PARAMS;
 
-        // Build the formula string with actual DVFS values
-        const phiFormula = dvfs && Object.keys(dvfs).length > 0
-            ? `φ(f_GPU) = 
-                { 
-                  ${dvfs.b1} * f_GPU + ${dvfs.c1}, if f_GPU ≤ ${dvfs.f_t} * f_ref
-                  ${dvfs.a2} * f_GPU² + ${dvfs.b2} * f_GPU + ${dvfs.c2}, if f_GPU > ${dvfs.f_t} * f_ref
-                }`
-            : "No DVFS parameters available";
+        if (!dvfs || Object.keys(dvfs).length === 0) {
+            return `
+            <tr>
+                <td>${gpu.name}</td>
+                <td>${f_ref} MHz</td>
+                <td>${tdp_ref} W</td>
+                <td>No DVFS parameters available</td>
+            </tr>
+            `;
+        }
+
+        // Take the first workload & benchmark for display
+        const firstWorkload = Object.keys(dvfs)[0];
+        const firstBenchmark = Object.keys(dvfs[firstWorkload])[0];
+        const params = dvfs[firstWorkload][firstBenchmark];
+
+        const phiFormula = `
+φ(f_GPU) =
+{
+  ${params.b1} * f_GPU + ${params.c1},          if f_GPU ≤ ${params.f_t} * f_ref
+  ${params.a2} * f_GPU² + ${params.b2} * f_GPU + ${params.c2},  if f_GPU > ${params.f_t} * f_ref
+}`;
 
         return `
         <tr>
@@ -1840,6 +1858,7 @@ function showPowerModel() {
         `;
     }).join("");
 
+    // Create modal
     const modal = document.createElement("div");
     modal.style.position = "fixed";
     modal.style.top = "5%";
@@ -1872,10 +1891,12 @@ function showPowerModel() {
 
     document.body.appendChild(modal);
 
+    // Close modal
     document.getElementById("closeModalBtn").addEventListener("click", () => {
         document.body.removeChild(modal);
     });
 }
+
 
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
