@@ -1808,37 +1808,41 @@ window.addEventListener('DOMContentLoaded', initSliderToggle);
 document.getElementById("showPowerModelBtn").addEventListener("click", () => {
     showPowerModel();
 });
+
 function showPowerModel() {
-    // Gather GPU data
-    const gpuInfo = GPU_data.map(gpu => {
+    // Build table rows for each GPU
+    const rows = GPU_data.map((gpu, idx) => {
         const f_ref = GPU_F_REF[gpu.name] ?? "N/A";
         const tdp_ref = GPU_TDP_REF[gpu.name] ?? "N/A";
         const dvfs = gpu.DVFS_PARAMS ?? {};
 
+        const dvfsContent = Object.entries(dvfs).map(([key, val]) => 
+            `<tr><td>${key}</td><td>${val}</td></tr>`
+        ).join("");
+
         return `
-        <strong>${gpu.name}</strong><br>
-        Reference frequency (f_ref): ${f_ref} MHz<br>
-        Reference TDP (tdp_ref): ${tdp_ref} W<br>
-        DVFS Parameters:<br>
-        <pre>${JSON.stringify(dvfs, null, 2)}</pre>
-        <hr>
+        <tr>
+            <td>${gpu.name}</td>
+            <td>${f_ref} MHz</td>
+            <td>${tdp_ref} W</td>
+            <td>
+                <button class="toggleDVFS" data-idx="${idx}">Show DVFS</button>
+                <table class="dvfsTable" id="dvfsTable${idx}" style="display:none; margin-top:10px; border-collapse: collapse;">
+                    <tr><th>Parameter</th><th>Value</th></tr>
+                    ${dvfsContent}
+                </table>
+            </td>
+        </tr>
         `;
     }).join("");
 
-    // Show in a modal or alert
-    const modalContent = `
-        <div style="max-height: 70vh; overflow-y: auto; font-family: monospace;">
-            ${gpuInfo}
-        </div>
-    `;
-
-    // Simple popup
+    // Create modal
     const modal = document.createElement("div");
     modal.style.position = "fixed";
-    modal.style.top = "10%";
-    modal.style.left = "10%";
-    modal.style.width = "80%";
-    modal.style.height = "80%";
+    modal.style.top = "5%";
+    modal.style.left = "5%";
+    modal.style.width = "90%";
+    modal.style.height = "90%";
     modal.style.backgroundColor = "white";
     modal.style.border = "2px solid #333";
     modal.style.padding = "20px";
@@ -1846,15 +1850,46 @@ function showPowerModel() {
     modal.style.overflowY = "auto";
     modal.innerHTML = `
         <h2>GPU Power Model</h2>
-        ${modalContent}
+        <table style="width:100%; border-collapse: collapse;" border="1">
+            <thead>
+                <tr>
+                    <th>GPU</th>
+                    <th>f_ref (MHz)</th>
+                    <th>tdp_ref (W)</th>
+                    <th>DVFS Parameters</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+        <br>
         <button id="closeModalBtn">Close</button>
     `;
+
     document.body.appendChild(modal);
 
+    // Add toggle functionality for DVFS tables
+    modal.querySelectorAll(".toggleDVFS").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const idx = btn.dataset.idx;
+            const dvfsTable = document.getElementById(`dvfsTable${idx}`);
+            if (dvfsTable.style.display === "none") {
+                dvfsTable.style.display = "table";
+                btn.textContent = "Hide DVFS";
+            } else {
+                dvfsTable.style.display = "none";
+                btn.textContent = "Show DVFS";
+            }
+        });
+    });
+
+    // Close modal
     document.getElementById("closeModalBtn").addEventListener("click", () => {
         document.body.removeChild(modal);
     });
 }
+
 
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
