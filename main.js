@@ -1160,6 +1160,8 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
   const headers = [
     "GPU",
     "#GPUs",
+	"Total Perf (ns/day*atoms)",
+	"Total Power (W)",
     "Total TCO (€)",
     "Perf/TCO (ns/day/€ * atoms)",
     "Power/TCO (W/€)",
@@ -1170,6 +1172,8 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
   const rows = data.map(r => [
     r.name,
     r.n_gpu,
+	r.performance.toFixed(1),
+	r.power.toFixed(1),
     Math.round(r.total_cost),
     r.perf_per_tco.toFixed(1),
     r.power_per_tco.toFixed(1),
@@ -1193,6 +1197,8 @@ document.getElementById("download-csv").addEventListener("click", () => {
 console.table(window.results.map(r => ({
   GPU: r.name,
   '#GPUs': r.n_gpu,
+  'Total Perf (ns/day*atoms)': r.performance.toFixed(1),
+  'Total Power (W)': r.power.toFixed(1),
   'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
   'Perf/TCO (ns/day*atoms/€)': r.perf_per_tco.toFixed(1),
   'Power/TCO (W/€)': r.power_per_tco.toFixed(1), 
@@ -1232,7 +1238,7 @@ const tableHTML = `
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
 		  <td style="background-color:${getHeatmapColor(r.performance, maxTotalPerf)}">${r.performance.toExponential(2)}</td> 
-      		<td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toFixed(1)}</td>       
+      	  <td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toExponential(2)}</td>       
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
 		  <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco < 1 ? r.power_per_tco.toExponential(2) : r.power_per_tco.toFixed(1)}</td>
