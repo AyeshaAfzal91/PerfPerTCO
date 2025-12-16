@@ -2107,55 +2107,55 @@ ACTIVE_METRICS.forEach(metric => {
 
     // ---------- Elasticity (OWN colorbar) ----------
     heatmapData.push({
-        z: zElasticity[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: -zMaxElasticity[metric],
-        zmax:  zMaxElasticity[metric],
-        colorbar: {
-            title: "Elasticity (%)",
-            x: 1.02
-        },
-        visible: metric === "tco",
-        name: `Elasticity-${metric}`,
-        xaxis: "x1",
-        yaxis: "y1"
-    });
+    z: zElasticity[metric],
+    x: xLabels,
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    zmin: -zMaxElasticity[metric],
+    zmax:  zMaxElasticity[metric],
+    colorbar: {
+        title: "Elasticity (%)",
+        x: 0.97
+    },
+    visible: metric === "tco",
+    name: `Elasticity-${metric}`,
+    xaxis: "x1",
+    yaxis: "y1"
+});
 
     // ---------- Sobol (shared colorbar) ----------
     heatmapData.push({
-        z: zSobol[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: 0,
-        zmax: 100,
-        coloraxis: "coloraxisSM",
-        visible: metric === "tco",
-        name: `Sobol-${metric}`,
-        xaxis: "x2",
-        yaxis: "y2"
-    });
+    z: zSobol[metric],
+    x: xLabels,
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    zmin: 0,
+    zmax: 100,
+    coloraxis: "coloraxisSM",   // 🔥 REQUIRED
+    visible: metric === "tco",
+    name: `Sobol-${metric}`,
+    xaxis: "x2",
+    yaxis: "y2"
+});
 
     // ---------- Monte Carlo (shared colorbar) ----------
     heatmapData.push({
-        z: zMonteCarlo[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: 0,
-        zmax: 100,
-        coloraxis: "coloraxisSM",
-        visible: metric === "tco",
-        name: `MC-${metric}`,
-        xaxis: "x3",
-        yaxis: "y3"
-    });
+    z: zMonteCarlo[metric],
+    x: xLabels,
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    zmin: 0,
+    zmax: 100,
+    coloraxis: "coloraxisSM",   // 🔥 SAME AXIS
+    visible: metric === "tco",
+    name: `MC-${metric}`,
+    xaxis: "x3",
+    yaxis: "y3"
 });
+
 
 // ---------- Layout ----------
 const heatmapLayout = {
@@ -2171,22 +2171,21 @@ const heatmapLayout = {
     height: 600,
     width: 1450,
 
-    // IMPORTANT: give room for colorbars
-    margin: { t: 80, l: 160, r: 220 },
+    // 🔥 Enough space for both colorbars
+    margin: { t: 80, l: 160, r: 260 },
 
-    // Y labels only on first plot
     yaxis:  { showticklabels: true },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
-    // SHARED Sobol + Monte Carlo colorbar
+    // ✅ SHARED Sobol + Monte Carlo colorbar
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
-            title: "Sobol + Monte Carlo (%)",
-            x: 1.03,     
+            title: "Sensitivity (%)",
+            x: 1.08,
             len: 0.9
         }
     },
