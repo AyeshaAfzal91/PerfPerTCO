@@ -1024,10 +1024,12 @@ let n_gpu_list = [];
 if (mode === "budget") {
 // ---------- Compute n_gpu ----------
  n_gpu_list = GPU_data.map((gpu, i) => {
-  const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
+  //const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
+  //const power = gpu.power[workload][benchmarkId];
   const gpuFreq = getEffectiveGPUFreq(gpu);  // returns slider value or reference frequency
   const power = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
-  //const power = gpu.power[workload][benchmarkId];
+  const basePerf = gpu.perf[workload][benchmarkId];
+  const perf = basePerf * (gpuFreq / gpu.f_ref);
   if (perf === 0 || power === 0) return 0;
 
   const per_node = gpu.per_node;
