@@ -2093,136 +2093,105 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-const metricTitles = {
-  tco: "TCO",
-  perf_per_tco: "Perf / TCO",
-  power_per_tco: "Power / TCO",
-  perf_per_watt_per_tco: "Perf / Watt / TCO"
-};
-
+// ---------- Heatmap Traces ----------
 const heatmapData = [];
 
-ACTIVE_METRICS.forEach(metric => {
+ACTIVE_METRICS.forEach((metric, metricIdx) => {
     const xLabels = window.results.map(r => r.name);
 
-    // ---------- Elasticity (OWN colorbar) ----------
+    // Elasticity
     heatmapData.push({
-    z: zElasticity[metric],
-    x: xLabels,
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-    zmin: -zMaxElasticity[metric],
-    zmax:  zMaxElasticity[metric],
-    colorbar: {
-        title: "Elasticity (%)",
-        x: 0.97
-    },
-    visible: metric === "tco",
-    name: `Elasticity-${metric}`,
-    xaxis: "x1",
-    yaxis: "y1"
+        z: zElasticity[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: -zMaxElasticity[metric],
+        zmax: zMaxElasticity[metric],
+        colorbar: { title: "Elasticity (%)", x: 0.97, len: 0.9, y: 0.5 },
+        visible: metric === "tco",
+        name: `Elasticity-${metric}`,
+        xaxis: "x1",
+        yaxis: "y1"
+    });
+
+    // Sobol (shared colorbar)
+    heatmapData.push({
+        z: zSobol[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: 0,
+        zmax: 100,
+        coloraxis: "coloraxisSM",
+        visible: metric === "tco",
+        name: `Sobol-${metric}`,
+        xaxis: "x2",
+        yaxis: "y2"
+    });
+
+    // Monte Carlo (shared colorbar)
+    heatmapData.push({
+        z: zMonteCarlo[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: 0,
+        zmax: 100,
+        coloraxis: "coloraxisSM",
+        visible: metric === "tco",
+        name: `MC-${metric}`,
+        xaxis: "x3",
+        yaxis: "y3"
+    });
 });
 
-    // ---------- Sobol (shared colorbar) ----------
-    heatmapData.push({
-    z: zSobol[metric],
-    x: xLabels,
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-    zmin: 0,
-    zmax: 100,
-    coloraxis: "coloraxisSM",   // 🔥 REQUIRED
-    visible: metric === "tco",
-    name: `Sobol-${metric}`,
-    xaxis: "x2",
-    yaxis: "y2"
-});
-
-    // ---------- Monte Carlo (shared colorbar) ----------
-    heatmapData.push({
-    z: zMonteCarlo[metric],
-    x: xLabels,
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-    zmin: 0,
-    zmax: 100,
-    coloraxis: "coloraxisSM",   // 🔥 SAME AXIS
-    visible: metric === "tco",
-    name: `MC-${metric}`,
-    xaxis: "x3",
-    yaxis: "y3"
-});
-});
-
-// ---------- Layout ----------
 // ---------- Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps",
-
-    grid: {
-        rows: 1,
-        columns: 3,
-        pattern: "independent",
-        xgap: 0.03
-    },
-
+    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.03 },
     height: 600,
     width: 1450,
-
     margin: { t: 80, l: 160, r: 260 },
 
-    yaxis:  { showticklabels: true },
+    yaxis: { showticklabels: true },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
-    // Elasticity colorbar stays the same
-    coloraxis: {   // for Elasticity, optional if already set in trace
-        colorbar: {
-            title: "Elasticity (%)",
-            x: 0.97,
-            len: 0.9,      // match this length
-            y: 0.5         // center vertically
-        }
-    },
-
-    // ✅ Shared Sobol + Monte Carlo colorbar
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: {
-            title: "Sensitivity (%)",
-            x: 1.08,
-            len: 0.9,   // same as Elasticity
-            y: 0.5      // center vertically
-        }
+        colorbar: { title: "Sensitivity (%)", x: 1.08, len: 0.9, y: 0.5 }
     },
 
     annotations: [
-        { text: "Elasticity",  xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Sobol",       xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
         { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
-    ],
-
-    updatemenus: [{
-        type: "buttons",
-        direction: "right",
-        x: 0.5,
-        y: 1.18,
-        xanchor: "center",
-        buttons: ACTIVE_METRICS.map((metric, idx) => ({
-            label: metricTitles[metric],
-            method: "update",
-            args: [{
-                visible: heatmapData.map((_, i) => Math.floor(i / 3) === idx)
-            }]
-        }))
-    }]
+    ]
 };
 
+// ---------- Metric Toggle Dropdown (like tornado) ----------
+const metricSelector = document.createElement("select");
+metricSelector.style.marginBottom = "10px";
+ACTIVE_METRICS.forEach(metric => {
+    const opt = document.createElement("option");
+    opt.value = metric;
+    opt.text = metricTitles[metric];
+    metricSelector.appendChild(opt);
+});
+document.getElementById("sensitivityHeatmaps").prepend(metricSelector);
+
+metricSelector.addEventListener("change", e => {
+    const metric = e.target.value;
+    const visibility = heatmapData.map((_, i) => {
+        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
+    });
+    Plotly.update("sensitivityHeatmaps", { visible: visibility });
+});
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
