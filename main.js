@@ -689,6 +689,25 @@ const GPU_F_REF = {
   GH200: 1980   
 };
 
+function toggleGPUFreqSlider() {
+  const mode = document.querySelector('input[name="gpuFreqMode"]:checked')?.value;
+  const slider = document.getElementById("slider_gpu_freq");
+
+  if (!slider) return;
+
+  slider.style.display = (mode === "custom") ? "block" : "none";
+}
+
+function getEffectiveGPUFreq(gpu) {
+  const mode = document.querySelector('input[name="gpuFreqMode"]:checked')?.value;
+
+  if (mode !== "custom") {
+    return gpu.f_ref;  // default: reference frequency
+  }
+
+  return getSliderValue("gpu_graphics_freq");
+}
+
 if (typeof GPU_data === "undefined") {
   var GPU_data = [...activeGPUData];
 }
