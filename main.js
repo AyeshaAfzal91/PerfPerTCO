@@ -1804,7 +1804,57 @@ function initSliderToggle() {
 // Run initialization after DOM is ready
 window.addEventListener('DOMContentLoaded', initSliderToggle);
 
+// ---------- Show Power Model ----------
+document.getElementById("showPowerModelBtn").addEventListener("click", () => {
+    showPowerModel();
+});
+function showPowerModel() {
+    // Gather GPU data
+    const gpuInfo = GPU_data.map(gpu => {
+        const f_ref = GPU_F_REF[gpu.name] ?? "N/A";
+        const tdp_ref = GPU_TDP_REF[gpu.name] ?? "N/A";
+        const dvfs = gpu.DVFS_PARAMS ?? {};
 
+        return `
+        <strong>${gpu.name}</strong><br>
+        Reference frequency (f_ref): ${f_ref} MHz<br>
+        Reference TDP (tdp_ref): ${tdp_ref} W<br>
+        DVFS Parameters:<br>
+        <pre>${JSON.stringify(dvfs, null, 2)}</pre>
+        <hr>
+        `;
+    }).join("");
+
+    // Show in a modal or alert
+    const modalContent = `
+        <div style="max-height: 70vh; overflow-y: auto; font-family: monospace;">
+            ${gpuInfo}
+        </div>
+    `;
+
+    // Simple popup
+    const modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.top = "10%";
+    modal.style.left = "10%";
+    modal.style.width = "80%";
+    modal.style.height = "80%";
+    modal.style.backgroundColor = "white";
+    modal.style.border = "2px solid #333";
+    modal.style.padding = "20px";
+    modal.style.zIndex = 1000;
+    modal.style.overflowY = "auto";
+    modal.innerHTML = `
+        <h2>GPU Power Model</h2>
+        ${modalContent}
+        <button id="closeModalBtn">Close</button>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+        document.body.removeChild(modal);
+    });
+}
 
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
