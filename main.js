@@ -758,7 +758,7 @@ const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
     
     for (const benchmarkId of Object.keys(gpu.perf[workload])) {
       dvfsPerWorkload[workload][benchmarkId] = {
-        f_t: 0.9,   // transition point (normalized)
+        f_t: 0.9,
         b1: 0.6,
         c1: 0.4,
         a2: 0.8,
@@ -772,8 +772,7 @@ const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
     name: gpu.name,
     DVFS_PARAMS: dvfsPerWorkload
   };
-}));
-
+});
 
 function dvfsScaling(f_norm, params) {
   const { f_t, b1, c1, a2, b2, c2 } = params;
