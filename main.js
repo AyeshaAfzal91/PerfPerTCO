@@ -2088,7 +2088,6 @@ ACTIVE_METRICS.forEach(metric => {
 	allElasticities[metric] = elasticities.length ? safeMakePlainArray(safeTranspose(elasticities)) : [];
 	sobolIndicesOptimized[metric] = computeTotalOrderSobolNormalized(2000, metric) || [];
 	monteCarloParamResults[metric] = monteCarloUncertaintyNormalized(2000, metric) || [];
-	console.log('Elasticities for metric', metric, elasticities.length);	
 });
 
 // ---------- Shared Cost Evaluation Function ----------
