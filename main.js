@@ -1200,7 +1200,7 @@ console.table(window.results.map(r => ({
   '#GPUs': r.n_gpu,
   'Total Perf (ns/day*atoms)': r.performance.toFixed(1),
   'Total Power (W)': r.power.toFixed(1),
-  'Total TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
+  'TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
   'Work-per-TCO (ns/€ * atoms)': r.perf_per_tco.toFixed(1),
   'Power-per-TCO (W/€)': r.power_per_tco.toFixed(1), 
   'Work-per-watt-per-TCO (ns/W/€ * atoms)': r.power_per_tco.toFixed(1), 
@@ -1226,7 +1226,7 @@ const tableHTML = `
         <th>#GPUs</th>
 		<th>Total Perf (ns/day*atoms)</th>      
     	<th>Total Power (W)</th> 
-        <th>Total TCO (€)</th>
+        <th>TCO (€)</th>
         <th>Work-per-TCO (ns/€ * atoms)</th>
 		<th>Power-per-TCO (W/€)</th>
         <th>Work-per-watt-per-TCO (ns/W/€ * atoms)</th>
@@ -2391,9 +2391,9 @@ function renderPerfPowerHeatmaps() {
 
 function showFormula() {
   alert(`
-    Performance Per Total Cost of Ownership (TCO) calculation:
+    Work Per Total Cost of Ownership (TCO) calculation:
 
-    Performance / TCO = Performance / (C_capital + C_operational)
+    Work-per-TCO = (Performance * system_usage * lifetime / 24) / (C_capital + C_operational)
 
     with:
 
@@ -2457,7 +2457,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // This function updates the tip based on slider values
 function updateAITip(event) {
   const id = event?.target?.id || "default";
-  let tip = "💡 Adjusting values can help optimize your Performance per TCO!";
+  let tip = "💡 Adjusting values can help optimize your Work-per-TCO!";
 
   switch (id) {
     case "total_budget":
@@ -2513,7 +2513,7 @@ function updateAITip(event) {
       tip = "💡 Choose between GROMACS or AMBER based on your scientific simulation needs.";
       break;
     default:
-      tip = "💡 Adjusting values can help optimize your Performance per TCO!";
+      tip = "💡 Adjusting values can help optimize your Work-per-TCO!";
   }
 
   document.getElementById("ai-tip-text").innerText = tip;
@@ -2578,7 +2578,7 @@ In this analysis, we used the Wattlytics tool to evaluate GPU-based compute node
 ### 📈 Results
 The best GPU configuration found was:
 - GPU: ${bestGpu}
-- Performance per TCO: ${bestPerfTCO} ns/day/€ * atom
+- Work-per-TCO: ${bestPerfTCO} ns/€ * atom
 
 ### 🔗 Explore This Scenario
 You can explore these exact configuration settings, including all custom costs and parameters, by clicking the link below:
@@ -2793,7 +2793,7 @@ async function generatePDFReport() {
 
   // --- Title
   doc.setFontSize(16);
-  doc.text("Performance per TCO Report", 15, y);
+  doc.text("Work-per-TCO Report", 15, y);
   y += lineHeight;
   doc.setFontSize(10);
   doc.text(`Generated: ${now}`, 15, y);
@@ -2814,7 +2814,7 @@ async function generatePDFReport() {
   const best = window.bestResult;
   if (best) {
     doc.text(`Best GPU: ${best.name}`, 15, y); y += lineHeight;
-    doc.text(`Performance per TCO: ${best.perf_per_tco.toExponential(3)} ns/day/€`, 15, y); y += lineHeight;
+    doc.text(`Work-per-TCO: ${best.perf_per_tco.toExponential(3)} ns/€ * atoms`, 15, y); y += lineHeight;
   } else {
     doc.text("No calculation result found. Please calculate before exporting.", 15, y);
     y += lineHeight;
@@ -2983,7 +2983,7 @@ const maxPerf2 = Math.max(...perf2);
 
     html += `
       <tr>
-        <td>Total TCO (€) for ${result1.name}</td>
+        <td>TCO (€) for ${result1.name}</td>
         <td>${result1.total_cost.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         <td>${result2.total_cost.toLocaleString(undefined, { maximumFractionDigits: 1 })}</td>
         ${renderChangeCell(percentageChange(result1.total_cost, result2.total_cost))}
@@ -3007,7 +3007,7 @@ const maxPerf2 = Math.max(...perf2);
         ${renderChangeCell(percentageChange(result1.power, result2.power))}
       </tr>
 <tr>
-  <td><strong>Performance per TCO (ns/day/€ * atom) for ${result1.name}</strong></td>
+  <td><strong>Work-per-TCO (ns/€ * atoms) for ${result1.name}</strong></td>
   <td style="background: ${getGreenScale(result1.perf_per_tco, minPerf1, maxPerf1)};">
     <strong>${result1.perf_per_tco.toFixed(1)}</strong>
   </td>
