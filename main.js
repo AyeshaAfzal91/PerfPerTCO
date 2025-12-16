@@ -2093,7 +2093,7 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-// ---------- Heatmap Traces ----------
+const metricTitles = { tco: "TCO", perf_per_tco: "Perf / TCO", power_per_tco: "Power / TCO", perf_per_watt_per_tco: "Perf / Watt / TCO" };
 const heatmapData = [];
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
