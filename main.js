@@ -678,6 +678,55 @@ const activeGPUData = [
   }
 ];
 
+// --- Reference graphics frequencies (MHz) ---
+const GPU_F_REF = {
+  L4: 2040,
+  A40: 1740,
+  L40: 2490,
+  L40S: 2490,
+  A100: 1410,
+  H100: 1980,
+  GH200: 1980   
+};
+
+const DVFS_PARAMS = {
+  f_t: 0.9,   // transition point (normalized)
+  b1: 0.6,
+  c1: 0.4,
+  a2: 0.8,
+  b2: -0.3,
+  c2: 0.5
+};
+
+function dvfsScaling(f_norm, params) {
+  const { f_t, b1, c1, a2, b2, c2 } = params;
+
+  if (f_norm <= f_t) {
+    return b1 * f_norm + c1;
+  } else {
+    return a2 * f_norm * f_norm + b2 * f_norm + c2;
+  }
+}
+
+function computeGpuPowerDVFS(gpu, basePower, f_gpu_mhz) {
+  if (!gpu.f_ref || gpu.f_ref <= 1) {
+    return basePower; // DVFS disabled (GH200)
+  }
+
+  const f_norm = f_gpu_mhz / gpu.f_ref;
+  const phi = dvfsScaling(f_norm, DVFS_PARAMS);
+
+  // Scale power
+  let scaledPower = basePower * phi;
+
+  // Clamp to observed max (acts as TDP bound)
+  const powerCap = Math.max(...Object.values(gpu.power.GROMACS || {}), 
+                            ...Object.values(gpu.power.AMBER || {}));
+
+  return Math.min(scaledPower, powerCap);
+}
+
+
 if (typeof GPU_data === "undefined") {
   var GPU_data = [...activeGPUData];
 }
@@ -888,6 +937,7 @@ console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.nam
   const C_heatreuseperkWh = getSliderValue("C_heatreuseperkWh");
   const F_heatreuse = getSliderValue("Factor_heatreuse");
   const total_budget = getSliderValue("total_budget");
+  const gpu_graphics_freq = getSliderValue("gpu_graphics_freq"); 
 
 if (workload === "GROMACS" && benchmarkId > 7) {
   alert("⚠️ GROMACS benchmark data is only available up to ID 7.\nPlease select a lower Benchmark ID.");
