@@ -2046,6 +2046,15 @@ ACTIVE_METRICS.forEach(metric => {
   zSobol[metric] = normalized.map(row => Array.from(row));
 });
 
+console.log(
+  "Sobol raw max (TCO):",
+  Math.max(...sobolIndicesOptimized.tco.flat())
+);
+
+console.log(
+  "Sobol heatmap max (TCO):",
+  Math.max(...zSobol.tco.flat())
+);
 
 
 // Monte Carlo
