@@ -1148,16 +1148,6 @@ const comparisonMessage = `
 
 comparisonMessageContainer.innerHTML = comparisonMessage;
 
-const totalPerformance = nonzeroResults.reduce((sum, gpu) => sum + gpu.performance, 0);
-const totalPower = nonzeroResults.reduce((sum, gpu) => sum + gpu.power, 0);
-const totalTCO = nonzeroResults.reduce((sum, gpu) => sum + gpu.total_cost, 0);
-
-comparisonMessageContainer.innerHTML += `
-  <p><strong>Total performance across selected GPUs:</strong> ${totalPerformance.toLocaleString()} units</p>
-  <p><strong>Total power consumption across selected GPUs:</strong> ${totalPower.toLocaleString()} W</p>
-  <p><strong>Total TCO across selected GPUs:</strong> €${totalTCO.toLocaleString()}</p>
-`;
-
 // Download CSV
 document.getElementById('download-csv').style.display = 'block';
 
@@ -1217,6 +1207,8 @@ const maxPowerPerTCO = Math.max(...window.results.map(r => r.power_per_tco));
 const maxPerfPerWattPerTCO = Math.max(...window.results.map(r => r.perf_per_watt_per_tco));
 const maxBaselinePct = Math.max(...window.results.map(r => r.baseline_pct));
 const maxGPUs = Math.max(...window.results.map(r => r.n_gpu)); // Find the max number of GPUs
+const maxTotalPerf = Math.max(...window.results.map(r => r.performance));
+const maxTotalPower = Math.max(...window.results.map(r => r.power));
 
 // Create the table HTML dynamically
 const tableHTML = `
@@ -1225,6 +1217,8 @@ const tableHTML = `
       <tr>
         <th>GPU</th>
         <th>#GPUs</th>
+		<th>Total Perf (ns/day*atoms)</th>      
+    	<th>Total Power (W)</th> 
         <th>Total TCO (€)</th>
         <th>Perf/TCO (ns/day*atoms/€)</th>
 		<th>Power/TCO (W/€)</th>
@@ -1237,6 +1231,8 @@ const tableHTML = `
         <tr>
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
+		  <td style="background-color:${getHeatmapColor(r.performance, maxTotalPerf)}">${r.performance.toLocaleString()}</td> <!-- total_perf -->
+      		<td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toLocaleString()}</td>        <!-- total_power -->
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
 		  <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco < 1 ? r.power_per_tco.toExponential(2) : r.power_per_tco.toFixed(1)}</td>
