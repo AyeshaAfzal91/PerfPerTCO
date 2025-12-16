@@ -2093,96 +2093,94 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-// ---------- Heatmap Traces ----------
-const metricTitles = {
-  tco: "TCO",
-  perf_per_tco: "Perf / TCO",
-  power_per_tco: "Power / TCO",
-  perf_per_watt_per_tco: "Perf / Watt / TCO"
-};
-
 const heatmapData = [];
-const SENSITIVITY_TYPES = ["Elasticity", "Sobol", "Monte Carlo"];
-
-// Define color scale configuration for easy mapping
-const SENSITIVITY_COLORS = {
-    "Elasticity": { scale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]], min: (m) => -zMaxElasticity[m], max: (m) => zMaxElasticity[m] },
-    "Sobol":      { scale: "Viridis", min: () => 0, max: () => 100 },
-    "Monte Carlo": { scale: "Cividis", min: () => 0, max: () => 100 }
+const metricTitles = {
+  tco: "TCO",
+  perf_per_tco: "Perf / TCO",
+  power_per_tco: "Power / TCO",
+  perf_per_watt_per_tco: "Perf / Watt / TCO"
 };
 
-// Loop over sensitivity types (columns in the new 1x3 grid)
-SENSITIVITY_TYPES.forEach((sType, sIdx) => {
-    const sKey = sType === "Monte Carlo" ? "MC" : sType; // Use "MC" for data lookup
-    const xAxis = `x${sIdx + 1}`;
-    const yAxis = `y1`; // All columns share the same Y axis (y1)
+ACTIVE_METRICS.forEach((metric, metricIdx) => {
+  const xaxis = `x${metricIdx + 1}`;
+  const yaxis = `y${metricIdx + 1}`;
 
-    // Loop over metrics (traces to be toggled)
-    ACTIVE_METRICS.forEach((metric, mIdx) => {
-        let zData;
-        if (sKey === "Elasticity") zData = zElasticity[metric];
-        else if (sKey === "Sobol") zData = zSobol[metric];
-        else zData = zMonteCarlo[metric];
+  // Elasticity
+  heatmapData.push({
+    z: zElasticity[metric],
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    zmin: -zMaxElasticity[metric],
+    zmax:  zMaxElasticity[metric],
+    colorbar: { title: "Elasticity (%)" },
+    visible: metricIdx === 0, // first metric default
+    xaxis,
+    yaxis,
+    name: `Elasticity-${metric}`
+  });
 
-        const colorCfg = SENSITIVITY_COLORS[sType];
+  // Sobol
+  heatmapData.push({
+    z: zSobol[metric],
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: "Viridis",
+    zmin: 0,
+    zmax: 100,
+    colorbar: { title: "Sobol (%)" },
+    visible: false,
+    xaxis,
+    yaxis,
+    name: `Sobol-${metric}`
+  });
 
-        // Colorbar should only be defined for the first metric (TCO) of that sensitivity type
-        const colorbar = (mIdx === 0)
-            ? { title: `${sType} (%)` }
-            : undefined;
-
-        heatmapData.push({
-            z: zData,
-            x: window.results.map(r => r.name),
-            y: elasticityLabels,
-            type: "heatmap",
-            colorscale: colorCfg.scale,
-            zmin: colorCfg.min(metric),
-            zmax: colorCfg.max(metric),
-            colorbar: colorbar,
-            visible: metric === ACTIVE_METRICS[0], // Only TCO visible by default
-            xaxis: xAxis,
-            yaxis: yAxis,
-            name: `${sType}-${metric}`
-        });
-    });
+  // Monte Carlo
+  heatmapData.push({
+    z: zMonteCarlo[metric],
+    x: window.results.map(r => r.name),
+    y: elasticityLabels,
+    type: "heatmap",
+    colorscale: "Cividis",
+    zmin: 0,
+    zmax: 100,
+    colorbar: { title: "Monte Carlo (%)" },
+    visible: false,
+    xaxis,
+    yaxis,
+    name: `MC-${metric}`
+  });
 });
 
+// ---------- Layout (3 side-by-side heatmaps per metric) ----------
 const heatmapLayout = {
-  title: "Parameter Sensitivity Heatmaps",
-  grid: { rows: 1, columns: 3, pattern: "independent" }, // CHANGED to 1x3 grid
-  height: 600,
-  width: 1400,
-  margin: { t: 80, l: 160, r: 80 },
-
-  // Titles per column (now Sensitivity Types)
-  annotations: SENSITIVITY_TYPES.map((s, i) => ({
-    text: s, // Text is the Sensitivity Type
-    xref: "paper",
-    yref: "paper",
-    x: (i + 0.5) / SENSITIVITY_TYPES.length,
-    y: 1.08,
-    showarrow: false,
-    font: { size: 14, weight: "bold" }
-  })),
-
-  updatemenus: [{
-    type: "buttons",
-    direction: "right",
-    x: 0.5,
-    y: 1.18,
-    xanchor: "center",
-    buttons: ACTIVE_METRICS.map((metric, mIdx) => ({ // Now looping over metrics
-      label: metricTitles[metric], // Now correctly referencing the defined object
-      method: "update",
-      args: [{ 
-            // This visibility logic toggles all three heatmaps simultaneously based on the selected metric index.
-            visible: heatmapData.map((_, i) => (i % ACTIVE_METRICS.length) === mIdx) 
-        }]
-    }))
-  }]
+  title: "Parameter Sensitivity Heatmaps",
+  grid: { rows: 1, columns: 3, pattern: "independent" },
+  height: 600,
+  width: 1200,
+  margin: { t: 80, l: 160, r: 80 },
+  updatemenus: [{
+    type: "buttons",
+    direction: "right",
+    x: 0.5,
+    y: 1.18,
+    xanchor: "center",
+    buttons: ACTIVE_METRICS.map((metric, idx) => ({
+      label: metricTitles[metric],
+      method: "update",
+      args: [{
+        visible: heatmapData.map((_, i) => Math.floor(i/3) === idx) // each metric has 3 heatmaps
+      }]
+    }))
+  }],
+  annotations: [
+    { text: "Elasticity", x: 0.17, y: 1.08, xref: "paper", yref: "paper", showarrow: false },
+    { text: "Sobol", x: 0.5, y: 1.08, xref: "paper", yref: "paper", showarrow: false },
+    { text: "Monte Carlo", x: 0.83, y: 1.08, xref: "paper", yref: "paper", showarrow: false }
+  ]
 };
-
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
