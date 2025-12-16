@@ -2031,16 +2031,21 @@ ACTIVE_METRICS.forEach(metric => {
 // Sobol
 const zSobol = {};
 ACTIVE_METRICS.forEach(metric => {
-    const raw = sobolIndicesOptimized[metric];
+  const raw = sobolIndicesOptimized[metric]; // [GPU][parameter]
 
-    // Ensure 2D array: plain is in [GPU] x [Parameter] format
-    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
-        ? safeMakePlainArray(raw)
-        : Array.from({length: window.results.length}, () => Array(15).fill(0));
+  if (!raw || !raw.length) {
+    zSobol[metric] = [];
+    return;
+  }
 
-    // to ensure dimensional consistency and correct scaling for the 0-100 color axis.
-    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(plain));
+  // 1️⃣ Normalize per parameter across GPUs
+  const normalized = normalizeAcrossDimension(raw); 
+  // normalized is already [parameter][GPU]
+
+  // 2️⃣ Ensure plain arrays
+  zSobol[metric] = normalized.map(row => Array.from(row));
 });
+
 
 
 // Monte Carlo
