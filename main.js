@@ -2102,54 +2102,54 @@ const metricTitles = {
 
 const heatmapData = [];
 
-ACTIVE_METRICS.forEach((metric, metricIdx) => {
+ACTIVE_METRICS.forEach(metric => {
     const xLabels = window.results.map(r => r.name);
 
-    // Elasticity
+    // ---------- Elasticity (OWN colorbar) ----------
     heatmapData.push({
         z: zElasticity[metric],
         x: xLabels,
         y: elasticityLabels,
         type: "heatmap",
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-		//colorscale: "Viridis",
         zmin: -zMaxElasticity[metric],
         zmax:  zMaxElasticity[metric],
-        colorbar: { title: "Elasticity (%)", x: 0.8 },
-        visible: metric === "tco", // default metric visible
+        colorbar: {
+            title: "Elasticity (%)",
+            x: 1.02
+        },
+        visible: metric === "tco",
         name: `Elasticity-${metric}`,
         xaxis: "x1",
         yaxis: "y1"
     });
 
-    // Sobol
+    // ---------- Sobol (shared colorbar) ----------
     heatmapData.push({
         z: zSobol[metric],
         x: xLabels,
         y: elasticityLabels,
         type: "heatmap",
-        //colorscale: "Viridis",
-		colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         zmin: 0,
         zmax: 100,
-        colorbar: { title: "Sobol (%)", x: 0.85 },
+        coloraxis: "coloraxisSM",
         visible: metric === "tco",
         name: `Sobol-${metric}`,
         xaxis: "x2",
         yaxis: "y2"
     });
 
-    // Monte Carlo
+    // ---------- Monte Carlo (shared colorbar) ----------
     heatmapData.push({
         z: zMonteCarlo[metric],
         x: xLabels,
         y: elasticityLabels,
         type: "heatmap",
-        // colorscale: "Viridis",
-		colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         zmin: 0,
         zmax: 100,
-        colorbar: { title: "Sobol Monte Carlo (%)", x: 0.9 },
+        coloraxis: "coloraxisSM",
         visible: metric === "tco",
         name: `MC-${metric}`,
         xaxis: "x3",
@@ -2160,19 +2160,37 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 // ---------- Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps",
-    grid: { rows: 1, columns: 3, pattern: "independent" },
+    grid: {
+        rows: 1,
+        columns: 3,
+        pattern: "independent",
+        xgap: 0.03   // 🔥 bring plots closer together
+    },
     height: 600,
-    width: 1400,
-    margin: { t: 80, l: 160, r: 80 },
+    width: 1450,
+    margin: { t: 80, l: 160, r: 140 },
 
+    // Keep y labels only on first plot
     yaxis:  { showticklabels: true },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
+    // Shared Sobol + Monte Carlo colorbar
+    coloraxisSM: {
+        cmin: 0,
+        cmax: 100,
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        colorbar: {
+            title: "Sensitivity (%)",
+            x: 1.08,
+            len: 0.9
+        }
+    },
+
     annotations: [
-        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Sobol",      xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Monte Carlo",xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
+        { text: "Elasticity",  xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Sobol",       xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
     ],
 
     updatemenus: [{
@@ -2192,7 +2210,6 @@ const heatmapLayout = {
 };
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
-
 
 
 // ---------- Tornado Charts (also in %) (with metric toggle) ----------
