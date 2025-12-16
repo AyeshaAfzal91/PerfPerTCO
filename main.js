@@ -2094,6 +2094,24 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const metricTitles = { tco: "TCO", perf_per_tco: "Perf / TCO", power_per_tco: "Power / TCO", perf_per_watt_per_tco: "Perf / Watt / TCO" };
+// ---------- Metric Toggle Dropdown (like tornado) ----------
+const metricSelector = document.createElement("select");
+metricSelector.style.marginBottom = "10px";
+ACTIVE_METRICS.forEach(metric => {
+    const opt = document.createElement("option");
+    opt.value = metric;
+    opt.text = metricTitles[metric];
+    metricSelector.appendChild(opt);
+});
+document.getElementById("sensitivityHeatmaps").prepend(metricSelector);
+
+metricSelector.addEventListener("change", e => {
+    const metric = e.target.value;
+    const visibility = heatmapData.map((_, i) => {
+        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
+    });
+    Plotly.update("sensitivityHeatmaps", { visible: visibility });
+});
 const heatmapData = [];
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
@@ -2160,12 +2178,28 @@ const heatmapLayout = {
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
-    coloraxisSM: {
-        cmin: 0,
-        cmax: 100,
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: { title: "Sensitivity (%)", x: 1.08, len: 0.9, y: 0.5 }
-    },
+    // Elasticity colorbar
+coloraxis: {
+    colorbar: {
+        title: "Elasticity (%)",
+        x: 0.97,
+        len: 0.9,   // height
+        y: 0.5      // vertical center
+    }
+},
+
+// Shared Sobol + Monte Carlo colorbar
+coloraxisSM: {
+    cmin: 0,
+    cmax: 100,
+    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+    colorbar: {
+        title: "Sensitivity (%)",
+        x: 1.08,
+        len: 0.9,  // same height as Elasticity
+        y: 0.5     // vertical center
+    }
+},
 
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
@@ -2173,25 +2207,6 @@ const heatmapLayout = {
         { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
     ]
 };
-
-// ---------- Metric Toggle Dropdown (like tornado) ----------
-const metricSelector = document.createElement("select");
-metricSelector.style.marginBottom = "10px";
-ACTIVE_METRICS.forEach(metric => {
-    const opt = document.createElement("option");
-    opt.value = metric;
-    opt.text = metricTitles[metric];
-    metricSelector.appendChild(opt);
-});
-document.getElementById("sensitivityHeatmaps").prepend(metricSelector);
-
-metricSelector.addEventListener("change", e => {
-    const metric = e.target.value;
-    const visibility = heatmapData.map((_, i) => {
-        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
-    });
-    Plotly.update("sensitivityHeatmaps", { visible: visibility });
-});
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
