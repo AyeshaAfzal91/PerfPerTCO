@@ -2030,21 +2030,22 @@ ACTIVE_METRICS.forEach(metric => {
 
 // Sobol
 const zSobol = {};
+
 ACTIVE_METRICS.forEach(metric => {
   const raw = sobolIndicesOptimized[metric]; // [GPU][parameter]
 
-  if (!raw || !raw.length) {
+  if (!Array.isArray(raw) || !raw.length) {
     zSobol[metric] = [];
     return;
   }
 
-  // 1️⃣ Normalize per parameter across GPUs
-  const normalized = normalizeAcrossDimension(raw); 
-  // normalized is already [parameter][GPU]
+  // Normalize per parameter across GPUs
+  const normalized = normalizeAcrossDimension(raw); // [parameter][GPU]
 
-  // 2️⃣ Ensure plain arrays
+  // CRITICAL: convert Float64Array → Array
   zSobol[metric] = normalized.map(row => Array.from(row));
 });
+
 
 console.log(
   "Sobol raw max (TCO):",
