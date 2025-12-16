@@ -1960,9 +1960,14 @@ function generatePerturbations(N, k, ranges) {
     }
 
     const Y_A = A.map(a => evaluateMetric(a, g, metric)); // calls evaluateCost on each row of A, producing a number for each sample. After this, Y_A = [y_1, y_2, ..., y_N], just numbers.
-    const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples; // sums the numbers in Y_A as a = the running sum and b = the current element of the array. After summing, we divide by numSamples.
-    const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1); // s = the accumulator (sum of squared differences), y = the current element of Y_A. (y - meanYA) ** 2 = the squared deviation of the element from the mean. After summing all squared deviations, we divide by (numSamples - 1) to get the sample variance.
-    const S_T = new Float64Array(numParams);
+	const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples;
+	const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1);
+	// CRITICAL FIX: zero / invalid variance → zero Sobol
+	if (!isFinite(varY) || varY <= 1e-12) {
+	  sobolResults[g] = new Float64Array(numParams).fill(0);
+	  continue;
+	}
+	const S_T = new Float64Array(numParams);
 
     for (let j = 0; j < numParams; j++) {
       let sumSqDiff = 0;
