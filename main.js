@@ -1006,9 +1006,6 @@ console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.nam
   const C_heatreuseperkWh = getSliderValue("C_heatreuseperkWh");
   const F_heatreuse = getSliderValue("Factor_heatreuse");
   const total_budget = getSliderValue("total_budget");
-  const gpuFreq = getEffectiveGPUFreq(gpu);  // returns slider value or reference frequency
-// const gpuPower = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
- 
 
 if (workload === "GROMACS" && benchmarkId > 7) {
   alert("⚠️ GROMACS benchmark data is only available up to ID 7.\nPlease select a lower Benchmark ID.");
@@ -1028,6 +1025,8 @@ if (mode === "budget") {
 // ---------- Compute n_gpu ----------
  n_gpu_list = GPU_data.map((gpu, i) => {
   const perf = gpu.perf[workload][benchmarkId]; // Use workload and benchmarkId
+  const gpuFreq = getEffectiveGPUFreq(gpu);  // returns slider value or reference frequency
+// const gpuPower = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
   const power = gpu.power[workload][benchmarkId];
   if (perf === 0 || power === 0) return 0;
 
