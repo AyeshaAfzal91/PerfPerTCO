@@ -91,23 +91,11 @@
             <p id="uploadStatusMain" style="margin-top: 10px;"></p>
 
           </section>
-		  <label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
-    Node Baseline Power w/o GPUs (W):
-    <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5"
-           oninput="updateValue('v_baseline', this.value); updateAITip()">
-    <span id="v_baseline">500</span>
-
-    <br>
-    <small>
-      Uncertainty ±%
-      <input type="range" class="paramUncertainty" data-param="W_node_baseline"
-             min="0" max="100" step="1" value="10">
-      <span class="uncValue">10</span>%
-    </small>
-  </label>
-
+</fieldset>
+		
+<fieldset>
 <!-- GPU Frequency -->
-  <legend>GPU Frequency Model</legend>
+  <legend>GPU Frequency/Power Model</legend>
 
   <!-- Use reference frequency -->
   <label data-tooltip="Use vendor reference GPU frequency (no DVFS scaling).">
@@ -141,20 +129,52 @@
   </div>
 
 <!-- GPU Power Cap -->
-<label for="gpu_power_cap"
-       data-tooltip="Set the GPU power cap in watts.">
-  GPU Power Cap (W):
-  <input type="range"
-         id="gpu_power_cap"
-         min="10"
-         max="1000"
-         step="1"
-         value="300"
-         oninput="updateValue('v_gpu_power_cap', this.value); updateAITip()">
-  <span id="v_gpu_power_cap">300</span>
-</label>
+<!-- Use reference TDP -->
+  <label data-tooltip="Use vendor reference GPU TDP (no manual cap).">
+    <input type="radio"
+           name="gpuPowerMode"
+           value="ref"
+           checked
+           onchange="toggleGPUPowerSlider()">
+    Use Reference GPU Power (TDP)
+  </label>
 
-    </fieldset>
+  <!-- Override power cap -->
+  <label data-tooltip="Set a custom GPU power cap in watts.">
+    <input type="radio"
+           name="gpuPowerMode"
+           value="custom"
+           onchange="toggleGPUPowerSlider()">
+    Change GPU Power Cap
+  </label>
+
+  <!-- Slider (only visible in custom mode) -->
+  <div class="mode-slider" id="slider_gpu_power" style="display:none;">
+    <input type="range"
+           id="gpu_power_cap"
+           min="10"
+           max="1000"
+           step="1"
+           value="300"
+           oninput="updateValue('v_gpu_power_cap', this.value); updateAITip()">
+    <span id="v_gpu_power_cap">300</span> W
+  </div>
+
+<label for="W_node_baseline" data-tooltip="Set the power consumption per node in watts (excluding GPUs).">
+    Node Baseline Power w/o GPUs (W):
+    <input type="range" id="W_node_baseline" min="0" max="10000" value="500" step="5"
+           oninput="updateValue('v_baseline', this.value); updateAITip()">
+    <span id="v_baseline">500</span>
+
+    <br>
+    <small>
+      Uncertainty ±%
+      <input type="range" class="paramUncertainty" data-param="W_node_baseline"
+             min="0" max="100" step="1" value="10">
+      <span class="uncValue">10</span>%
+    </small>
+</label>
+</fieldset>
 
 <fieldset>
   <legend>Deployment Scenarios for the Limiting Factors</legend>
