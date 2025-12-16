@@ -2107,7 +2107,12 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const heatmapData = []; // declare first
-const metricTitles = { tco: "TCO", perf_per_tco: "Work-per-TCO", power_per_tco: "Power-per-TCO", perf_per_watt_per_tco: "Work-per-Watt-per-TCO" };
+const metricTitles = {
+  tco: "TCO",
+  perf_per_tco: "Work-per-TCO",
+  power_per_tco: "Power-per-TCO",
+  perf_per_watt_per_tco: "Work-per-Watt-per-TCO"
+};
 const metricSelector = document.getElementById("metricSelector");
 ACTIVE_METRICS.forEach(metric => {
     const opt = document.createElement("option");
