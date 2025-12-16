@@ -1910,16 +1910,17 @@ function evaluateMetric(params, gpuIndex, metricKey) {
 
   const total_perf = perf * n_gpu;
   const total_power = power * n_gpu;
+  const total_work = total_perf * system_usage * lifetime / 24;	
 
   switch (metricKey) {
     case "tco":
       return TCO;
     case "perf_per_tco":
-      return total_perf / TCO;
+      return total_work / TCO;
     case "power_per_tco":
       return total_power / TCO;
     case "perf_per_watt_per_tco":
-      return total_perf / (total_power / 1000) / TCO;
+      return total_work / total_power / TCO;
     default:
       throw new Error("Unknown metric: " + metricKey);
   }
@@ -2106,7 +2107,7 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const heatmapData = []; // declare first
-const metricTitles = { tco: "TCO", perf_per_tco: "Perf / TCO", power_per_tco: "Power / TCO", perf_per_watt_per_tco: "Perf / Watt / TCO" };
+const metricTitles = { tco: "TCO", perf_per_tco: "Work-per-TCO", power_per_tco: "Power-per-TCO", perf_per_watt_per_tco: "Work-per-Watt-per-TCO" };
 const metricSelector = document.getElementById("metricSelector");
 ACTIVE_METRICS.forEach(metric => {
     const opt = document.createElement("option");
