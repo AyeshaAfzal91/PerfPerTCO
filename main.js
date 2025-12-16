@@ -2093,6 +2093,14 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
+// ---------- Heatmap Traces ----------
+const metricTitles = {
+  tco: "TCO",
+  perf_per_tco: "Perf / TCO",
+  power_per_tco: "Power / TCO",
+  perf_per_watt_per_tco: "Perf / Watt / TCO"
+};
+
 const heatmapData = [];
 const SENSITIVITY_TYPES = ["Elasticity", "Sobol", "Monte Carlo"];
 
@@ -2165,7 +2173,7 @@ const heatmapLayout = {
     y: 1.18,
     xanchor: "center",
     buttons: ACTIVE_METRICS.map((metric, mIdx) => ({ // Now looping over metrics
-      label: metricTitles[metric],
+      label: metricTitles[metric], // Now correctly referencing the defined object
       method: "update",
       args: [{ 
             // This visibility logic toggles all three heatmaps simultaneously based on the selected metric index.
