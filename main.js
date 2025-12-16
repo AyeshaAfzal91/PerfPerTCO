@@ -1163,7 +1163,7 @@ function downloadCSV2(data, filename = "gpu_tco_results.csv") {
     "#GPUs",
 	"Total Perf (ns/day*atoms)",
 	"Total Power (W)",
-    "Total TCO (€)",
+    "TCO (€)",
     "Work-per-TCO (ns/€ * atoms)",
     "Power-per-TCO (W/€)",
     "Work-per-watt-per-TCO (ns/W/€ * atoms)",
