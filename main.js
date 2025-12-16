@@ -1913,86 +1913,93 @@ function evaluateMetric(params, gpuIndex, metricKey) {
   }
 }
 
-
 // ---------- Sobol Total-Order Sensitivity (robust) ----------
 function computeTotalOrderSobolNormalized(numSamples = 2000, metric) {
-  const numGPUs = window.results.length;
-  const numParams = 15;
-  const sobolResults = new Array(numGPUs);
-  const activeUncertainty = getActiveUncertaintyVector();
+  const numGPUs = window.results.length;
+  const numParams = 15;
+  const sobolResults = new Array(numGPUs);
+  const activeUncertainty = getActiveUncertaintyVector();
 
 function generatePerturbations(N, k, ranges) {
-  const p = new Float64Array(N * k);
-  for (let i = 0; i < N; i++) {
-    for (let j = 0; j < k; j++) {
-      const r = ranges[j];
-      p[i * k + j] = (Math.random() - 0.5) * 2 * r; // uniform [0,1] shifts to [-0.5, 0.5] and then scales to [-r, r], i.e., ±r*100%
-    }
-  }
-  return p;
+  const p = new Float64Array(N * k);
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < k; j++) {
+      const r = ranges[j];
+      p[i * k + j] = (Math.random() - 0.5) * 2 * r; // uniform [0,1] shifts to [-0.5, 0.5] and then scales to [-r, r], i.e., ±r*100%
+    }
+  }
+  return p;
 }
 
-  for (let g = 0; g < numGPUs; g++) {
-    const gpu = GPU_data[window.results[g].originalGPUIndex];
-    const base = [
-      gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
-      C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
-      lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
-    ];
+  for (let g = 0; g < numGPUs; g++) {
+    const gpu = GPU_data[window.results[g].originalGPUIndex];
+    const base = [
+      gpu.cost, C_node_server, C_node_infra, C_node_facility, C_software,
+      C_electricity, C_heatreuseperkWh, PUE, C_maintenance, system_usage,
+      lifetime, W_node_baseline, C_depreciation, C_subscription, C_uefficiency
+    ];
 
-    // Normalize to ~1
-    const normBase = base.map(v => v === 0 ? 0.001 : v); // numerical safeguard only: Zero baselines are replaced with a small value 0.001 to prevent zero variance, which would otherwise make Sobol indices meaningless and the Monte Carlo standard deviation zero.
+    // Normalize to ~1
+    const normBase = base.map(v => v === 0 ? 0.001 : v); // numerical safeguard only: Zero baselines are replaced with a small value 0.001 to prevent zero variance, which would otherwise make Sobol indices meaningless and the Monte Carlo standard deviation zero.
 
 	const perturbA = generatePerturbations(numSamples, numParams, activeUncertainty);
 	const perturbB = generatePerturbations(numSamples, numParams, activeUncertainty);
 
-    const A = [], B = [];
+    const A = [], B = [];
 
-    for (let i = 0; i < numSamples; i++) {
-      const rowA = new Float64Array(numParams);
-      const rowB = new Float64Array(numParams);
-      for (let j = 0; j < numParams; j++) {
-        rowA[j] = normBase[j] * (1 + perturbA[i * numParams + j]);
-        rowB[j] = normBase[j] * (1 + perturbB[i * numParams + j]);
-      }
-      A.push(rowA);
-      B.push(rowB);
+    for (let i = 0; i < numSamples; i++) {
+      const rowA = new Float64Array(numParams);
+      const rowB = new Float64Array(numParams);
+      for (let j = 0; j < numParams; j++) {
+        rowA[j] = normBase[j] * (1 + perturbA[i * numParams + j]);
+        rowB[j] = normBase[j] * (1 + perturbB[i * numParams + j]);
+      }
+      A.push(rowA);
+      B.push(rowB);
+    }
+
+    const Y_A = A.map(a => evaluateMetric(a, g, metric)); 
+    
+    // Check if any metric evaluation is invalid (e.g., division by zero leading to Infinity/NaN)
+    if (Y_A.some(v => !isFinite(v))) {
+        sobolResults[g] = Array.from(new Float64Array(numParams).fill(0));
+        continue;
     }
 
-    const Y_A = A.map(a => evaluateMetric(a, g, metric)); // calls evaluateCost on each row of A, producing a number for each sample. After this, Y_A = [y_1, y_2, ..., y_N], just numbers.
-	const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples;
-	const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1);
-	// CRITICAL FIX: zero / invalid variance → zero Sobol
-	if (!isFinite(varY) || varY <= 1e-12) {
-	  sobolResults[g] = new Float64Array(numParams).fill(0);
-	  continue;
-	}
-	if (!isFinite(varY) || varY <= 1e-12) {
-  console.warn(`Zero variance Sobol: GPU ${g}, metric ${metric}`);
-  sobolResults[g] = new Float64Array(numParams).fill(0);
-  continue;
-	}
-	const S_T = new Float64Array(numParams);
+    const meanYA = Y_A.reduce((a, b) => a + b, 0) / numSamples;
+    const varY = Y_A.reduce((s, y) => s + (y - meanYA) ** 2, 0) / (numSamples - 1);
+    
+    // ✅ CRITICAL FIX: Check for negligible variance (division by zero trap)
+    if (!isFinite(varY) || varY <= 1e-15) { // Relaxed tolerance to 1e-15
+      sobolResults[g] = Array.from(new Float64Array(numParams).fill(0));
+      continue;
+    }
+    
+    // Note: The redundant `if (!isFinite(varY) || varY <= 1e-12)` block below the mean/var calculation was removed.
+    
+    const S_T = new Float64Array(numParams);
 
-    for (let j = 0; j < numParams; j++) {
-      let sumSqDiff = 0;
-      for (let i = 0; i < numSamples; i++) {
-        const hybrid = new Float64Array(A[i]);
-        hybrid[j] = B[i][j];
-        sumSqDiff += (Y_A[i] - evaluateMetric(hybrid, g, metric)) ** 2;
-      }
-       // % of total variance
-	if (!isFinite(sumSqDiff)) {
-	  S_T[j] = 0;
-	} else {
-	  S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples));
-	}
-    }
+    for (let j = 0; j < numParams; j++) {
+      let sumSqDiff = 0;
+      for (let i = 0; i < numSamples; i++) {
+        const hybrid = new Float64Array(A[i]);
+        hybrid[j] = B[i][j];
+        sumSqDiff += (Y_A[i] - evaluateMetric(hybrid, g, metric)) ** 2;
+      }
+      
+      // Calculate Sobol index only if sumSqDiff is finite (preventing secondary NaN)
+      if (isFinite(sumSqDiff)) {
+        S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); 
+      } else {
+        S_T[j] = 0;
+      }
+    }
 
-    sobolResults[g] = S_T;
-  }
+    // ✅ Final fix: Ensure the raw Sobol index array is a plain array for other functions to process.
+    sobolResults[g] = Array.from(S_T);
+  }
 
-  return sobolResults;
+  return sobolResults;
 }
 
 // ---------- Monte Carlo (% std / base cost) ----------
