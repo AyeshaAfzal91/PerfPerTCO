@@ -541,13 +541,15 @@
 
 <div id="sensitivityWrapper" style="text-align: center;">
   <h2>Parameter sensitivity and uncertainty heatmaps (cross-GPU view) </h2>
-  <select id="metricSelector" style="margin-bottom:10px;"> Select output metric: </select>
+  <label for="metricSelector">Select output metric:</label>
+  <select id="metricSelector" style="margin-bottom:10px;"> </select>
   <div id="sensitivityHeatmaps"></div>
 </div>
 
 <div style="text-align: center;">
   <h2>Parameter sensitivity and uncertainty tornado plots (per-GPU view) </h2>
-<select id="tornadoMetricSelect" style="margin-bottom:10px;"> Select output metric:
+  <label for="tornadoMetricSelect">Select output metric:</label>
+<select id="tornadoMetricSelect" style="margin-bottom:10px;">
 	<option value="tco">TCO</option>
   <option value="perf_per_tco">Perf / TCO</option>
   <option value="power_per_tco">Power / TCO</option>
