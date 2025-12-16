@@ -105,6 +105,35 @@
       <span class="uncValue">10</span>%
     </small>
   </label>
+
+<!-- GPU Frequency -->
+<label for="gpu_graphics_freq"
+       data-tooltip="Set the GPU graphics clock frequency (future: affects performance and power).">
+  GPU Graphics Frequency (MHz):
+  <input type="range"
+         id="gpu_graphics_freq"
+         min="300"
+         max="2500"
+         step="50"
+         value="1500"
+         oninput="updateValue('v_gpu_graphics_freq', this.value); updateAITip()">
+  <span id="v_gpu_graphics_freq">1500</span>
+</label>
+
+<!-- GPU Power Cap -->
+<label for="gpu_power_cap"
+       data-tooltip="Set the GPU power cap in watts (future: constrains power and performance).">
+  GPU Power Cap (W):
+  <input type="range"
+         id="gpu_power_cap"
+         min="50"
+         max="1000"
+         step="10"
+         value="300"
+         oninput="updateValue('v_gpu_power_cap', this.value); updateAITip()">
+  <span id="v_gpu_power_cap">300</span>
+</label>
+
     </fieldset>
 
 <fieldset>
