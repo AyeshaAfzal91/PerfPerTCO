@@ -2093,129 +2093,117 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
+// ---------- Heatmap Traces ----------
 const heatmapData = []; // declare first
 const metricTitles = { tco: "TCO", perf_per_tco: "Perf / TCO", power_per_tco: "Power / TCO", perf_per_watt_per_tco: "Perf / Watt / TCO" };
 const metricSelector = document.getElementById("metricSelector");
+
+// Assuming the options are already in the HTML. If not, uncomment the block below.
+/*
 ACTIVE_METRICS.forEach(metric => {
-    const opt = document.createElement("option");
-    opt.value = metric;
-    opt.text = metricTitles[metric];
-    metricSelector.appendChild(opt);
+    const opt = document.createElement("option");
+    opt.value = metric;
+    opt.text = metricTitles[metric];
+    metricSelector.appendChild(opt);
 });
+*/
+
 metricSelector.addEventListener("change", e => {
-    const metric = e.target.value;
-    const visibility = heatmapData.map((_, i) => {
-        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
-    });
-    Plotly.update("sensitivityHeatmaps", { visible: visibility });
+    const metric = e.target.value;
+    const visibility = heatmapData.map((_, i) => {
+        // Traces are grouped by Metric (0=tco, 3=perf_per_tco, 6=power_per_tco, 9=perf_per_watt_per_tco)
+        const metricIndex = Math.floor(i / 3);
+        const targetMetricIndex = ACTIVE_METRICS.indexOf(metric);
+        return metricIndex === targetMetricIndex;
+    });
+    // Use Plotly.restyle to update visibility, which is more efficient than Plotly.update for data changes.
+    Plotly.restyle("sensitivityHeatmaps", { visible: visibility }); 
 });
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
-    const xLabels = window.results.map(r => r.name);
+    const xLabels = window.results.map(r => r.name);
+    const visible = metric === "tco";
 
-    // Elasticity
-    heatmapData.push({
-        z: zElasticity[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: -zMaxElasticity[metric],
-        zmax: zMaxElasticity[metric],
-        colorbar: { title: "Elasticity (%)", x: 0.97, len: 0.9, y: 0.5 },
-        visible: metric === "tco",
-        name: `Elasticity-${metric}`,
-        xaxis: "x1",
-        yaxis: "y1"
-    });
+    // Elasticity (x1, y1)
+    heatmapData.push({
+        z: zElasticity[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: -zMaxElasticity[metric],
+        zmax: zMaxElasticity[metric],
+        // FIX 2 & 3: Define explicit colorbar for this trace (Positioned right of the first plot)
+        colorbar: { title: "Elasticity (%)", x: 0.35, len: 0.9, y: 0.5, xanchor: "left" }, 
+        visible: visible,
+        name: `Elasticity-${metric}`,
+        xaxis: "x1",
+        yaxis: "y1" 
+    });
 
-    // Sobol (shared colorbar)
-    heatmapData.push({
-        z: zSobol[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: 0,
-        zmax: 100,
-        coloraxis: "coloraxisSM",
-        visible: metric === "tco",
-        name: `Sobol-${metric}`,
-        xaxis: "x2",
-        yaxis: "y2"
-    });
+    // Sobol (x2, y2)
+    heatmapData.push({
+        z: zSobol[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: "Viridis", // Corrected colorscale
+        zmin: 0,
+        zmax: 100,
+        // FIX 2 & 3: Define explicit colorbar for this trace (Positioned right of the second plot)
+        colorbar: { title: "Sobol (%)", x: 0.69, len: 0.9, y: 0.5, xanchor: "left" },
+        visible: visible,
+        name: `Sobol-${metric}`,
+        xaxis: "x2",
+        yaxis: "y1" // Use y1 to simplify the Y-axis setup
+    });
 
-    // Monte Carlo (shared colorbar)
-    heatmapData.push({
-        z: zMonteCarlo[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: 0,
-        zmax: 100,
-        coloraxis: "coloraxisSM",
-        visible: metric === "tco",
-        name: `MC-${metric}`,
-        xaxis: "x3",
-        yaxis: "y3"
-    });
+    // Monte Carlo (x3, y3)
+    heatmapData.push({
+        z: zMonteCarlo[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: "Cividis", // Corrected colorscale
+        zmin: 0,
+        zmax: 100,
+        // FIX 2 & 3: Define explicit colorbar for this trace (Positioned far right)
+        colorbar: { title: "Monte Carlo (%)", x: 1.03, len: 0.9, y: 0.5, xanchor: "left" },
+        visible: visible,
+        name: `MC-${metric}`,
+        xaxis: "x3",
+        yaxis: "y1" // Use y1 to simplify the Y-axis setup
+    });
 });
 
 // ---------- Layout ----------
 const heatmapLayout = {
-  title: "Parameter Sensitivity Heatmaps",
-  height: 600,
-  width: 1450,
-  margin: { t: 80, l: 150, r: 220 },
+    title: "Parameter Sensitivity Heatmaps",
+    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
+    height: 600,
+    width: 1450,
+    margin: { t: 80, l: 160, r: 200, b: 80 }, // FIX 1: Increased right margin (r: 200) to ensure space for the third colorbar
 
-  // Explicitly define x domains to center plots
-  xaxis: { domain: [0, 0.28] },
-  xaxis2: { domain: [0.36, 0.64] },
-  xaxis3: { domain: [0.72, 1] },
+    // FIX 1: Explicitly define X-axis domains to ensure the three plots are evenly spaced and centered.
+    // The total plotting area is split into three roughly equal domains [0.00-0.30], [0.34-0.64], [0.68-0.98]
+    xaxis: { domain: [0.00, 0.30] },
+    xaxis2: { domain: [0.34, 0.64] },
+    xaxis3: { domain: [0.68, 0.98] },
 
-  yaxis: { showticklabels: true },
-  yaxis2: { showticklabels: false },
-  yaxis3: { showticklabels: false },
+    // FIX: Enforce Y-axis properties. All traces use y1, so we only need to define y1.
+    yaxis: { showticklabels: true, title: "Parameter", automargin: true },
+    yaxis2: { showticklabels: false }, // These are still needed to define the axis for the grid system
+    yaxis3: { showticklabels: false }, // but setting showticklabels: false hides the duplicated labels.
 
-  // Elasticity colorbar
-  coloraxis: {
-    colorbar: {
-      title: "Elasticity (%)",
-      len: 0.9,
-      y: 0.5,
-      x: 1.03,
-      xanchor: "left"
-    }
-  },
-
-  // Shared Sobol + Monte Carlo colorbar
-  coloraxisSM: {
-    cmin: 0,
-    cmax: 100,
-    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-    colorbar: {
-      title: "Sensitivity (%)",
-      len: 0.9,
-      y: 0.5,
-      x: 1.12,
-      xanchor: "left"
-    }
-  },
-
-  annotations: [
-    { text: "Elasticity", xref: "paper", yref: "paper", x: 0.14, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-    { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-    { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
-  ]
+    // FIX 2: Removed coloraxis/coloraxisSM definitions as colorbars are now defined in traces.
+    
+    annotations: [
+        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.15, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Sobol", xref: "paper", yref: "paper", x: 0.49, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.83, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
+    ]
 };
 
-// Make sure only one trace has showscale true for shared colorbar
-heatmapData.forEach(trace => {
-  if (trace.coloraxis === "coloraxisSM") trace.showscale = false;
-});
-// Enable the colorbar on the first Sobol or Monte Carlo trace
-heatmapData.find(t => t.coloraxis === "coloraxisSM").showscale = true;
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
