@@ -1897,7 +1897,69 @@ function showPowerModel() {
     });
 }
 
+// ---------- Show Power Plot ----------
+document.getElementById("showPowerPlotBtn").addEventListener("click", () => {
+    showPowerPlot();
+});
 
+function showPowerPlot() {
+    const ctx = document.getElementById("powerPlot");
+    ctx.style.display = "block";
+
+    // Example: Choose GPU to plot
+    const gpu = GPU_data[0]; // You can let user select GPU if needed
+    const f_ref = GPU_F_REF[gpu.name];
+    const dvfs = gpu.DVFS_PARAMS;
+    
+    // Take first workload & benchmark as representative
+    const firstWorkload = Object.keys(dvfs)[0];
+    const firstBenchmark = Object.keys(dvfs[firstWorkload])[0];
+    const p = dvfs[firstWorkload][firstBenchmark];
+
+    // Generate frequencies from 0 to 1.2*f_ref
+    const freqs = [];
+    const powers = [];
+    const maxF = f_ref * 1.2;
+    const step = f_ref / 100;
+
+    for (let f = 0; f <= maxF; f += step) {
+        freqs.push(f.toFixed(0));
+        let power = 0;
+        if (f <= p.f_t * f_ref) {
+            power = p.b1 * f + p.c1;
+        } else {
+            power = p.a2 * f * f + p.b2 * f + p.c2;
+        }
+        powers.push(power.toFixed(2));
+    }
+
+    // Destroy existing chart if exists
+    if (window.powerChart) window.powerChart.destroy();
+
+    window.powerChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: freqs,
+            datasets: [{
+                label: `Power vs Frequency for ${gpu.name}`,
+                data: powers,
+                borderColor: 'rgb(75, 192, 192)',
+                fill: false,
+                tension: 0.2
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: { display: true, text: 'Frequency (MHz)' }
+                },
+                y: {
+                    title: { display: true, text: 'Power (W)' }
+                }
+            }
+        }
+    });
+}
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
