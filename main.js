@@ -689,6 +689,15 @@ const GPU_F_REF = {
   GH200: 1980   
 };
 
+const GPU_TDP_REF = {
+  L4: 75,
+  A40: 300,
+  L40: 300,
+  A100: 400,
+  H100: 700,
+  GH200: 900
+};
+
 function toggleGPUFreqSlider() {
   const mode = document.querySelector('input[name="gpuFreqMode"]:checked')?.value;
   const slider = document.getElementById("slider_gpu_freq");
@@ -708,6 +717,25 @@ function getEffectiveGPUFreq(gpu) {
   return getSliderValue("gpu_graphics_freq");
 }
 
+function toggleGPUPowerSlider() {
+  const mode = document.querySelector('input[name="gpuPowerMode"]:checked')?.value;
+  const slider = document.getElementById("slider_gpu_power");
+
+  if (!slider) return;
+
+  slider.style.display = (mode === "custom") ? "block" : "none";
+}
+
+function getEffectiveGPUPower(gpu) {
+  const mode = document.querySelector('input[name="gpuPowerMode"]:checked')?.value;
+
+  if (mode !== "custom") {
+    return gpu.tdp_ref;  // default: reference TDP
+  }
+
+  return getSliderValue("gpu_power_cap");
+}
+
 if (typeof GPU_data === "undefined") {
   var GPU_data = [...activeGPUData];
 }
@@ -715,6 +743,10 @@ if (typeof GPU_data === "undefined") {
 // --- Attach reference graphics frequency to each GPU ---
 GPU_data.forEach(gpu => {
   gpu.f_ref = GPU_F_REF[gpu.name] || 2000; // MHz
+});
+
+GPU_data.forEach(gpu => {
+  gpu.tdp_ref = GPU_TDP_REF[gpu.name] || 300;
 });
 
 const DVFS_PARAMS = {
