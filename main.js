@@ -750,14 +750,30 @@ GPU_data.forEach(gpu => {
   gpu.tdp_ref = GPU_TDP_REF[gpu.name] || 300;
 });
 
-const DVFS_PARAMS = {
-  f_t: 0.9,   // transition point (normalized)
-  b1: 0.6,
-  c1: 0.4,
-  a2: 0.8,
-  b2: -0.3,
-  c2: 0.5
-};
+const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
+  const dvfsPerWorkload = {};
+  
+  for (const workload of Object.keys(gpu.perf)) {
+    dvfsPerWorkload[workload] = {};
+    
+    for (const benchmarkId of Object.keys(gpu.perf[workload])) {
+      dvfsPerWorkload[workload][benchmarkId] = {
+        f_t: 0.9,   // transition point (normalized)
+        b1: 0.6,
+        c1: 0.4,
+        a2: 0.8,
+        b2: -0.3,
+        c2: 0.5
+      };
+    }
+  }
+  
+  return {
+    name: gpu.name,
+    DVFS_PARAMS: dvfsPerWorkload
+  };
+}));
+
 
 function dvfsScaling(f_norm, params) {
   const { f_t, b1, c1, a2, b2, c2 } = params;
@@ -769,31 +785,21 @@ function dvfsScaling(f_norm, params) {
   }
 }
 
-function computeGpuPowerDVFS(gpu, basePower, f_gpu_mhz) {
-  if (!gpu.f_ref || gpu.f_ref <= 1) {
-    return basePower; // DVFS disabled (GH200)
-  }
+function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
+  const dvfsParamsObj = DVFS_PARAMS_GPU.find(g => g.name === gpu.name);
+  if (!dvfsParamsObj) return basePower;
 
-  const f_norm = f_gpu_mhz / gpu.f_ref;
-  const phi = dvfsScaling(f_norm, DVFS_PARAMS);
+  const dvfsParams = dvfsParamsObj.DVFS_PARAMS[workload]?.[benchmarkId];
+  if (!dvfsParams) return basePower;
 
-  // Scale power
-  let scaledPower = basePower * phi;
+  const { f_t, b1, c1, a2, b2, c2 } = dvfsParams;
+  const f_norm = gpuFreq / gpu.f_ref;
 
-  // Determine the correct power cap
-  const mode = document.querySelector('input[name="gpuPowerMode"]:checked')?.value;
-  let powerCap;
-
-  if (mode === "custom") {
-    powerCap = getSliderValue("gpu_power_cap");  // use slider value
+  if (f_norm <= f_t) {
+    return basePower * (b1 * f_norm + c1);
   } else {
-    powerCap = Math.max(
-      ...Object.values(gpu.power.GROMACS || {}),
-      ...Object.values(gpu.power.AMBER || {})
-    ); // reference max power
+    return basePower * (a2 * f_norm * f_norm + b2 * f_norm + c2);
   }
-
-  return Math.min(scaledPower, powerCap);
 }
 
 function updateValue(spanId, val) {
