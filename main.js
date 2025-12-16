@@ -2155,7 +2155,7 @@ ACTIVE_METRICS.forEach(metric => {
     xaxis: "x3",
     yaxis: "y3"
 });
-
+});
 
 // ---------- Layout ----------
 const heatmapLayout = {
