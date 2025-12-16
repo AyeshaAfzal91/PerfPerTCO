@@ -689,6 +689,15 @@ const GPU_F_REF = {
   GH200: 1980   
 };
 
+if (typeof GPU_data === "undefined") {
+  var GPU_data = [...activeGPUData];
+}
+
+// --- Attach reference graphics frequency to each GPU ---
+GPU_data.forEach(gpu => {
+  gpu.f_ref = GPU_F_REF[gpu.name] || 2000; // MHz
+});
+
 const DVFS_PARAMS = {
   f_t: 0.9,   // transition point (normalized)
   b1: 0.6,
@@ -724,11 +733,6 @@ function computeGpuPowerDVFS(gpu, basePower, f_gpu_mhz) {
                             ...Object.values(gpu.power.AMBER || {}));
 
   return Math.min(scaledPower, powerCap);
-}
-
-
-if (typeof GPU_data === "undefined") {
-  var GPU_data = [...activeGPUData];
 }
 
 function updateValue(spanId, val) {
