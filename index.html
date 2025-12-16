@@ -518,7 +518,7 @@
   <div id="comparison-message-container" class="comparison-message"></div>
 
 <div style="text-align: center;">
-  <h2>Output by GPU Type: GPU Count, Performance per TCO, Power per TCO, Performance per watt per TCO </h2>
+  <h2>Per-GPU Output: GPU Count, Work-per-TCO, Power-per-TCO, Work-per-watt-per-TCO </h2>
     <div id="charts-container" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
     <div id="gpu-chart" style="flex: 1 1 300px; min-width: 300px; max-width: 400px;"></div>
     <div id="power-chart" style="flex: 1 1 300px; min-width: 300px; max-width: 400px;"></div>
@@ -547,7 +547,7 @@
 
 <div style="text-align: center;">
   <h2>Parameter sensitivity and uncertainty tornado plots (per-GPU view) </h2>
-<select id="tornadoMetricSelect" style="margin-bottom:10px;">
+<select id="tornadoMetricSelect" style="margin-bottom:10px;"> Select output metric:
 	<option value="tco">TCO</option>
   <option value="perf_per_tco">Perf / TCO</option>
   <option value="power_per_tco">Power / TCO</option>
