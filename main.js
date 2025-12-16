@@ -1231,8 +1231,8 @@ const tableHTML = `
         <tr>
           <td>${r.name}</td>
           <td style="background-color:${getHeatmapColor(r.n_gpu, maxGPUs)}">${r.n_gpu}</td>
-		  <td style="background-color:${getHeatmapColor(r.performance, maxTotalPerf)}">${r.performance.toLocaleString()}</td> <!-- total_perf -->
-      		<td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toLocaleString()}</td>        <!-- total_power -->
+		  <td style="background-color:${getHeatmapColor(r.performance, maxTotalPerf)}">${r.performance.toExponential(2)}</td> 
+      		<td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toFixed(1)}</td>       
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">${r.total_cost.toFixed(0)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(1)}</td>
 		  <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco < 1 ? r.power_per_tco.toExponential(2) : r.power_per_tco.toFixed(1)}</td>
