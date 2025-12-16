@@ -2176,7 +2176,6 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 
 // ---------- Layout ----------
 const heatmapLayout = {
-    title: "Parameter Sensitivity Heatmaps",
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
     height: 600,
     width: 1450,
@@ -2264,7 +2263,7 @@ function renderTornadoPlots(metric) {
     };
 
     const layout = {
-      title: `${gpuName} – ${metric} – % Uncertainty Contribution`,
+      title: `${gpuName} – ${metric}`,
       barmode: "group",
       margin: { l: 200, r: 40, t: 50, b: 30 },
       height: 500,
