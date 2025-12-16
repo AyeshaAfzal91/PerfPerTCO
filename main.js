@@ -1146,8 +1146,17 @@ const comparisonMessage = `
   <p>compared to the ${minResult.n_gpu} ${minResult.name} GPUs (the lowest Performance per TCO).</p>
 `;
 
-
 comparisonMessageContainer.innerHTML = comparisonMessage;
+
+const totalPerformance = nonzeroResults.reduce((sum, gpu) => sum + gpu.performance, 0);
+const totalPower = nonzeroResults.reduce((sum, gpu) => sum + gpu.power, 0);
+const totalTCO = nonzeroResults.reduce((sum, gpu) => sum + gpu.total_cost, 0);
+
+comparisonMessageContainer.innerHTML += `
+  <p><strong>Total performance across selected GPUs:</strong> ${totalPerformance.toLocaleString()} units</p>
+  <p><strong>Total power consumption across selected GPUs:</strong> ${totalPower.toLocaleString()} W</p>
+  <p><strong>Total TCO across selected GPUs:</strong> €${totalTCO.toLocaleString()}</p>
+`;
 
 // Download CSV
 document.getElementById('download-csv').style.display = 'block';
