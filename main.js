@@ -779,9 +779,18 @@ function computeGpuPowerDVFS(gpu, basePower, f_gpu_mhz) {
   // Scale power
   let scaledPower = basePower * phi;
 
-  // Clamp to observed max (acts as TDP bound)
-  const powerCap = Math.max(...Object.values(gpu.power.GROMACS || {}), 
-                            ...Object.values(gpu.power.AMBER || {}));
+  // Determine the correct power cap
+  const mode = document.querySelector('input[name="gpuPowerMode"]:checked')?.value;
+  let powerCap;
+
+  if (mode === "custom") {
+    powerCap = getSliderValue("gpu_power_cap");  // use slider value
+  } else {
+    powerCap = Math.max(
+      ...Object.values(gpu.power.GROMACS || {}),
+      ...Object.values(gpu.power.AMBER || {})
+    ); // reference max power
+  }
 
   return Math.min(scaledPower, powerCap);
 }
@@ -971,6 +980,11 @@ function getSliderValue(id) {
 
 console.log("after getSliderValue: GPU_data used for calculation:", GPU_data.map(g => g.name));
 
+document.addEventListener("DOMContentLoaded", () => {
+  toggleGPUFreqSlider();
+  toggleGPUPowerSlider();
+});
+
 function calculate() {
 console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.name));
 
@@ -992,7 +1006,9 @@ console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.nam
   const C_heatreuseperkWh = getSliderValue("C_heatreuseperkWh");
   const F_heatreuse = getSliderValue("Factor_heatreuse");
   const total_budget = getSliderValue("total_budget");
-  const gpu_graphics_freq = getSliderValue("gpu_graphics_freq"); 
+  const gpuFreq = getEffectiveGPUFreq(gpu);  // returns slider value or reference frequency
+// const gpuPower = computeGpuPowerDVFS(gpu, gpu.power[workload][benchmarkId], gpuFreq);
+ 
 
 if (workload === "GROMACS" && benchmarkId > 7) {
   alert("⚠️ GROMACS benchmark data is only available up to ID 7.\nPlease select a lower Benchmark ID.");
