@@ -2165,37 +2165,39 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 // ---------- Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps",
-    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.03 },
+    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
     height: 600,
     width: 1450,
-    margin: { t: 80, l: 160, r: 260 },
+    margin: { t: 80, l: 160, r: 160 }, // center plots
 
     yaxis: { showticklabels: true },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
     // Elasticity colorbar
-coloraxis: {
-    colorbar: {
-        title: "Elasticity (%)",
-        x: 0.97,
-        len: 0.9,   // height
-        y: 0.5      // vertical center
-    }
-},
+    coloraxis: {
+        colorbar: {
+            title: "Elasticity (%)",
+            x: 1.02,
+            xanchor: "left",
+            len: 0.9,
+            y: 0.5
+        }
+    },
 
-// Shared Sobol + Monte Carlo colorbar
-coloraxisSM: {
-    cmin: 0,
-    cmax: 100,
-    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-    colorbar: {
-        title: "Sensitivity (%)",
-        x: 1.08,
-        len: 0.9 * 0.95,   // slightly smaller to match Elasticity visually
-        y: 0.5
-    }
-},
+    // Shared Sobol + Monte Carlo colorbar
+    coloraxisSM: {
+        cmin: 0,
+        cmax: 100,
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        colorbar: {
+            title: "Sensitivity (%)", // give explicit title
+            x: 1.12,                 // move slightly right
+            xanchor: "left",
+            len: 0.9,                // same as Elasticity
+            y: 0.5
+        }
+    },
 
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
@@ -2203,6 +2205,7 @@ coloraxisSM: {
         { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
     ]
 };
+
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
