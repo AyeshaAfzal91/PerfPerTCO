@@ -1976,7 +1976,12 @@ function generatePerturbations(N, k, ranges) {
         hybrid[j] = B[i][j];
         sumSqDiff += (Y_A[i] - evaluateMetric(hybrid, g, metric)) ** 2;
       }
-      S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples)); // % of total variance
+       // % of total variance
+	if (!isFinite(sumSqDiff)) {
+	  S_T[j] = 0;
+	} else {
+	  S_T[j] = 100 * (sumSqDiff / (2 * varY * numSamples));
+	}
     }
 
     sobolResults[g] = S_T;
