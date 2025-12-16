@@ -1810,50 +1810,36 @@ function initSliderToggle() {
 window.addEventListener('DOMContentLoaded', initSliderToggle);
 
 // ---------- Show Power Model ----------
+// ---------- Show Power Model ----------
 document.getElementById("showPowerModelBtn").addEventListener("click", () => {
     showPowerModel();
 });
 
 function showPowerModel() {
-    // Build table rows for each GPU
-    const rows = GPU_data.map((gpu, idx) => {
+    const rows = GPU_data.map(gpu => {
         const f_ref = GPU_F_REF[gpu.name] ?? "N/A";
         const tdp_ref = GPU_TDP_REF[gpu.name] ?? "N/A";
         const dvfs = gpu.DVFS_PARAMS ?? {};
 
-        // Build a nested table of DVFS parameters per workload & benchmark
-        const dvfsContent = Object.entries(dvfs).map(([workload, benchmarks]) => {
-            const benchmarkRows = Object.entries(benchmarks).map(([benchmarkId, params]) => {
-                const paramStr = Object.entries(params).map(([k,v]) => `${k}: ${v}`).join(", ");
-                return `<tr>
-                            <td>${workload}</td>
-                            <td>${benchmarkId}</td>
-                            <td>${paramStr}</td>
-                        </tr>`;
-            }).join("");
-            return benchmarkRows;
-        }).join("");
+        // Build the formula string with actual DVFS values
+        const phiFormula = dvfs && Object.keys(dvfs).length > 0
+            ? `φ(f_GPU) = 
+                { 
+                  ${dvfs.b1} * f_GPU + ${dvfs.c1}, if f_GPU ≤ ${dvfs.f_t} * f_ref
+                  ${dvfs.a2} * f_GPU² + ${dvfs.b2} * f_GPU + ${dvfs.c2}, if f_GPU > ${dvfs.f_t} * f_ref
+                }`
+            : "No DVFS parameters available";
 
         return `
         <tr>
             <td>${gpu.name}</td>
             <td>${f_ref} MHz</td>
             <td>${tdp_ref} W</td>
-            <td>
-                <table style="width:100%; border-collapse: collapse;" border="1">
-                    <tr>
-                        <th>Workload</th>
-                        <th>Benchmark ID</th>
-                        <th>DVFS Parameters</th>
-                    </tr>
-                    ${dvfsContent}
-                </table>
-            </td>
+            <td style="white-space: pre-line; font-family: monospace;">${phiFormula}</td>
         </tr>
         `;
     }).join("");
 
-    // Create modal
     const modal = document.createElement("div");
     modal.style.position = "fixed";
     modal.style.top = "5%";
@@ -1873,7 +1859,7 @@ function showPowerModel() {
                     <th>GPU</th>
                     <th>f_ref (MHz)</th>
                     <th>tdp_ref (W)</th>
-                    <th>DVFS Parameters per Workload/Benchmark</th>
+                    <th>Power Model φ(f_GPU)</th>
                 </tr>
             </thead>
             <tbody>
@@ -1886,11 +1872,11 @@ function showPowerModel() {
 
     document.body.appendChild(modal);
 
-    // Close modal
     document.getElementById("closeModalBtn").addEventListener("click", () => {
         document.body.removeChild(modal);
     });
 }
+
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
