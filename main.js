@@ -1823,6 +1823,7 @@ ACTIVE_METRICS.forEach(metric => {
         const power = gpu.power[workload][benchmarkId];
         const total_perf = perf * n_gpu;
         const total_power = power * n_gpu;
+		const total_work = total_perf * system_usage * lifetime / 24;
         const W_gpu_total = (power * system_usage * lifetime * n_gpu) / 1000;
         const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
         const TCO = r.total_cost;
@@ -1830,9 +1831,9 @@ ACTIVE_METRICS.forEach(metric => {
         let metricValue;
         switch (metric) {
             case "tco": metricValue = TCO; break;
-            case "perf_per_tco": metricValue = total_perf / TCO; break;
+            case "perf_per_tco": metricValue = total_work / TCO; break;
             case "power_per_tco": metricValue = total_power / TCO; break;
-            case "perf_per_watt_per_tco": metricValue = total_perf / (total_power / 1000) / TCO; break;
+            case "perf_per_watt_per_tco": metricValue = total_work / total_power / TCO; break;
             default: metricValue = undefined;
         }
         if (metricValue === undefined || metricValue === 0) return null;
