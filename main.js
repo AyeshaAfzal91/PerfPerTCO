@@ -2094,95 +2094,91 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const heatmapData = [];
-const metricTitles = {
-  tco: "TCO",
-  perf_per_tco: "Perf / TCO",
-  power_per_tco: "Power / TCO",
-  perf_per_watt_per_tco: "Perf / Watt / TCO"
-};
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
-  const xaxis = `x${metricIdx + 1}`;
-  const yaxis = `y${metricIdx + 1}`;
+    const xLabels = window.results.map(r => r.name);
 
-  // Elasticity
-  heatmapData.push({
-    z: zElasticity[metric],
-    x: window.results.map(r => r.name),
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-    zmin: -zMaxElasticity[metric],
-    zmax:  zMaxElasticity[metric],
-    colorbar: { title: "Elasticity (%)" },
-    visible: metricIdx === 0, // first metric default
-    xaxis,
-    yaxis,
-    name: `Elasticity-${metric}`
-  });
+    // Elasticity
+    heatmapData.push({
+        z: zElasticity[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: -zMaxElasticity[metric],
+        zmax:  zMaxElasticity[metric],
+        colorbar: { title: "Elasticity (%)" },
+        visible: metric === "tco", // default metric visible
+        name: `Elasticity-${metric}`,
+        xaxis: "x1",
+        yaxis: "y1"
+    });
 
-  // Sobol
-  heatmapData.push({
-    z: zSobol[metric],
-    x: window.results.map(r => r.name),
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: "Viridis",
-    zmin: 0,
-    zmax: 100,
-    colorbar: { title: "Sobol (%)" },
-    visible: false,
-    xaxis,
-    yaxis,
-    name: `Sobol-${metric}`
-  });
+    // Sobol
+    heatmapData.push({
+        z: zSobol[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: "Viridis",
+        zmin: 0,
+        zmax: 100,
+        colorbar: { title: "Sobol (%)" },
+        visible: metric === "tco",
+        name: `Sobol-${metric}`,
+        xaxis: "x2",
+        yaxis: "y2"
+    });
 
-  // Monte Carlo
-  heatmapData.push({
-    z: zMonteCarlo[metric],
-    x: window.results.map(r => r.name),
-    y: elasticityLabels,
-    type: "heatmap",
-    colorscale: "Cividis",
-    zmin: 0,
-    zmax: 100,
-    colorbar: { title: "Monte Carlo (%)" },
-    visible: false,
-    xaxis,
-    yaxis,
-    name: `MC-${metric}`
-  });
+    // Monte Carlo
+    heatmapData.push({
+        z: zMonteCarlo[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: "Cividis",
+        zmin: 0,
+        zmax: 100,
+        colorbar: { title: "Monte Carlo (%)" },
+        visible: metric === "tco",
+        name: `MC-${metric}`,
+        xaxis: "x3",
+        yaxis: "y3"
+    });
 });
 
-// ---------- Layout (3 side-by-side heatmaps per metric) ----------
+// ---------- Layout ----------
 const heatmapLayout = {
-  title: "Parameter Sensitivity Heatmaps",
-  grid: { rows: 1, columns: 3, pattern: "independent" },
-  height: 600,
-  width: 1200,
-  margin: { t: 80, l: 160, r: 80 },
-  updatemenus: [{
-    type: "buttons",
-    direction: "right",
-    x: 0.5,
-    y: 1.18,
-    xanchor: "center",
-    buttons: ACTIVE_METRICS.map((metric, idx) => ({
-      label: metricTitles[metric],
-      method: "update",
-      args: [{
-        visible: heatmapData.map((_, i) => Math.floor(i/3) === idx) // each metric has 3 heatmaps
-      }]
-    }))
-  }],
-  annotations: [
-    { text: "Elasticity", x: 0.17, y: 1.08, xref: "paper", yref: "paper", showarrow: false },
-    { text: "Sobol", x: 0.5, y: 1.08, xref: "paper", yref: "paper", showarrow: false },
-    { text: "Monte Carlo", x: 0.83, y: 1.08, xref: "paper", yref: "paper", showarrow: false }
-  ]
+    title: "Parameter Sensitivity Heatmaps",
+    grid: { rows: 1, columns: 3, pattern: "independent" },
+    height: 600,
+    width: 1400,
+    margin: { t: 80, l: 160, r: 80 },
+
+    annotations: [
+        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
+        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
+    ],
+
+    updatemenus: [{
+        type: "buttons",
+        direction: "right",
+        x: 0.5,
+        y: 1.18,
+        xanchor: "center",
+        buttons: ACTIVE_METRICS.map((metric, idx) => ({
+            label: metricTitles[metric],
+            method: "update",
+            args: [{
+                visible: heatmapData.map((_, i) => Math.floor(i / 3) === idx)
+            }]
+        }))
+    }]
 };
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
 
 
 // ---------- Tornado Charts (also in %) (with metric toggle) ----------
