@@ -2108,6 +2108,7 @@ metricSelector.addEventListener("change", e => {
     });
     Plotly.update("sensitivityHeatmaps", { visible: visibility });
 });
+const metricTitles = { tco: "TCO", perf_per_tco: "Perf / TCO", power_per_tco: "Power / TCO", perf_per_watt_per_tco: "Perf / Watt / TCO" };
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
     const xLabels = window.results.map(r => r.name);
