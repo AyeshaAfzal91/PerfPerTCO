@@ -2158,6 +2158,7 @@ ACTIVE_METRICS.forEach(metric => {
 });
 
 // ---------- Layout ----------
+// ---------- Layout ----------
 const heatmapLayout = {
     title: "Parameter Sensitivity Heatmaps",
 
@@ -2171,14 +2172,23 @@ const heatmapLayout = {
     height: 600,
     width: 1450,
 
-    // 🔥 Enough space for both colorbars
     margin: { t: 80, l: 160, r: 260 },
 
     yaxis:  { showticklabels: true },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
-    // ✅ SHARED Sobol + Monte Carlo colorbar
+    // Elasticity colorbar stays the same
+    coloraxis: {   // for Elasticity, optional if already set in trace
+        colorbar: {
+            title: "Elasticity (%)",
+            x: 0.97,
+            len: 0.9,      // match this length
+            y: 0.5         // center vertically
+        }
+    },
+
+    // ✅ Shared Sobol + Monte Carlo colorbar
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
@@ -2186,7 +2196,8 @@ const heatmapLayout = {
         colorbar: {
             title: "Sensitivity (%)",
             x: 1.08,
-            len: 0.9
+            len: 0.9,   // same as Elasticity
+            y: 0.5      // center vertically
         }
     },
 
@@ -2211,6 +2222,7 @@ const heatmapLayout = {
         }))
     }]
 };
+
 
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
 
