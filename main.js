@@ -1877,8 +1877,8 @@ function showPowerModel() {
                 <tr>
                     <th>GPU</th>
                     <th>f_ref (MHz)</th>
-                    <th>tdp_ref (W)</th>
-                    <th>Power Model φ(f_GPU)</th>
+                    <th>W_TDP (W)</th>
+                    <th>Power Model W(f_GPU)=W_TDP*φ(f_GPU)</th>
                 </tr>
             </thead>
             <tbody>
