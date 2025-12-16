@@ -1265,7 +1265,7 @@ const perfTrace = {
   x: barLabels,
   y: perfPerTCO,
   type: 'bar',
-  name: 'Performance per TCO',
+  name: 'Work-per-TCO (ns/€ * atoms)',
   marker: {
     color: barColors,
     line: {
@@ -1358,7 +1358,7 @@ const powerLayout = {
   title: '',
   barmode: 'group',
   xaxis: { title: 'GPU Type', tickangle: -45 },
-  yaxis: { title: 'Power per TCO (W/€)', rangemode: 'tozero', showgrid: true },
+  yaxis: { title: 'Power-per-TCO (W/€)', rangemode: 'tozero', showgrid: true },
   yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red' },
   legend: { orientation: 'h', y: -0.2 },
   height: 500,
@@ -1394,7 +1394,7 @@ const perfWattLayout = {
   title: '',
   barmode: 'group',
   xaxis: { title: 'GPU Type', tickangle: -45 },
-  yaxis: { title: 'Perf/Watt per TCO (ns/day*atoms/kW/€)', rangemode: 'tozero', showgrid: true },
+  yaxis: { title: 'Work-per-watt-per-TCO (ns/W/€ * atoms)', rangemode: 'tozero', showgrid: true },
   yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red' },
   legend: { orientation: 'h', y: -0.2 },
   height: 500,
