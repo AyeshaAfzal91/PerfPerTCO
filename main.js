@@ -1967,6 +1967,11 @@ function generatePerturbations(N, k, ranges) {
 	  sobolResults[g] = new Float64Array(numParams).fill(0);
 	  continue;
 	}
+	if (!isFinite(varY) || varY <= 1e-12) {
+  console.warn(`Zero variance Sobol: GPU ${g}, metric ${metric}`);
+  sobolResults[g] = new Float64Array(numParams).fill(0);
+  continue;
+	}
 	const S_T = new Float64Array(numParams);
 
     for (let j = 0; j < numParams; j++) {
