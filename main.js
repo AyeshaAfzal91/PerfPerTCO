@@ -2094,16 +2094,14 @@ const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
 const metricTitles = { tco: "TCO", perf_per_tco: "Perf / TCO", power_per_tco: "Power / TCO", perf_per_watt_per_tco: "Perf / Watt / TCO" };
-// ---------- Metric Toggle Dropdown (like tornado) ----------
 const metricSelector = document.createElement("select");
-metricSelector.style.marginBottom = "10px";
+const metricSelector = document.getElementById("metricSelector");
 ACTIVE_METRICS.forEach(metric => {
     const opt = document.createElement("option");
     opt.value = metric;
     opt.text = metricTitles[metric];
     metricSelector.appendChild(opt);
 });
-document.getElementById("sensitivityHeatmaps").prepend(metricSelector);
 
 metricSelector.addEventListener("change", e => {
     const metric = e.target.value;
@@ -2196,8 +2194,8 @@ coloraxisSM: {
     colorbar: {
         title: "Sensitivity (%)",
         x: 1.08,
-        len: 0.9,  // same height as Elasticity
-        y: 0.5     // vertical center
+        len: 0.9 * 0.95,   // slightly smaller to match Elasticity visually
+        y: 0.5
     }
 },
 
