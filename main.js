@@ -1780,16 +1780,18 @@ const ACTIVE_METRICS = ["tco", "perf_per_tco", "power_per_tco", "perf_per_watt_p
 
 // ---------- Compute Sensitivities for all metrics ----------
 const normalizeAcrossDimension = arr => {
-    const transposed = arr[0] ? arr[0].map((_, i) => arr.map(row => row[i])) : [];
-    const normalizedTransposed = transposed.map(row => {
-        const plainRow = Array.from(row);
-        const maxVal = Math.max(...plainRow.map(Math.abs));
-        if (maxVal < 1e-6) return plainRow.map(() => 0);
-        return plainRow.map(v => (v / maxVal) * 100);
-    });
-    return normalizedTransposed;
+    const transposed = arr[0] ? arr[0].map((_, i) => arr.map(row => row[i])) : [];
+    const normalizedTransposed = transposed.map(row => {
+        const plainRow = Array.from(row);
+        const maxVal = Math.max(...plainRow.map(Math.abs));
+        
+        // 🔑 FIX 1: Change safeguard from 1e-6 to 1e-15 to allow small values to be normalized
+        if (maxVal < 1e-15) return plainRow.map(() => 0); 
+        
+        return plainRow.map(v => (v / maxVal) * 100);
+    });
+    return normalizedTransposed;
 };
-
 const safeNormalizeAcrossDimension = arr => arr && arr.length ? normalizeAcrossDimension(arr) : [];
 const safeTranspose = m => m.length && m[0] ? m[0].map((_, i) => m.map(row => row[i])) : [];
 const safeMakePlainArray = arr => arr && arr.length ? arr.map(row => Array.from(row)) : [];
@@ -2028,17 +2030,16 @@ ACTIVE_METRICS.forEach(metric => {
 
 // Sobol
 const zSobol = {};
-
 ACTIVE_METRICS.forEach(metric => {
-    const raw = sobolIndicesOptimized[metric];
+    const raw = sobolIndicesOptimized[metric];
 
-    // Ensure 2D array: plain is in [GPU] x [Parameter] format
-    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
-        ? safeMakePlainArray(raw)
-        : Array.from({length: window.results.length}, () => Array(15).fill(0));
+    // Ensure 2D array: plain is in [GPU] x [Parameter] format
+    const plain = Array.isArray(raw) && raw.length && Array.isArray(raw[0])
+        ? safeMakePlainArray(raw)
+        : Array.from({length: window.results.length}, () => Array(15).fill(0));
 
-    // This correctly scales the largest Sobol index for any parameter across all GPUs to 100%.
-    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(plain));
+    // to ensure dimensional consistency and correct scaling for the 0-100 color axis.
+    zSobol[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(plain));
 });
 
 
