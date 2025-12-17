@@ -799,12 +799,17 @@ function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
   const { f_t, b1, c1, a2, b2, c2 } = dvfsParams;
   const f_norm = gpuFreq / gpu.f_ref;
 
+  let scaledPower;
   if (f_norm <= f_t) {
-    return basePower * (b1 * f_norm + c1);
+    scaledPower = basePower * (b1 * f_norm + c1);
   } else {
-    return basePower * (a2 * f_norm * f_norm + b2 * f_norm + c2);
+    scaledPower = basePower * (a2 * f_norm * f_norm + b2 * f_norm + c2);
   }
+
+  // TDP CLAMP 
+  return Math.min(scaledPower, gpu.tdp_ref);
 }
+
 
 function updateValue(spanId, val) {
   document.getElementById(spanId).innerText = val;
