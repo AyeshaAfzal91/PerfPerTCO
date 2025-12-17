@@ -589,7 +589,7 @@ GPU_data.forEach(gpu => {
   gpu.tdp_ref = GPU_TDP_REF[gpu.name] || 300;
 });
 
-const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
+/* const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
   const dvfsPerWorkload = {};
   
   for (const workload of Object.keys(gpu.perf)) {
@@ -611,7 +611,9 @@ const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
     name: gpu.name,
     DVFS_PARAMS: dvfsPerWorkload
   };
-});
+}); */
+
+import { DVFS_PARAMS_GPU } from './Inputs/DVFS_PARAMS.js';
 
 GPU_data.forEach(gpu => {
     const dvfs = DVFS_PARAMS_GPU.find(d => d.name === gpu.name);
