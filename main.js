@@ -1897,69 +1897,100 @@ function showPowerModel() {
     });
 }
 
-// ---------- Show Power Plot ----------
+// ---------- Show Power Plots (All Benchmarks, All GPUs) ----------
 document.getElementById("showPowerPlotBtn").addEventListener("click", () => {
-    showPowerPlot();
+  showPowerPlotsAllBenchmarks();
 });
 
-function showPowerPlot() {
-    const ctx = document.getElementById("powerPlot");
-    ctx.style.display = "block";
+function showPowerPlotsAllBenchmarks() {
+  const container = document.getElementById("powerPlotContainer");
+  container.innerHTML = "";
 
-    // Example: Choose GPU to plot
-    const gpu = GPU_data[0]; // You can let user select GPU if needed
-    const f_ref = GPU_F_REF[gpu.name];
-    const dvfs = gpu.DVFS_PARAMS;
-    
-    // Take first workload & benchmark as representative
-    const firstWorkload = Object.keys(dvfs)[0];
-    const firstBenchmark = Object.keys(dvfs[firstWorkload])[0];
-    const p = dvfs[firstWorkload][firstBenchmark];
+  const workload = document.getElementById("workload").value;
 
-    // Generate frequencies from 0 to 1.2*f_ref
-    const freqs = [];
-    const powers = [];
-    const maxF = f_ref * 1.2;
-    const step = f_ref / 100;
+  // Use benchmark list from first GPU
+  const benchmarkIds = Object.keys(GPU_data[0].DVFS_PARAMS[workload]);
 
-    for (let f = 0; f <= maxF; f += step) {
-        freqs.push(f.toFixed(0));
-        let power = 0;
-        if (f <= p.f_t * f_ref) {
-            power = p.b1 * f + p.c1;
+  benchmarkIds.forEach(benchmarkId => {
+    // Create canvas per benchmark
+    const canvas = document.createElement("canvas");
+    canvas.style.marginBottom = "40px";
+    container.appendChild(canvas);
+
+    const ctx = canvas.getContext("2d");
+
+    let labels = null;
+    const datasets = [];
+
+    GPU_data.forEach(gpu => {
+      const f_ref = GPU_F_REF[gpu.name];
+      const dvfs = gpu.DVFS_PARAMS?.[workload]?.[benchmarkId];
+      if (!f_ref || !dvfs) return;
+
+      const freqs = [];
+      const powers = [];
+
+      const maxF = f_ref * 1.2;
+      const step = f_ref / 100;
+
+      for (let f = 0; f <= maxF; f += step) {
+        freqs.push(Math.round(f));
+        let power;
+        if (f <= dvfs.f_t * f_ref) {
+          power = dvfs.b1 * f + dvfs.c1;
         } else {
-            power = p.a2 * f * f + p.b2 * f + p.c2;
+          power = dvfs.a2 * f * f + dvfs.b2 * f + dvfs.c2;
         }
-        powers.push(power.toFixed(2));
-    }
+        powers.push(power);
+      }
 
-    // Destroy existing chart if exists
-    if (window.powerChart) window.powerChart.destroy();
+      if (!labels) labels = freqs;
 
-    window.powerChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: freqs,
-            datasets: [{
-                label: `Power vs Frequency for ${gpu.name}`,
-                data: powers,
-                borderColor: 'rgb(75, 192, 192)',
-                fill: false,
-                tension: 0.2
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    title: { display: true, text: 'Frequency (MHz)' }
-                },
-                y: {
-                    title: { display: true, text: 'Power (W)' }
-                }
-            }
-        }
+      datasets.push({
+        label: gpu.name,
+        data: powers,
+        fill: false,
+        tension: 0.2,
+        borderWidth: 2
+      });
     });
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: `DVFS Power Model – ${workload}, Benchmark ${benchmarkId}`
+          },
+          legend: {
+            position: "top"
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "GPU Graphics Frequency (MHz)"
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: "Relative Power φ(f_GPU)"
+            }
+          }
+        }
+      }
+    });
+  });
 }
+
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
