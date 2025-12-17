@@ -1573,6 +1573,183 @@ function initSliderToggle() {
 // Run initialization after DOM is ready
 window.addEventListener('DOMContentLoaded', initSliderToggle);
 
+
+// ---------- Show Performance Model ----------
+document.getElementById("showPerfModelBtn").addEventListener("click", () => {
+    showPerfModel();
+});
+
+function showPerfModel() {
+    const rows = GPU_data.map(gpu => {
+        const f_ref = GPU_F_REF[gpu.name] ?? "N/A";
+        const perfRef = gpu.perf ? gpu.perf : "N/A";
+
+        if (!perfRef || Object.keys(perfRef).length === 0) {
+            return `
+            <tr>
+                <td>${gpu.name}</td>
+                <td>${f_ref} MHz</td>
+                <td>No performance data available</td>
+            </tr>
+            `;
+        }
+
+        // Take the first workload & benchmark for display
+        const firstWorkload = Object.keys(perfRef)[0];
+        const firstBenchmark = Object.keys(perfRef[firstWorkload])[0];
+        const basePerf = perfRef[firstWorkload][firstBenchmark];
+
+        const perfFormula = `P(f_GPU) = ${basePerf} * (f_GPU / ${f_ref})`;
+
+        return `
+        <tr>
+            <td>${gpu.name}</td>
+            <td>${f_ref} MHz</td>
+            <td style="white-space: pre-line; font-family: monospace;">${perfFormula}</td>
+        </tr>
+        `;
+    }).join("");
+
+    // Create modal
+    const modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.top = "5%";
+    modal.style.left = "5%";
+    modal.style.width = "90%";
+    modal.style.height = "90%";
+    modal.style.backgroundColor = "white";
+    modal.style.border = "2px solid #333";
+    modal.style.padding = "20px";
+    modal.style.zIndex = 1000;
+    modal.style.overflowY = "auto";
+    modal.innerHTML = `
+        <h2>GPU Performance Model</h2>
+        <table style="width:100%; border-collapse: collapse;" border="1">
+            <thead>
+                <tr>
+                    <th>GPU</th>
+                    <th>f_base (MHz)</th>
+                    <th>Performance Model P(f_GPU)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+        <br>
+        <button id="closeModalPerfBtn">Close</button>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close modal
+    document.getElementById("closeModalPerfBtn").addEventListener("click", () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// ---------- Show Power Plots (All Benchmarks, All GPUs) ----------
+document.getElementById("showPerfPlotBtn").addEventListener("click", () => {
+    showPerfPlotsAllBenchmarks();
+});
+
+function showPerfPlotsAllBenchmarks() {
+    const container = document.getElementById("perfPlotContainer");
+    if (!container) {
+        console.error("perfPlotContainer not found in DOM");
+        return;
+    }
+
+    container.innerHTML = "";
+    container.style.display = "flex";
+    container.style.flexWrap = "wrap";
+    container.style.gap = "20px";
+    container.style.justifyContent = "center";
+
+    const workload = document.getElementById("workload").value;
+
+    const benchmarkIds = Object.keys(GPU_data[0].perf[workload]);
+
+    benchmarkIds.forEach(benchmarkId => {
+        const plotWrapper = document.createElement("div");
+        plotWrapper.style.width = "420px";
+        plotWrapper.style.height = "320px";
+        plotWrapper.style.border = "1px solid #ccc";
+        plotWrapper.style.padding = "10px";
+        plotWrapper.style.background = "#fafafa";
+
+        const title = document.createElement("h4");
+        title.textContent = `Performance Model – ${workload}, Benchmark ${benchmarkId}`;
+        title.style.textAlign = "center";
+
+        const canvas = document.createElement("canvas");
+        canvas.height = 300;
+        canvas.style.height = "380px";
+
+        plotWrapper.appendChild(title);
+        plotWrapper.appendChild(canvas);
+        container.appendChild(plotWrapper);
+
+        const ctx = canvas.getContext("2d");
+
+        let labels = null;
+        const datasets = [];
+
+        GPU_data.forEach(gpu => {
+            const f_ref = GPU_F_REF[gpu.name];
+            const basePerf = gpu.perf?.[workload]?.[benchmarkId];
+            if (!f_ref || !basePerf) return;
+
+            const freqs = [];
+            const perfs = [];
+
+            const maxF = f_ref * 1.2;
+            const step = 15;
+
+            for (let f = 0; f <= maxF; f += step) {
+                freqs.push(Math.round(f));
+                const perf = basePerf * (f / f_ref);
+                perfs.push(perf);
+            }
+
+            if (!labels) labels = freqs;
+
+            datasets.push({
+                label: gpu.name,
+                data: perfs,
+                fill: false,
+                tension: 0.15,
+                borderWidth: 1.5,
+                pointRadius: 1
+            });
+        });
+
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels,
+                datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { bottom: 50 } },
+                plugins: { legend: { position: "top" } },
+                scales: {
+                    x: { 
+                        title: { display: true, text: "GPU Graphics Frequency (MHz)" },
+                        ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }
+                    },
+                    y: {
+                        min: 0,
+                        title: { display: true, text: "Performance P(f_GPU)" }
+                    }
+                }
+            }
+        });
+    });
+}
+
 // ---------- Show Power Model ----------
 document.getElementById("showPowerModelBtn").addEventListener("click", () => {
     showPowerModel();
