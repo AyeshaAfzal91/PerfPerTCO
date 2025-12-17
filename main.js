@@ -758,7 +758,7 @@ const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
     
     for (const benchmarkId of Object.keys(gpu.perf[workload])) {
       dvfsPerWorkload[workload][benchmarkId] = {
-        f_t: 0.56,
+        f_t: 975,
         b1: 0.1,
         c1: 70,
         a2: 0.000055,
@@ -779,13 +779,13 @@ GPU_data.forEach(gpu => {
     if (dvfs) gpu.DVFS_PARAMS = dvfs.DVFS_PARAMS;
 });
 
-function dvfsScaling(f_norm, params) {
+function dvfsScaling(f, params) {
   const { f_t, b1, c1, a2, b2, c2 } = params;
 
-  if (f_norm <= f_t) {
-    return b1 * f_norm + c1;
+  if (f <= f_t) {
+    return b1 * f + c1;
   } else {
-    return a2 * f_norm * f_norm + b2 * f_norm + c2;
+    return a2 * f * f + b2 * f + c2;
   }
 }
 
@@ -797,13 +797,13 @@ function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
   if (!dvfsParams) return basePower;
 
   const { f_t, b1, c1, a2, b2, c2 } = dvfsParams;
-  const f_norm = gpuFreq / gpu.f_ref;
+  //const f_norm = gpuFreq / gpu.f_ref;
 
   let scaledPower;
-  if (f_norm <= f_t) {
-    scaledPower = basePower * (b1 * f_norm + c1);
+  if (gpuFreq <= f_t) {
+    scaledPower = basePower * (b1 * gpuFreq + c1);
   } else {
-    scaledPower = basePower * (a2 * f_norm * f_norm + b2 * f_norm + c2);
+    scaledPower = basePower * (a2 * gpuFreq * gpuFreq + b2 * gpuFreq + c2);
   }
 
   // TDP CLAMP 
@@ -1883,7 +1883,7 @@ function showPowerModel() {
                     <th>GPU</th>
                     <th>f_base (MHz)</th>
                     <th>W_TDP (W)</th>
-                    <th>Power Model W(f_GPU)=min(W_TDP, W(f_base)*φ(f_GPU))</th>
+                    <th>Power Model W(f_GPU)=min(W_TDP, φ(f_GPU))</th>
                 </tr>
             </thead>
             <tbody>
@@ -1967,21 +1967,18 @@ function showPowerPlotsAllBenchmarks() {
       for (let f = 0; f <= maxF; f += step) {
         freqs.push(Math.round(f));
 
-		const W_base = gpu.power?.[workload]?.[benchmarkId];
 		const W_TDP  = gpu.tdp_ref;
 		
-		if (!W_base || !W_TDP) return;
-		
-		const f_norm = f / f_ref;
-		
+		if (!W_TDP) return;
+				
 		let phi;
-		if (f_norm <= dvfs.f_t) {
-		  phi = dvfs.b1 * f_norm + dvfs.c1;
+		if (f <= dvfs.f_t) {
+		  phi = dvfs.b1 * f + dvfs.c1;
 		} else {
-		  phi = dvfs.a2 * f_norm * f_norm + dvfs.b2 * f_norm + dvfs.c2;
+		  phi = dvfs.a2 * f * f + dvfs.b2 * f + dvfs.c2;
 		}
 		
-		const power = Math.min(W_TDP, W_base * phi);
+		const power = Math.min(W_TDP, phi);
 		powers.push(power);
       }
 
@@ -2027,7 +2024,7 @@ function showPowerPlotsAllBenchmarks() {
 		    },
 		  y: {
 		  min: 0,
-		  title: { display: true, text: "Power W(f_GPU)=min(W_TDP, W(f_base)*φ(f_GPU))" }
+		  title: { display: true, text: "Power W(f_GPU)=min(W_TDP, φ(f_GPU))" }
 		}
         }
       }
