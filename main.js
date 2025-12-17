@@ -789,13 +789,13 @@ function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
   const { f_t, b1, c1, a2, b2, c2 } = dvfsParams;
   //const f_norm = gpuFreq / gpu.f_ref;
 
-  let scaledPower;
+  let phi;
   if (gpuFreq <= f_t) {
-    scaledPower = basePower * (b1 * gpuFreq + c1);
+    phi = b1 * gpuFreq + c1;
   } else {
-    scaledPower = basePower * (a2 * gpuFreq * gpuFreq + b2 * gpuFreq + c2);
+    phi = a2 * gpuFreq * gpuFreq + b2 * gpuFreq + c2;
   }
-  return Math.min(scaledPower, gpu.tdp_ref); // TDP CLAMP 
+  return Math.min(phi, gpu.tdp_ref); // TDP CLAMP 
 }
 
 
@@ -1891,9 +1891,6 @@ function showPowerModel() {
 }
 
 // ---------- Show Power Plots (All Benchmarks, All GPUs) ----------
-1) instead of recalculating , why cannot we call computeGpuPowerDVFS?
-2) lines are very thick due to large data points ... how to decrease marker size?
-
 document.getElementById("showPowerPlotBtn").addEventListener("click", () => {
   showPowerPlotsAllBenchmarks();
 });
