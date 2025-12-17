@@ -779,16 +779,6 @@ GPU_data.forEach(gpu => {
     if (dvfs) gpu.DVFS_PARAMS = dvfs.DVFS_PARAMS;
 });
 
-function dvfsScaling(f, params) {
-  const { f_t, b1, c1, a2, b2, c2 } = params;
-
-  if (f <= f_t) {
-    return b1 * f + c1;
-  } else {
-    return a2 * f * f + b2 * f + c2;
-  }
-}
-
 function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
   const dvfsParamsObj = DVFS_PARAMS_GPU.find(g => g.name === gpu.name);
   if (!dvfsParamsObj) return basePower;
@@ -805,9 +795,7 @@ function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
   } else {
     scaledPower = basePower * (a2 * gpuFreq * gpuFreq + b2 * gpuFreq + c2);
   }
-
-  // TDP CLAMP 
-  return Math.min(scaledPower, gpu.tdp_ref);
+  return Math.min(scaledPower, gpu.tdp_ref); // TDP CLAMP 
 }
 
 
