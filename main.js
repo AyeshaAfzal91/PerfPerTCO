@@ -1629,7 +1629,7 @@ function showPerfModel() {
                 <tr>
                     <th>GPU</th>
                     <th>f_base (MHz)</th>
-                    <th>Performance Model P(f_GPU)</th>
+                    <th>Performance Model P(f_GPU) P_base * (f_GPU / f_base);</th>
                 </tr>
             </thead>
             <tbody>
