@@ -3777,4 +3777,3 @@ window.downloadComparisonPDF = downloadComparisonPDF;
 window.renderPerfPowerHeatmaps = renderPerfPowerHeatmaps;
 window.generatePDFReport = generatePDFReport;
 window.generateBlogPost = generateBlogPost;
-window.copyBlogText = copyBlogText;
