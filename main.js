@@ -1989,18 +1989,28 @@ function showPowerPlotsAllBenchmarks() {
         datasets
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: "top" }
-        },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: "GPU Graphics Frequency (MHz)"
-            }
-          },
+		  responsive: true,
+		  maintainAspectRatio: false,
+		  layout: {
+		    padding: {
+		      bottom: 20   // space for x-axis labels
+		    }
+		  },
+		  plugins: {
+		    legend: { position: "top" }
+		  },
+		  scales: {
+		    x: {
+		      title: {
+		        display: true,
+		        text: "GPU Graphics Frequency (MHz)"
+		      },
+		      ticks: {
+		        maxRotation: 0,
+		        autoSkip: true,
+		        maxTicksLimit: 6
+		      }
+		    },
 		  y: {
 		  min: 0,
 		  title: { display: true, text: "Power W(f_GPU)=W_TDP*φ(f_GPU)" }
