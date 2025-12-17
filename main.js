@@ -1962,7 +1962,7 @@ function showPowerPlotsAllBenchmarks() {
       const powers = [];
 
       const maxF = f_ref * 1.2;
-      const step = f_ref / 100;
+      const step = 15;
 
       for (let f = 0; f <= maxF; f += step) {
         freqs.push(Math.round(f));
