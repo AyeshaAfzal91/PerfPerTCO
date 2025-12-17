@@ -1902,7 +1902,7 @@ function showPowerPlotsAllBenchmarks() {
     return;
   }
 
-  // --- NEW: side-by-side layout ---
+  // --- Side-by-side layout ---
   container.innerHTML = "";
   container.style.display = "flex";
   container.style.flexWrap = "wrap";
@@ -1912,14 +1912,13 @@ function showPowerPlotsAllBenchmarks() {
   const workload = document.getElementById("workload").value;
 
   // Use benchmark list from first GPU
-  const benchmarkIds = Object.keys(GPU_data[0].DVFS_PARAMS[workload]);
+  const benchmarkIds = Object.keys(GPU_data[0].DVFS_PARAMS[workload] || {});
 
   benchmarkIds.forEach(benchmarkId => {
-
-    // --- NEW: wrapper per plot ---
+    // --- Wrapper per plot ---
     const plotWrapper = document.createElement("div");
     plotWrapper.style.width = "420px";
-	plotWrapper.style.height = "320px";
+    plotWrapper.style.height = "320px";
     plotWrapper.style.border = "1px solid #ccc";
     plotWrapper.style.padding = "10px";
     plotWrapper.style.background = "#fafafa";
@@ -1930,7 +1929,7 @@ function showPowerPlotsAllBenchmarks() {
 
     const canvas = document.createElement("canvas");
     canvas.height = 300;
-	canvas.style.height = "380px";
+    canvas.style.height = "380px";
 
     plotWrapper.appendChild(title);
     plotWrapper.appendChild(canvas);
@@ -1944,23 +1943,22 @@ function showPowerPlotsAllBenchmarks() {
     GPU_data.forEach(gpu => {
       const f_ref = GPU_F_REF[gpu.name];
       const dvfs = gpu.DVFS_PARAMS?.[workload]?.[benchmarkId];
-      if (!f_ref || !dvfs) return;
+      const W_TDP = gpu.tdp_ref;
+
+      if (!f_ref || !dvfs || !W_TDP) {
+        console.warn(`Skipping GPU ${gpu.name} for benchmark ${benchmarkId}`);
+        return; // skip this GPU safely
+      }
 
       const freqs = [];
       const powers = [];
-
       const maxF = f_ref * 1.2;
       const step = 15;
 
       for (let f = 0; f <= maxF; f += step) {
         freqs.push(Math.round(f));
-		const power = computeGpuPowerDVFS(
-		    gpu,
-		    f,
-		    workload,
-		    benchmarkId
-		  );
-		powers.push(power);
+        const power = computeGpuPowerDVFS(gpu, f, workload, benchmarkId);
+        powers.push(power);
       }
 
       if (!labels) labels = freqs;
@@ -1969,9 +1967,9 @@ function showPowerPlotsAllBenchmarks() {
         label: gpu.name,
         data: powers,
         fill: false,
-        tension: 0.2,
-		pointRadius: 0.05,        // markers soze
-        borderWidth: 2
+        tension: 0.15,
+        borderWidth: 1.5,   // thinner lines
+        pointRadius: 1       // smaller markers for large datasets
       });
     });
 
@@ -1982,37 +1980,38 @@ function showPowerPlotsAllBenchmarks() {
         datasets
       },
       options: {
-		  responsive: true,
-		  maintainAspectRatio: false,
-		  layout: {
-		    padding: {
-		      bottom: 50   // space for x-axis labels
-		    }
-		  },
-		  plugins: {
-		    legend: { position: "top" }
-		  },
-		  scales: {
-		    x: {
-		      title: {
-		        display: true,
-		        text: "GPU Graphics Frequency (MHz)"
-		      },
-		      ticks: {
-		        maxRotation: 0,
-		        autoSkip: true,
-		        maxTicksLimit: 6
-		      }
-		    },
-		  y: {
-		  min: 0,
-		  title: { display: true, text: "Power W(f_GPU)=min(W_TDP, φ(f_GPU))" }
-		}
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 50   // space for x-axis labels
+          }
+        },
+        plugins: {
+          legend: { position: "top" }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "GPU Graphics Frequency (MHz)"
+            },
+            ticks: {
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 6
+            }
+          },
+          y: {
+            min: 0,
+            title: { display: true, text: "Power W(f_GPU)=min(W_TDP, φ(f_GPU))" }
+          }
         }
       }
     });
   });
 }
+
 
 
 	
