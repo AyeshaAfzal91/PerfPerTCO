@@ -3758,3 +3758,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof calculate === "function") calculate();
   });
 });
+
+// ---- Expose functions to HTML (ES module fix) ----
+window.toggleGPUFreqSlider = toggleGPUFreqSlider;
+window.toggleGPUPowerSlider = toggleGPUPowerSlider;
+window.updateValue = updateValue;
+
