@@ -1891,6 +1891,9 @@ function showPowerModel() {
 }
 
 // ---------- Show Power Plots (All Benchmarks, All GPUs) ----------
+1) instead of recalculating , why cannot we call computeGpuPowerDVFS?
+2) lines are very thick due to large data points ... how to decrease marker size?
+
 document.getElementById("showPowerPlotBtn").addEventListener("click", () => {
   showPowerPlotsAllBenchmarks();
 });
@@ -1902,6 +1905,7 @@ function showPowerPlotsAllBenchmarks() {
     return;
   }
 
+  // --- NEW: side-by-side layout ---
   container.innerHTML = "";
   container.style.display = "flex";
   container.style.flexWrap = "wrap";
@@ -1909,12 +1913,16 @@ function showPowerPlotsAllBenchmarks() {
   container.style.justifyContent = "center";
 
   const workload = document.getElementById("workload").value;
-  const benchmarkIds = Object.keys(GPU_data[0].DVFS_PARAMS[workload] || {});
+
+  // Use benchmark list from first GPU
+  const benchmarkIds = Object.keys(GPU_data[0].DVFS_PARAMS[workload]);
 
   benchmarkIds.forEach(benchmarkId => {
+
+    // --- NEW: wrapper per plot ---
     const plotWrapper = document.createElement("div");
     plotWrapper.style.width = "420px";
-    plotWrapper.style.height = "320px";
+	plotWrapper.style.height = "320px";
     plotWrapper.style.border = "1px solid #ccc";
     plotWrapper.style.padding = "10px";
     plotWrapper.style.background = "#fafafa";
@@ -1925,7 +1933,7 @@ function showPowerPlotsAllBenchmarks() {
 
     const canvas = document.createElement("canvas");
     canvas.height = 300;
-    canvas.style.height = "380px";
+	canvas.style.height = "380px";
 
     plotWrapper.appendChild(title);
     plotWrapper.appendChild(canvas);
@@ -1933,30 +1941,39 @@ function showPowerPlotsAllBenchmarks() {
 
     const ctx = canvas.getContext("2d");
 
+    let labels = null;
     const datasets = [];
 
-    // Compute a common frequency array (labels) based on the first valid GPU
-    let labels = [];
-    for (const gpu of GPU_data) {
+    GPU_data.forEach(gpu => {
       const f_ref = GPU_F_REF[gpu.name];
       const dvfs = gpu.DVFS_PARAMS?.[workload]?.[benchmarkId];
-      if (f_ref && dvfs) {
-        const maxF = f_ref * 1.2;
-        const step = 15;
-        for (let f = 0; f <= maxF; f += step) {
-          labels.push(Math.round(f));
-        }
-        break; // only need one valid GPU to define labels
+      if (!f_ref || !dvfs) return;
+
+      const freqs = [];
+      const powers = [];
+
+      const maxF = f_ref * 1.2;
+      const step = 15;
+
+      for (let f = 0; f <= maxF; f += step) {
+        freqs.push(Math.round(f));
+
+		const W_TDP  = gpu.tdp_ref;
+		
+		if (!W_TDP) return;
+				
+		let phi;
+		if (f <= dvfs.f_t) {
+		  phi = dvfs.b1 * f + dvfs.c1;
+		} else {
+		  phi = dvfs.a2 * f * f + dvfs.b2 * f + dvfs.c2;
+		}
+		
+		const power = Math.min(W_TDP, phi);
+		powers.push(power);
       }
-    }
 
-    // Compute power for each GPU
-    GPU_data.forEach(gpu => {
-      const dvfs = gpu.DVFS_PARAMS?.[workload]?.[benchmarkId];
-      const W_TDP = gpu.tdp_ref;
-      if (!dvfs || !W_TDP) return;
-
-      const powers = labels.map(f => computeGpuPowerDVFS(gpu, f, workload, benchmarkId));
+      if (!labels) labels = freqs;
 
       datasets.push({
         label: gpu.name,
@@ -1975,28 +1992,37 @@ function showPowerPlotsAllBenchmarks() {
         datasets
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        layout: { padding: { bottom: 50 } },
-        plugins: { legend: { position: "top" } },
-        scales: {
-          x: {
-            title: { display: true, text: "GPU Graphics Frequency (MHz)" },
-            ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }
-          },
-          y: {
-            min: 0,
-            title: { display: true, text: "Power W(f_GPU)=min(W_TDP, φ(f_GPU))" }
-          }
+		  responsive: true,
+		  maintainAspectRatio: false,
+		  layout: {
+		    padding: {
+		      bottom: 50   // space for x-axis labels
+		    }
+		  },
+		  plugins: {
+		    legend: { position: "top" }
+		  },
+		  scales: {
+		    x: {
+		      title: {
+		        display: true,
+		        text: "GPU Graphics Frequency (MHz)"
+		      },
+		      ticks: {
+		        maxRotation: 0,
+		        autoSkip: true,
+		        maxTicksLimit: 6
+		      }
+		    },
+		  y: {
+		  min: 0,
+		  title: { display: true, text: "Power W(f_GPU)=min(W_TDP, φ(f_GPU))" }
+		}
         }
       }
     });
   });
 }
-
-
-
-
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
 const elasticityLabels = [
