@@ -1881,9 +1881,9 @@ function showPowerModel() {
             <thead>
                 <tr>
                     <th>GPU</th>
-                    <th>f_ref (MHz)</th>
+                    <th>f_base (MHz)</th>
                     <th>W_TDP (W)</th>
-                    <th>Power Model W(f_GPU)=W_TDP*φ(f_GPU)</th>
+                    <th>Power Model W(f_GPU)=min(W_TDP, W(f_base)*φ(f_GPU))</th>
                 </tr>
             </thead>
             <tbody>
@@ -1967,13 +1967,22 @@ function showPowerPlotsAllBenchmarks() {
       for (let f = 0; f <= maxF; f += step) {
         freqs.push(Math.round(f));
 
-        let power;
-        if (f <= dvfs.f_t * f_ref) {
-          power = dvfs.b1 * f + dvfs.c1;
-        } else {
-          power = dvfs.a2 * f * f + dvfs.b2 * f + dvfs.c2;
-        }
-        powers.push(power);
+		const W_base = gpu.power?.[workload]?.[benchmarkId];
+		const W_TDP  = gpu.tdp_ref;
+		
+		if (!W_base || !W_TDP) return;
+		
+		const f_norm = f / f_ref;
+		
+		let phi;
+		if (f_norm <= dvfs.f_t) {
+		  phi = dvfs.b1 * f_norm + dvfs.c1;
+		} else {
+		  phi = dvfs.a2 * f_norm * f_norm + dvfs.b2 * f_norm + dvfs.c2;
+		}
+		
+		const power = Math.min(W_TDP, W_base * phi);
+		powers.push(power);
       }
 
       if (!labels) labels = freqs;
@@ -2018,7 +2027,7 @@ function showPowerPlotsAllBenchmarks() {
 		    },
 		  y: {
 		  min: 0,
-		  title: { display: true, text: "Power W(f_GPU)=W_TDP*φ(f_GPU)" }
+		  title: { display: true, text: "Power W(f_GPU)=min(W_TDP, W(f_base)*φ(f_GPU))" }
 		}
         }
       }
