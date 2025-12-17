@@ -549,7 +549,7 @@ function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
   const dvfsParamsObj = DVFS_PARAMS[gpu.name];
   if (!dvfsParamsObj) return basePower;
 
-  const dvfsParams = dvfsParamsObj.DVFS_PARAMS[workload]?.[benchmarkId];
+  const dvfsParams = dvfsParamsObj[workload]?.[benchmarkId];
   if (!dvfsParams) return basePower;
 
   const { f_t, b1, c1, a2, b2, c2 } = dvfsParams;
