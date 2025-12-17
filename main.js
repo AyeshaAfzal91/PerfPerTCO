@@ -1966,19 +1966,12 @@ function showPowerPlotsAllBenchmarks() {
 
       for (let f = 0; f <= maxF; f += step) {
         freqs.push(Math.round(f));
-
-		const W_TDP  = gpu.tdp_ref;
-		
-		if (!W_TDP) return;
-				
-		let phi;
-		if (f <= dvfs.f_t) {
-		  phi = dvfs.b1 * f + dvfs.c1;
-		} else {
-		  phi = dvfs.a2 * f * f + dvfs.b2 * f + dvfs.c2;
-		}
-		
-		const power = Math.min(W_TDP, phi);
+		const power = computeGpuPowerDVFS(
+		    gpu,
+		    f,
+		    workload,
+		    benchmarkId
+		  );
 		powers.push(power);
       }
 
@@ -1989,6 +1982,7 @@ function showPowerPlotsAllBenchmarks() {
         data: powers,
         fill: false,
         tension: 0.2,
+		pointRadius: 0.05,        // markers soze
         borderWidth: 2
       });
     });
