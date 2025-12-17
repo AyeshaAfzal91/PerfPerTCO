@@ -1926,6 +1926,7 @@ function showPowerPlotsAllBenchmarks() {
     // --- NEW: wrapper per plot ---
     const plotWrapper = document.createElement("div");
     plotWrapper.style.width = "420px";
+	plotWrapper.style.height = "320px";
     plotWrapper.style.border = "1px solid #ccc";
     plotWrapper.style.padding = "10px";
     plotWrapper.style.background = "#fafafa";
@@ -1936,6 +1937,7 @@ function showPowerPlotsAllBenchmarks() {
 
     const canvas = document.createElement("canvas");
     canvas.height = 260;
+	canvas.style.height = "240px";
 
     plotWrapper.appendChild(title);
     plotWrapper.appendChild(canvas);
@@ -1999,12 +2001,11 @@ function showPowerPlotsAllBenchmarks() {
               text: "GPU Graphics Frequency (MHz)"
             }
           },
-          y: {
-            title: {
-              display: true,
-              text: "Relative Power φ(f_GPU)"
-            }
-          }
+		  y: {
+		  min: 0,
+		  max: 1.5,
+		  title: { display: true, text: "Relative Power φ(f_GPU)" }
+		}
         }
       }
     });
