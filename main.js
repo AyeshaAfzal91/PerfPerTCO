@@ -565,12 +565,12 @@ GPU_data.forEach(gpu => {
 import { DVFS_PARAMS } from './Inputs/DVFS_PARAMS.js';
 
 GPU_data.forEach(gpu => {
-    const dvfs = DVFS_PARAMS.find(d => d.name === gpu.name);
-    if (dvfs) gpu.DVFS_PARAMS = dvfs.DVFS_PARAMS;
+    const dvfs = DVFS_PARAMS[gpu.name]; 
+	if (dvfs) gpu.DVFS_PARAMS = dvfs;
 });
 
 function computeGpuPowerDVFS(gpu, basePower, gpuFreq, workload, benchmarkId) {
-  const dvfsParamsObj = DVFS_PARAMS.find(g => g.name === gpu.name);
+  const dvfsParamsObj = DVFS_PARAMS[gpu.name];
   if (!dvfsParamsObj) return basePower;
 
   const dvfsParams = dvfsParamsObj.DVFS_PARAMS[workload]?.[benchmarkId];
