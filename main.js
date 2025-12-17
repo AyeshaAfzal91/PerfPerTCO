@@ -525,6 +525,16 @@ function getEffectiveGPUPower(gpu) {
   return getSliderValue("gpu_power_cap");
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[name="gpuFreqMode"]').forEach(radio => {
+        radio.addEventListener('change', toggleGPUFreqSlider);
+    });
+
+    document.querySelectorAll('input[name="gpuPowerMode"]').forEach(radio => {
+        radio.addEventListener('change', toggleGPUPowerSlider);
+    });
+});
+
 if (typeof GPU_data === "undefined") {
   var GPU_data = [...activeGPUData];
 }
