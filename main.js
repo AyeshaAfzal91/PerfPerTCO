@@ -2003,8 +2003,7 @@ function showPowerPlotsAllBenchmarks() {
           },
 		  y: {
 		  min: 0,
-		  max: 1.5,
-		  title: { display: true, text: "Relative Power φ(f_GPU)" }
+		  title: { display: true, text: "Power W(f_GPU)=W_TDP*φ(f_GPU)" }
 		}
         }
       }
