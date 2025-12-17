@@ -1936,8 +1936,8 @@ function showPowerPlotsAllBenchmarks() {
     title.style.textAlign = "center";
 
     const canvas = document.createElement("canvas");
-    canvas.height = 260;
-	canvas.style.height = "240px";
+    canvas.height = 300;
+	canvas.style.height = "380px";
 
     plotWrapper.appendChild(title);
     plotWrapper.appendChild(canvas);
