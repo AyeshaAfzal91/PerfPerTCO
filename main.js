@@ -758,12 +758,12 @@ const DVFS_PARAMS_GPU = activeGPUData.map(gpu => {
     
     for (const benchmarkId of Object.keys(gpu.perf[workload])) {
       dvfsPerWorkload[workload][benchmarkId] = {
-        f_t: 0.9,
-        b1: 0.6,
-        c1: 0.4,
-        a2: 0.8,
-        b2: -0.3,
-        c2: 0.5
+        f_t: 1.8,
+        b1: 0.1,
+        c1: 70,
+        a2: 0.000055,
+        b2: 0.042,
+        c2: 71
       };
     }
   }
