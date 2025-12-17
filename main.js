@@ -1993,7 +1993,7 @@ function showPowerPlotsAllBenchmarks() {
 		  maintainAspectRatio: false,
 		  layout: {
 		    padding: {
-		      bottom: 40   // space for x-axis labels
+		      bottom: 50   // space for x-axis labels
 		    }
 		  },
 		  plugins: {
