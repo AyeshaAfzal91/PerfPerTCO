@@ -1904,7 +1904,17 @@ document.getElementById("showPowerPlotBtn").addEventListener("click", () => {
 
 function showPowerPlotsAllBenchmarks() {
   const container = document.getElementById("powerPlotContainer");
+  if (!container) {
+    console.error("powerPlotContainer not found in DOM");
+    return;
+  }
+
+  // --- NEW: side-by-side layout ---
   container.innerHTML = "";
+  container.style.display = "flex";
+  container.style.flexWrap = "wrap";
+  container.style.gap = "20px";
+  container.style.justifyContent = "center";
 
   const workload = document.getElementById("workload").value;
 
@@ -1912,10 +1922,24 @@ function showPowerPlotsAllBenchmarks() {
   const benchmarkIds = Object.keys(GPU_data[0].DVFS_PARAMS[workload]);
 
   benchmarkIds.forEach(benchmarkId => {
-    // Create canvas per benchmark
+
+    // --- NEW: wrapper per plot ---
+    const plotWrapper = document.createElement("div");
+    plotWrapper.style.width = "420px";
+    plotWrapper.style.border = "1px solid #ccc";
+    plotWrapper.style.padding = "10px";
+    plotWrapper.style.background = "#fafafa";
+
+    const title = document.createElement("h4");
+    title.textContent = `DVFS Power Model – ${workload}, Benchmark ${benchmarkId}`;
+    title.style.textAlign = "center";
+
     const canvas = document.createElement("canvas");
-    canvas.style.marginBottom = "40px";
-    container.appendChild(canvas);
+    canvas.height = 260;
+
+    plotWrapper.appendChild(title);
+    plotWrapper.appendChild(canvas);
+    container.appendChild(plotWrapper);
 
     const ctx = canvas.getContext("2d");
 
@@ -1935,6 +1959,7 @@ function showPowerPlotsAllBenchmarks() {
 
       for (let f = 0; f <= maxF; f += step) {
         freqs.push(Math.round(f));
+
         let power;
         if (f <= dvfs.f_t * f_ref) {
           power = dvfs.b1 * f + dvfs.c1;
@@ -1963,14 +1988,9 @@ function showPowerPlotsAllBenchmarks() {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          title: {
-            display: true,
-            text: `DVFS Power Model – ${workload}, Benchmark ${benchmarkId}`
-          },
-          legend: {
-            position: "top"
-          }
+          legend: { position: "top" }
         },
         scales: {
           x: {
@@ -1990,6 +2010,7 @@ function showPowerPlotsAllBenchmarks() {
     });
   });
 }
+
 
 	
 // ---------- Parameter Sensitivities Analysis (% Uncertainty Contribution) ----------
