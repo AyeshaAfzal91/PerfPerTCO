@@ -1264,23 +1264,10 @@ const barLayout = {
     side: 'right'
   },
 
-  legend: {
-    font: { size: 35 },
-    orientation: 'h',
-    y: -0.25
-  },
-
-  width: 1600,     // 🔥 CRITICAL
-  height: 1000,    // 🔥 CRITICAL
-  margin: { t: 100, b: 180, l: 150, r: 150 }
+  legend: { font: { size: 35 }, orientation: 'h', y: -0.2 },
+  height: 500,
+  margin: { t: 60, b: 100, l: 80, r: 80 }
 };
-
-Plotly.toImage('gpu-chart', {
-  format: 'svg',   // vector, perfect for LaTeX/Word
-  width: 1600,
-  height: 1000
-});
-
 
 // ---------- Plotly Bar Chart: Power per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
 const powerPerTCOTrace = {
