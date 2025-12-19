@@ -423,14 +423,14 @@
 
 <label for="eta_node" data-tooltip="Set the per-node efficiency factor. Reduces effective throughput per node due to interconnect/synchronization overhead.">
     Node Efficiency (η_node):
-    <input type="range" id="eta_node" min="0.8" max="1" value="0.99" step="0.001"
+    <input type="range" id="eta_node" min="0.95" max="1" value="0.9999" step="0.0001"
            oninput="updateValue('v_eta_node', this.value); updateAITip()">
     <span id="v_eta_node">0.99</span>
 </label>
 
 <label for="eta_gpu" data-tooltip="Set the per-GPU efficiency factor. Reduces effective throughput per GPU due to contention/overhead.">
     GPU Efficiency (η_gpu):
-    <input type="range" id="eta_gpu" min="0.95" max="1" value="0.998" step="0.001"
+    <input type="range" id="eta_gpu" min="0.95" max="1" value="1" step="0.0001"
            oninput="updateValue('v_eta_gpu', this.value); updateAITip()">
     <span id="v_eta_gpu">0.998</span>
 </label>
