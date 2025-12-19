@@ -1266,7 +1266,12 @@ const barLayout = {
 
   legend: { font: { size: 31 }, orientation: 'h', y: -0.1 },
   height: 500,
-  margin: { t: 60, b: 100, l: 80, r: 80 }
+margin: {
+  t: 80,
+  b: 200,   //  more space for X-axis ticks + legend
+  l: 180,
+  r: 180
+}
 };
 
 // ---------- Plotly Bar Chart: Power per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
