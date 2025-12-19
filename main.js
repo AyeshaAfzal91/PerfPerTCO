@@ -1162,9 +1162,9 @@ const tableHTML = `
 		  <td style="background-color:${getHeatmapColor(r.performance, maxTotalPerf)}">${r.performance.toExponential(2)}</td> 
       	  <td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toExponential(2)}</td>       
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">${r.total_cost.toExponential(2)}</td>
-          <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toExponential(2)}</td>
+          <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(2)}</td>
 		  <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco < 1 ? r.power_per_tco.toExponential(2) : r.power_per_tco.toFixed(1)}</td>
-          <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toFixed(1)}</td>
+          <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toExponential(2)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}</td>
         </tr>`).join('')}
     </tbody>
