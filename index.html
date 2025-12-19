@@ -113,9 +113,9 @@
     Fix Total Power (kW)
   </label>
   <div class="mode-slider" id="slider_power">
-    <input type="range" id="max_total_power" min="0" max="5000" value="80" step="5"
+    <input type="range" id="max_total_power" min="0" max="5000" value="70" step="5"
            oninput="updateValue('v_max_power', this.value); updateAITip()">
-    <span id="v_max_power">80</span>
+    <span id="v_max_power">70</span>
   </div>
 
   <!-- Fix Performance -->
@@ -124,9 +124,9 @@
     Fix Total Performance (ns/day *atoms)
   </label>
   <div class="mode-slider" id="slider_performance">
-    <input type="range" id="target_performance" min="1e6" max="1e10" value="1e9" step="1e6"
+    <input type="range" id="target_performance" min="1e6" max="1e10" value="8.5e9" step="1e6"
            oninput="updateValue('v_perf', this.value); updateAITip()">
-    <span id="v_perf">1e9</span>
+    <span id="v_perf">8.5e9</span>
   </div>
 
   <!-- Fix GPU Count -->
