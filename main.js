@@ -765,6 +765,13 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleGPUPowerSlider();
 });
 
+function multiGpuEfficiency(n_gpu, per_node) {
+    const n_nodes = n_gpu / per_node;
+    const eta_node = Math.pow(0.95, n_nodes - 1);   // inter-node overhead
+    const eta_gpu = Math.pow(0.98, n_gpu - 1);      // intra-node overhead
+    return eta_node * eta_gpu;
+}
+
 function calculate() {
 console.log("calculate: GPU_data used for calculation:", GPU_data.map(g => g.name));
 
@@ -953,7 +960,8 @@ if (!gpu.per_node || gpu.per_node <= 0) {
 
   const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
   const total_perf = perf * n_gpu;
-  const total_work = total_perf * Math.pow(n_gpu, 0.95)  * system_usage * lifetime / 24;
+  const eta_multiGPU = multiGpuEfficiency(n_gpu, per_node);
+  const total_work = total_perf * eta_multiGPU * system_usage * lifetime / 24;
   const perf_per_tco = total_work / used_budget;
   const total_power = power * n_gpu;
   const power_per_tco = total_power / used_budget;
@@ -2128,7 +2136,8 @@ ACTIVE_METRICS.forEach(metric => {
   		const perf = basePerf * (gpuFreq / gpu.f_ref);
         const total_perf = perf * n_gpu;
         const total_power = power * n_gpu;
-		const total_work = total_perf * Math.pow(n_gpu, 0.95)* system_usage * lifetime / 24;
+		const eta_multiGPU = multiGpuEfficiency(n_gpu, per_node);
+  		const total_work = total_perf * eta_multiGPU * system_usage * lifetime / 24;
         const W_gpu_total = (power * system_usage * lifetime * n_gpu) / 1000;
         const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
         const TCO = r.total_cost;
@@ -2219,7 +2228,8 @@ function evaluateMetric(params, gpuIndex, metricKey) {
 
   const total_perf = perf * n_gpu;
   const total_power = power * n_gpu;
-  const total_work = total_perf * Math.pow(n_gpu, 0.95) * system_usage * lifetime / 24;	
+  const eta_multiGPU = multiGpuEfficiency(n_gpu, per_node);
+  const total_work = total_perf * eta_multiGPU * system_usage * lifetime / 24;	
 
   switch (metricKey) {
     case "tco":
