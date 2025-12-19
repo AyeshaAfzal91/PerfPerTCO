@@ -1246,19 +1246,19 @@ const barLayout = {
   barmode: 'group',
 
   xaxis: {
-    title: { text: 'GPU Type', font: { size: 31 } },
+    title: { text: 'GPU Type', font: { size: 31 } ,  standoff: 50 },
     tickfont: { size: 31 },
     tickangle: -45
   },
 
   yaxis: {
-    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 31 } },
+    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 31 },  standoff: 50 },
     tickfont: { size: 31 },
     rangemode: 'tozero'
   },
 
   yaxis2: {
-    title: { text: '#GPUs', font: { size: 31, color: 'red' } },
+    title: { text: '#GPUs', font: { size: 31, color: 'red' },  standoff: 50 },
     tickfont: { size: 31, color: 'red' },
     overlaying: 'y',
     side: 'right'
