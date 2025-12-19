@@ -1116,7 +1116,7 @@ console.table(window.results.map(r => ({
   'TCO (€)': `€${Math.round(r.total_cost).toLocaleString()}`,
   'Work-per-TCO (ns/€ * atoms)': r.perf_per_tco.toFixed(1),
   'Power-per-TCO (W/€)': r.power_per_tco.toFixed(1), 
-  'Work-per-watt-per-TCO (ns/W/€ * atoms)': r.power_per_tco.toFixed(1), 
+  'Work-per-watt-per-TCO (ns/W/€ * atoms)': r.perf_per_watt_per_tco.toFixed(1), 
   'Baseline %': r.baseline_pct.toFixed(2)
 })));
 
