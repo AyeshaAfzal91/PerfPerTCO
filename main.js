@@ -1328,9 +1328,9 @@ const gpuTrace3 = {
 const perfWattLayout = {
   title: '',
   barmode: 'group',
-  xaxis: { title: 'GPU Type', tickangle: -45 },
-  yaxis: { title: 'Work-per-watt-per-TCO (ns/W/€ * atoms)', rangemode: 'tozero', showgrid: true },
-  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red' },
+  xaxis: { title: 'GPU Type', tickangle: -45, font: { size: 30 }},
+  yaxis: { title: 'Work-per-watt-per-TCO (ns/W/€ * atoms)', rangemode: 'tozero', showgrid: true, font: { size: 30 } },
+  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red', font: { size: 30 } },
   legend: { orientation: 'h', y: -0.2 },
   height: 500,
   margin: { t: 60, b: 100, l: 80, r: 80 }
