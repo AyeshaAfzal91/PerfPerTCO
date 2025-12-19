@@ -1025,12 +1025,7 @@ function getHeatmapColor(value, maxAbs) {
 }
 	
 // Sort the results by Performance per TCO
-//window.results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
-if (window.results.length === 0) {
-  console.warn("No valid GPUs available.");
-  document.getElementById("comparison-message-container").innerHTML = '<p>No valid GPUs found.</p>';
-  return;
-}
+window.results.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
 	
 // Filter out GPUs with zero Performance per TCO
 const nonzeroResults = window.results.filter(r => r.perf_per_tco > 0);
@@ -1041,9 +1036,8 @@ if (nonzeroResults.length === 0) {
   return;
 }
 
-//const sortedResults = [...nonzeroResults].sort((a, b) => b.perf_per_tco - a.perf_per_tco);
-//window.bestResult = sortedResults[0];
-nonzeroResults.sort((a, b) => b.perf_per_tco - a.perf_per_tco);
+const sortedResults = [...nonzeroResults].sort((a, b) => b.perf_per_tco - a.perf_per_tco);
+window.bestResult = sortedResults[0];
 	
 // Find max and min among valid entries
 const maxResult = nonzeroResults[0]; // Best GPU by Performance per TCO
