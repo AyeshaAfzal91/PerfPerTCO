@@ -1231,7 +1231,7 @@ const gpuTrace = {
   textposition: 'top center',
   textfont: {
     color: 'red',
-    size: 12
+    size: 30
   }
 };
 
@@ -1286,7 +1286,7 @@ const gpuTrace2 = {
   marker: { color: 'red', size: 6 },
   text: gpuCounts.map(String),
   textposition: 'top center',
-  textfont: { color: 'red', size: 12 }
+  textfont: { color: 'red', size: 30 }
 };
 
 const powerLayout = {
@@ -1321,7 +1321,7 @@ const gpuTrace3 = {
   marker: { color: 'red', size: 6 },
   text: gpuCounts.map(String),
   textposition: 'top center',
-  textfont: { color: 'red', size: 12 }
+  textfont: { color: 'red', size: 30 }
 };
 
 // Layout
