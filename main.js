@@ -1243,50 +1243,44 @@ const barLayout = {
     color: 'black'
   },
 
-  title: '',
   barmode: 'group',
 
   xaxis: {
-    title: {
-      text: 'GPU Type',
-      font: { size: 30 }
-    },
-    tickangle: -45,
-    tickfont: { size: 30 }
+    title: { text: 'GPU Type', font: { size: 30 } },
+    tickfont: { size: 30 },
+    tickangle: -45
   },
 
   yaxis: {
-    title: {
-      text: 'Work-per-TCO (ns/€ * atoms)',
-      font: { size: 30 }
-    },
+    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 30 } },
     tickfont: { size: 30 },
-    rangemode: 'tozero',
-    showgrid: true
+    rangemode: 'tozero'
   },
 
   yaxis2: {
-    title: {
-      text: '#GPUs',
-      font: { size: 30, color: 'red' }
-    },
+    title: { text: '#GPUs', font: { size: 30, color: 'red' } },
     tickfont: { size: 30, color: 'red' },
     overlaying: 'y',
-    side: 'right',
-    rangemode: 'tozero',
-    showgrid: false,
-    tickformat: ',d'
+    side: 'right'
   },
 
   legend: {
+    font: { size: 30 },
     orientation: 'h',
-    y: -0.25,
-    font: { size: 30 }
+    y: -0.25
   },
 
-  height: 700,
-  margin: { t: 80, b: 140, l: 120, r: 120 }
+  width: 1600,     // 🔥 CRITICAL
+  height: 1000,    // 🔥 CRITICAL
+  margin: { t: 100, b: 180, l: 150, r: 150 }
 };
+
+Plotly.toImage('gpu-chart', {
+  format: 'svg',   // vector, perfect for LaTeX/Word
+  width: 1600,
+  height: 1000
+});
+
 
 // ---------- Plotly Bar Chart: Power per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
 const powerPerTCOTrace = {
