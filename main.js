@@ -1264,13 +1264,13 @@ const barLayout = {
     side: 'right'
   },
 
-  legend: { font: { size: 31 }, orientation: 'h', y: -0.1 },
+  legend: { font: { size: 31 }, orientation: 'h', y: -0.15 },
   height: 500,
 margin: {
   t: 80,
-  b: 200,   //  more space for X-axis ticks + legend
-  l: 180,
-  r: 180
+  b: 140,   
+  l: 120,
+  r: 120
 }
 };
 
