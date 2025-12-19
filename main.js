@@ -765,11 +765,25 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleGPUPowerSlider();
 });
 
+function getEtaNode() {
+    return parseFloat(document.getElementById("eta_node").value) || 1;
+}
+
+function getEtaGPU() {
+    return parseFloat(document.getElementById("eta_gpu").value) || 1;
+}
+
 function multiGpuEfficiency(n_gpu, per_node) {
+    if (!n_gpu || !per_node) return 1; // fallback
+
     const n_nodes = n_gpu / per_node;
-    const eta_node = 1 - 0.01 * Math.log2(n_nodes);
-    const eta_gpu  = 1 - 0.002 * Math.log2(n_gpu);
-    return eta_node * eta_gpu; // now eta is numeric
+
+    // Read from sliders
+    const slider_eta_node = getEtaNode();
+    const slider_eta_gpu = getEtaGPU();
+
+    // Combined efficiency
+    return Math.pow(slider_eta_node, n_nodes - 1) * Math.pow(slider_eta_gpu, n_gpu - 1);
 }
 
 function calculate() {
