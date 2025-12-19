@@ -885,7 +885,7 @@ if (mode === "budget") {
 
     const gpu_cost_total = 
       gpu.cost * n_gpu +
-      ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * (W_gpu_total * n_gpu + W_node_baseline_total * n_gpu) / 1000) +
+      ((C_electricity - (F_heatreuse * C_heatreuseperkWh)) * PUE * (W_gpu_total * n_gpu + W_node_baseline_total * (n_gpu / per_node)) / 1000) +
       C_node_server * (n_gpu / per_node) +
       C_node_infra * (n_gpu / per_node) +
       C_node_facility * (n_gpu / per_node) +
