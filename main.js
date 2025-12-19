@@ -1231,7 +1231,7 @@ const gpuTrace = {
   textposition: 'top center',
   textfont: {
     color: 'red',
-    size: 35
+    size: 25
   }
 };
 
@@ -1239,32 +1239,32 @@ const gpuTrace = {
 const barLayout = {
   font: {
     family: 'Arial, sans-serif',
-    size: 35,
+    size: 25,
     color: 'black'
   },
 
   barmode: 'group',
 
   xaxis: {
-    title: { text: 'GPU Type', font: { size: 35 } },
-    tickfont: { size: 35 },
+    title: { text: 'GPU Type', font: { size: 25 } },
+    tickfont: { size: 25 },
     tickangle: -45
   },
 
   yaxis: {
-    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 35 } },
-    tickfont: { size: 35 },
+    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 25 } },
+    tickfont: { size: 25 },
     rangemode: 'tozero'
   },
 
   yaxis2: {
-    title: { text: '#GPUs', font: { size: 35, color: 'red' } },
-    tickfont: { size: 35, color: 'red' },
+    title: { text: '#GPUs', font: { size: 25, color: 'red' } },
+    tickfont: { size: 25, color: 'red' },
     overlaying: 'y',
     side: 'right'
   },
 
-  legend: { font: { size: 35 }, orientation: 'h', y: -0.2 },
+  legend: { font: { size: 25 }, orientation: 'h', y: -0.2 },
   height: 500,
   margin: { t: 60, b: 100, l: 80, r: 80 }
 };
