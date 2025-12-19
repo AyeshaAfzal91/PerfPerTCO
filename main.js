@@ -767,9 +767,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function multiGpuEfficiency(n_gpu, per_node) {
     const n_nodes = n_gpu / per_node;
-    const eta_node = Math.pow(0.95, n_nodes - 1);   // inter-node overhead
-    const eta_gpu = Math.pow(0.98, n_gpu - 1);      // intra-node overhead
-    return eta_node * eta_gpu;
+    const eta_node = 1 - 0.01 * Math.log2(n_nodes);
+    const eta_gpu  = 1 - 0.002 * Math.log2(n_gpu);
+    return eta_node * eta_gpu; // now eta is numeric
 }
 
 function calculate() {
