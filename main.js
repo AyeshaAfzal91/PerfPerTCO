@@ -2128,7 +2128,7 @@ ACTIVE_METRICS.forEach(metric => {
   		const perf = basePerf * (gpuFreq / gpu.f_ref);
         const total_perf = perf * n_gpu;
         const total_power = power * n_gpu;
-		const total_work = total_perf * system_usage * lifetime / 24;
+		const total_work = total_perf * Math.pow(n_gpu, 0.95)* system_usage * lifetime / 24;
         const W_gpu_total = (power * system_usage * lifetime * n_gpu) / 1000;
         const W_node_total = (W_node_baseline * system_usage * lifetime * n_nodes) / 1000;
         const TCO = r.total_cost;
@@ -2219,7 +2219,7 @@ function evaluateMetric(params, gpuIndex, metricKey) {
 
   const total_perf = perf * n_gpu;
   const total_power = power * n_gpu;
-  const total_work = total_perf * system_usage * lifetime / 24;	
+  const total_work = total_perf * Math.pow(n_gpu, 0.95) * system_usage * lifetime / 24;	
 
   switch (metricKey) {
     case "tco":
