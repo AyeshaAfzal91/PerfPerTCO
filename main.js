@@ -1237,32 +1237,55 @@ const gpuTrace = {
 
 // Layout with double Y axes
 const barLayout = {
+  font: {
+    family: 'Arial, sans-serif',
+    size: 30,
+    color: 'black'
+  },
+
   title: '',
   barmode: 'group',
+
   xaxis: {
-    title: 'GPU Type',
-    tickangle: -45
+    title: {
+      text: 'GPU Type',
+      font: { size: 30 }
+    },
+    tickangle: -45,
+    tickfont: { size: 30 }
   },
+
   yaxis: {
-    title: 'Work-per-TCO (ns/€ * atoms)',
+    title: {
+      text: 'Work-per-TCO (ns/€ * atoms)',
+      font: { size: 30 }
+    },
+    tickfont: { size: 30 },
     rangemode: 'tozero',
     showgrid: true
   },
+
   yaxis2: {
-    title: '#GPUs',
+    title: {
+      text: '#GPUs',
+      font: { size: 30, color: 'red' }
+    },
+    tickfont: { size: 30, color: 'red' },
     overlaying: 'y',
     side: 'right',
     rangemode: 'tozero',
     showgrid: false,
-    tickformat: ',d',
-    color: 'red'
+    tickformat: ',d'
   },
+
   legend: {
     orientation: 'h',
-    y: -0.2
+    y: -0.25,
+    font: { size: 30 }
   },
-  height: 500,
-  margin: { t: 60, b: 100, l: 80, r: 80 }
+
+  height: 700,
+  margin: { t: 80, b: 140, l: 120, r: 120 }
 };
 
 // ---------- Plotly Bar Chart: Power per TCO (Left Y-Axis) + #GPUs (Right Y-Axis) ----------
