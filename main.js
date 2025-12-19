@@ -953,7 +953,7 @@ if (!gpu.per_node || gpu.per_node <= 0) {
 
   const baseline_pct = 100 * (cap_baseline + op_baseline) / used_budget;
   const total_perf = perf * n_gpu;
-  const total_work = total_perf * system_usage * lifetime / 24;
+  const total_work = total_perf * Math.pow(n_gpu, 0.95)  * system_usage * lifetime / 24;
   const perf_per_tco = total_work / used_budget;
   const total_power = power * n_gpu;
   const power_per_tco = total_power / used_budget;
