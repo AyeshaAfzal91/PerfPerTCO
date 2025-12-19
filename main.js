@@ -1176,7 +1176,7 @@ const tableHTML = `
 		  <td style="background-color:${getHeatmapColor(r.performance, maxTotalPerf)}">${r.performance.toExponential(2)}</td> 
       	  <td style="background-color:${getHeatmapColor(r.power, maxTotalPower)}">${r.power.toExponential(2)}</td>       
           <td style="background-color:${getHeatmapColor(r.total_cost, maxTotalCost)}">${r.total_cost.toExponential(2)}</td>
-          <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toFixed(2)}</td>
+          <td style="background-color:${getHeatmapColor(r.perf_per_tco, maxPerfPerTCO)}">${r.perf_per_tco.toExponential(2)}</td>
 		  <td style="background-color:${getHeatmapColor(r.power_per_tco, maxPowerPerTCO)}">${r.power_per_tco < 1 ? r.power_per_tco.toExponential(2) : r.power_per_tco.toFixed(1)}</td>
           <td style="background-color:${getHeatmapColor(r.perf_per_watt_per_tco, maxPerfPerWattPerTCO)}">${r.perf_per_watt_per_tco.toExponential(2)}</td>
           <td style="background-color:${getHeatmapColor(r.baseline_pct, maxBaselinePct)}">${(r.baseline_pct).toFixed(2)}</td>
@@ -1246,19 +1246,19 @@ const barLayout = {
   barmode: 'group',
 
   xaxis: {
-    title: { text: 'GPU Type', font: { size: 31 } ,  standoff: 50 },
+    title: { text: 'GPU Type', font: { size: 31 } ,  standoff: 100 },
     tickfont: { size: 31 },
     tickangle: -45
   },
 
   yaxis: {
-    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 31 },  standoff: 50 },
+    title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 31 },  standoff: 100 },
     tickfont: { size: 31 },
     rangemode: 'tozero'
   },
 
   yaxis2: {
-    title: { text: '#GPUs', font: { size: 31, color: 'red' },  standoff: 50 },
+    title: { text: '#GPUs', font: { size: 31, color: 'red' },  standoff: 100 },
     tickfont: { size: 31, color: 'red' },
     overlaying: 'y',
     side: 'right'
