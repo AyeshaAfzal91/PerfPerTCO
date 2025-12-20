@@ -143,10 +143,13 @@ label {
 /* Charts and visual elements */
 .chart-wrapper {
   display: flex;
-  justify-content: center;  /* Horizontal center */
-  align-items: center;      /* Vertical center */
-  height: 100vh;            /* Full viewport height */
+  justify-content: center;
+  align-items: flex-start; /* align to top */
+  height: auto;             /* let chart define its height */
+  min-height: 600px;        /* optional */
+  padding: 20px;            /* spacing for colorbars */
 }
+
 
 .main-chart-title, .chart-title {
   text-align: center;  /* Center the main title */
@@ -157,12 +160,19 @@ label {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Clean font */
 }
 
-#gpu-chart,
-#sensitivityHeatmap {
+#gpu-chart {
   max-width: 95%; /* Increased from 60% to give the 3 charts room */
   margin: 0 auto;
   display: block;
 }
+
+#sensitivityHeatmap {
+  width: 100%;       /* let Plotly fill container */
+  max-width: 1400px; /* optional, limit total width */
+  margin: 0 auto;
+  display: block;
+}
+
 
 #stacked-tco-chart {
   max-width: 70%;
