@@ -2590,37 +2590,37 @@ const heatmapLayout = {
     font: { size: fontSize },
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
     height: 600,
-    width: 1400,
-    margin: { t: 120, l: 220, r: 320 }, // <- bigger left margin
+    width: 1500,            // increase total width
+    margin: { t: 120, l: 250, r: 400 },  // bigger left & right margins
 
     yaxis: { showticklabels: true, tickfont: { size: fontSize } },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
-	
-	coloraxisElasticity: {
-  cmin: -zMaxElasticity.tco,
-  cmax:  zMaxElasticity.tco,
-  colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-  colorbar: {
-    title: { text: "Elasticity (%)", font: { size: fontSize } },
-    x: 1.05,
-    xanchor: "left",
-    y: 0.5,
-    len: 0.85,              // ✅ same as SM
-    tickfont: { size: fontSize }
-  }
-},
 
+    // Elasticity colorbar (left)
+    coloraxisElasticity: {
+        cmin: -zMaxElasticity.tco,
+        cmax: zMaxElasticity.tco,
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        colorbar: {
+            title: { text: "Elasticity (%)", font: { size: fontSize } },
+            x: 1.05,          // slightly outside the plot
+            xanchor: "center", // center title
+            y: 0.5,
+            len: 0.85,
+            tickfont: { size: fontSize }
+        }
+    },
 
-    // Sobol + Monte Carlo colorbar
+    // Sobol + Monte Carlo colorbar (right)
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
             title: { text: "Sensitivity (%)", font: { size: fontSize } },
-            x: 1.28,
-            xanchor: "left",
+            x: 1.38,          // move far right
+            xanchor: "center", // center title
             y: 0.5,
             len: 0.85,
             tickfont: { size: fontSize }
@@ -2634,6 +2634,7 @@ const heatmapLayout = {
         { text: "Parameters", xref: "paper", yref: "paper", x: -0.02, y: 0.5, textangle: -90, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
     ]
 };
+
 
 // Plot heatmaps
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout, {
