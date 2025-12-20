@@ -2543,7 +2543,7 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         zmin: -zMaxElasticity[metric],
         zmax: zMaxElasticity[metric],
-        colorbar: { title: "Elasticity (%)", x: 0.97, len: 0.9, y: 0.5 },
+        coloraxis: "coloraxisElasticity",
         visible: metric === "tco",
         name: `Elasticity-${metric}`,
         xaxis: "x1",
@@ -2609,6 +2609,20 @@ const heatmapLayout = {
             tickfont: { size: fontSize }
         }
     },
+	coloraxisElasticity: {
+  cmin: -zMaxElasticity.tco,
+  cmax:  zMaxElasticity.tco,
+  colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+  colorbar: {
+    title: { text: "Elasticity (%)", font: { size: fontSize } },
+    x: 1.05,
+    xanchor: "left",
+    y: 0.5,
+    len: 0.85,              // ✅ same as SM
+    tickfont: { size: fontSize }
+  }
+},
+
 
     // Sobol + Monte Carlo colorbar
     coloraxisSM: {
