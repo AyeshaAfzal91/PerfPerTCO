@@ -3735,9 +3735,10 @@ async function restoreStateWhenReady(state){
         // ------------------------------
         // FORCE PLOT REBUILD
         // ------------------------------
-        if (typeof renderPerfPowerHeatmaps === "function") {
-            renderPerfPowerHeatmaps();
-        }
+        if (typeof runAllCalculations === "function") {
+    runAllCalculations(); // this must rebuild plots
+}
+
 
         console.log("✅ State restored successfully.");
 
