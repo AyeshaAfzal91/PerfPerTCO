@@ -2591,24 +2591,12 @@ const heatmapLayout = {
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
     height: 600,
     width: 1400,
-    margin: { t: 120, l: 120, r: 220 }, // more right margin for colorbars
+    margin: { t: 120, l: 220, r: 320 }, // <- bigger left margin
 
     yaxis: { showticklabels: true, tickfont: { size: fontSize } },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
-
-    // Elasticity colorbar
-    coloraxis: {
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: {
-            title: { text: "Elasticity (%)", font: { size: fontSize } },
-            x: 1.05,
-            xanchor: "left",
-            y: 0.5,
-            len: 0.85,
-            tickfont: { size: fontSize }
-        }
-    },
+	
 	coloraxisElasticity: {
   cmin: -zMaxElasticity.tco,
   cmax:  zMaxElasticity.tco,
@@ -2631,7 +2619,7 @@ const heatmapLayout = {
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
             title: { text: "Sensitivity (%)", font: { size: fontSize } },
-            x: 1.22,
+            x: 1.28,
             xanchor: "left",
             y: 0.5,
             len: 0.85,
@@ -2642,7 +2630,8 @@ const heatmapLayout = {
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
         { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
-        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } }
+        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
+        { text: "Parameters", xref: "paper", yref: "paper", x: -0.02, y: 0.5, textangle: -90, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
     ]
 };
 
