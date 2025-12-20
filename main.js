@@ -1553,8 +1553,8 @@ document.getElementById('stacked-tco-chart').parentElement.insertBefore(download
 document.getElementById('download-btn').addEventListener('click', () => {
   Plotly.toImage('stacked-tco-chart', {
     format: 'png',  // You can change this to 'svg' or 'jpeg' if needed
-    height: 800,    // Set height for high resolution
-    width: 1200,    // Set width for high resolution
+    height: 400,    // Set height for high resolution
+    width: 1400,    // Set width for high resolution
     scale: 2        // Increase scale for higher resolution
   }).then(function (url) {
     if (url) {
