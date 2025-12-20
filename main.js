@@ -2810,50 +2810,57 @@ benchmarkIds.pop();
     </div>
   `;
 
-  const axisFont = {
+ const axisFont = {
     titlefont: { size: 31 },
     tickfont: { size: 31 }
-  };
+};
 
-  Plotly.newPlot(
+Plotly.newPlot(
     "perf-heatmap",
     [{
-      z: perfData,
-      x: gpuNames,
-      y: benchmarkIds,
-      type: "heatmap",
-      colorscale: "Viridis",
-      colorbar: { title: "ns/day * atom" }
+        z: perfData,
+        x: gpuNames,
+        y: benchmarkIds,
+        type: "heatmap",
+        colorscale: "Viridis",
+        colorbar: {
+            title: { text: "ns/day * atom", font: { size: 31 } },
+            tickfont: { size: 31 }
+        }
     }],
     {
-      title: `${workload} Performance (ns/day)`,
-      xaxis: { title: "GPU Type", ...axisFont },
-      yaxis: { title: "Benchmark ID", ...axisFont }
+        title: { text: `${workload} Performance (ns/day)`, font: { size: 31 } },
+        xaxis: { title: "GPU Type", ...axisFont },
+        yaxis: { title: "Benchmark ID", ...axisFont },
+        height: 1200,
+        width: 1200,
+        margin: { t: 80, b: 100, l: 120, r: 40 }
     }
-  );
-  const layoutBase = {
-  height: 1200,   // increase heatmap height here
-  width: 1200, 
-  margin: { t: 80, b: 100, l: 120, r: 40 },
-};
-	
-  Plotly.newPlot(
+);
+
+Plotly.newPlot(
     "power-heatmap",
     [{
-      z: powerData,
-      x: gpuNames,
-      y: benchmarkIds,
-      type: "heatmap",
-      colorscale: "YlOrRd",
-      colorbar: { title: "Watts" }
+        z: powerData,
+        x: gpuNames,
+        y: benchmarkIds,
+        type: "heatmap",
+        colorscale: "YlOrRd",
+        colorbar: {
+            title: { text: "Watts", font: { size: 31 } },
+            tickfont: { size: 31 }
+        }
     }],
     {
-      title: `${workload} Power Consumption (W)`,
-      xaxis: { title: "GPU Type", ...axisFont },
-      yaxis: { title: "Benchmark ID", ...axisFont }
+        title: { text: `${workload} Power Consumption (W)`, font: { size: 31 } },
+        xaxis: { title: "GPU Type", ...axisFont },
+        yaxis: { title: "Benchmark ID", ...axisFont },
+        height: 1200,
+        width: 1200,
+        margin: { t: 80, b: 100, l: 120, r: 40 }
     }
-  );
-}
+);
+
 
 
 function showFormula() {
