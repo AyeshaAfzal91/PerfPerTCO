@@ -2759,10 +2759,24 @@ function downloadCSV(data, filename) {
 // Heatmaps: Benchmark × GPU Performance and Power
 function renderPerfPowerHeatmaps() {
   const workload = document.getElementById("workload").value;
-  const gpuNames = GPU_data.map(g => g.name);
-  const benchmarkIds = Array.from(new Set(
-    GPU_data.flatMap(gpu => Object.keys(gpu.perf[workload] || {}))
-  )).map(Number).sort((a, b) => a - b);
+
+  // 2) don't take GH200 if AMBER is used
+  const filteredGPUData =
+    workload === "AMBER"
+      ? GPU_data.filter(g => !g.name.includes("GH200"))
+      : GPU_data;
+
+  const gpuNames = filteredGPUData.map(g => g.name);
+
+  const benchmarkIds = Array.from(
+    new Set(
+      filteredGPUData.flatMap(gpu =>
+        Object.keys(gpu.perf[workload] || {})
+      )
+    )
+  )
+    .map(Number)
+    .sort((a, b) => a - b);
 
   const perfData = [];
   const powerData = [];
@@ -2771,9 +2785,9 @@ function renderPerfPowerHeatmaps() {
     const perfRow = [];
     const powerRow = [];
 
-    for (const gpu of GPU_data) {
-      const perf = gpu.perf[workload][id] || 0;
-      const power = gpu.power[workload][id] || 0;
+    for (const gpu of filteredGPUData) {
+      const perf = gpu.perf[workload]?.[id] || 0;
+      const power = gpu.power[workload]?.[id] || 0;
       perfRow.push(perf);
       powerRow.push(power);
     }
@@ -2790,31 +2804,44 @@ function renderPerfPowerHeatmaps() {
     </div>
   `;
 
-  Plotly.newPlot("perf-heatmap", [{
-    z: perfData,
-    x: gpuNames,
-    y: benchmarkIds,
-    type: "heatmap",
-    colorscale: "Viridis",
-    colorbar: { title: "ns/day * atom" }
-  }], {
-    title: `${workload} Performance (ns/day)`,
-    xaxis: { title: "GPU Type" },
-    yaxis: { title: "Benchmark ID" }
-  });
+  const axisFont = {
+    titlefont: { size: 31 },
+    tickfont: { size: 31 }
+  };
 
-  Plotly.newPlot("power-heatmap", [{
-    z: powerData,
-    x: gpuNames,
-    y: benchmarkIds,
-    type: "heatmap",
-    colorscale: "YlOrRd",
-    colorbar: { title: "Watts" }
-  }], {
-    title: `${workload} Power Consumption (W)`,
-    xaxis: { title: "GPU Type" },
-    yaxis: { title: "Benchmark ID" }
-  });
+  Plotly.newPlot(
+    "perf-heatmap",
+    [{
+      z: perfData,
+      x: gpuNames,
+      y: benchmarkIds,
+      type: "heatmap",
+      colorscale: "Viridis",
+      colorbar: { title: "ns/day * atom" }
+    }],
+    {
+      title: `${workload} Performance (ns/day)`,
+      xaxis: { title: "GPU Type", ...axisFont },
+      yaxis: { title: "Benchmark ID", ...axisFont }
+    }
+  );
+
+  Plotly.newPlot(
+    "power-heatmap",
+    [{
+      z: powerData,
+      x: gpuNames,
+      y: benchmarkIds,
+      type: "heatmap",
+      colorscale: "YlOrRd",
+      colorbar: { title: "Watts" }
+    }],
+    {
+      title: `${workload} Power Consumption (W)`,
+      xaxis: { title: "GPU Type", ...axisFont },
+      yaxis: { title: "Benchmark ID", ...axisFont }
+    }
+  );
 }
 
 
