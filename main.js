@@ -2509,61 +2509,6 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-// ---------- Helper Function ----------
-const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
-const flatten2D = arr => Array.isArray(arr) ? arr.reduce((acc, row) => acc.concat(row), []) : [];
-
-// ---------- Prepare Heatmap Data ----------
-// Elasticity: keep as before (Transposed: Parameters x GPUs)
-const zElasticity = {}; // store per metric
-
-ACTIVE_METRICS.forEach(metric => {
-    zElasticity[metric] = allElasticities[metric] || [[]]; // fallback to empty 2D array
-});
-
-// Sobol
-const zSobol = {};
-
-ACTIVE_METRICS.forEach(metric => {
-  const raw = sobolIndicesOptimized[metric]; // [GPU][parameter]
-
-  if (!Array.isArray(raw) || !raw.length) {
-    zSobol[metric] = [];
-    return;
-  }
-
-  // Normalize per parameter across GPUs
-  const normalized = normalizeAcrossDimension(raw); // [parameter][GPU]
-
-  // CRITICAL: convert Float64Array → Array
-  zSobol[metric] = normalized.map(row => Array.from(row));
-});
-
-console.log(
-  "Sobol raw max (TCO):",
-  Math.max(...flatten2D(sobolIndicesOptimized.tco))
-);
-
-console.log(
-  "Sobol heatmap max (TCO):",
-  Math.max(...flatten2D(zSobol.tco))
-);
-
-// Monte Carlo
-const zMonteCarlo = {};
-ACTIVE_METRICS.forEach(metric => {
-    zMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloParamResults[metric] || [[]]));
-});
-
-// Compute global max for scaling per metric
-const zMaxElasticity = {};
-ACTIVE_METRICS.forEach(metric => {
-    zMaxElasticity[metric] = Math.max(...flatten2D(zElasticity[metric]).map(Math.abs), 1);
-});
-const zMaxSobol = 100; // Normalized to 100
-const zMaxMonteCarlo = 100; // Normalized to 100
-
-// ---------- Heatmap Traces ----------
 const heatmapData = []; // declare first
 const metricTitles = {
   tco: "TCO",
@@ -2573,69 +2518,69 @@ const metricTitles = {
 };
 const metricSelector = document.getElementById("metricSelector");
 ACTIVE_METRICS.forEach(metric => {
-    const opt = document.createElement("option");
-    opt.value = metric;
-    opt.text = metricTitles[metric];
-    metricSelector.appendChild(opt);
+    const opt = document.createElement("option");
+    opt.value = metric;
+    opt.text = metricTitles[metric];
+    metricSelector.appendChild(opt);
 });
 metricSelector.addEventListener("change", e => {
-    const metric = e.target.value;
-    const visibility = heatmapData.map((_, i) => {
-        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
-    });
-    Plotly.update("sensitivityHeatmaps", { visible: visibility });
+    const metric = e.target.value;
+    const visibility = heatmapData.map((_, i) => {
+        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
+    });
+    Plotly.update("sensitivityHeatmaps", { visible: visibility });
 });
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
-    const xLabels = window.results.map(r => r.name);
+    const xLabels = window.results.map(r => r.name);
 
-    // Elasticity
-    heatmapData.push({
-        z: zElasticity[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: -zMaxElasticity[metric],
-        zmax: zMaxElasticity[metric],
-        colorbar: { title: "Elasticity (%)", x: 0.97, len: 0.9, y: 0.5 },
-        visible: metric === "tco",
-        name: `Elasticity-${metric}`,
-        xaxis: "x1",
-        yaxis: "y1"
-    });
+    // Elasticity
+    heatmapData.push({
+        z: zElasticity[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: -zMaxElasticity[metric],
+        zmax: zMaxElasticity[metric],
+        colorbar: { title: "Elasticity (%)", x: 0.97, len: 0.9, y: 0.5 },
+        visible: metric === "tco",
+        name: `Elasticity-${metric}`,
+        xaxis: "x1",
+        yaxis: "y1"
+    });
 
-    // Sobol (shared colorbar)
-    heatmapData.push({
-        z: zSobol[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: 0,
-        zmax: 100,
-        coloraxis: "coloraxisSM",
-        visible: metric === "tco",
-        name: `Sobol-${metric}`,
-        xaxis: "x2",
-        yaxis: "y2"
-    });
+    // Sobol (shared colorbar)
+    heatmapData.push({
+        z: zSobol[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: 0,
+        zmax: 100,
+        coloraxis: "coloraxisSM",
+        visible: metric === "tco",
+        name: `Sobol-${metric}`,
+        xaxis: "x2",
+        yaxis: "y2"
+    });
 
-    // Monte Carlo (shared colorbar)
-    heatmapData.push({
-        z: zMonteCarlo[metric],
-        x: xLabels,
-        y: elasticityLabels,
-        type: "heatmap",
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        zmin: 0,
-        zmax: 100,
-        coloraxis: "coloraxisSM",
-        visible: metric === "tco",
-        name: `MC-${metric}`,
-        xaxis: "x3",
-        yaxis: "y3"
-    });
+    // Monte Carlo (shared colorbar)
+    heatmapData.push({
+        z: zMonteCarlo[metric],
+        x: xLabels,
+        y: elasticityLabels,
+        type: "heatmap",
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        zmin: 0,
+        zmax: 100,
+        coloraxis: "coloraxisSM",
+        visible: metric === "tco",
+        name: `MC-${metric}`,
+        xaxis: "x3",
+        yaxis: "y3"
+    });
 });
 
 // ---------- Layout ----------
@@ -2702,6 +2647,7 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
         filename: 'sensitivity_heatmaps'
     });
 });
+
 
 
 
