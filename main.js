@@ -2768,15 +2768,18 @@ function renderPerfPowerHeatmaps() {
 
   const gpuNames = filteredGPUData.map(g => g.name);
 
-  const benchmarkIds = Array.from(
-    new Set(
-      filteredGPUData.flatMap(gpu =>
-        Object.keys(gpu.perf[workload] || {})
-      )
+  let benchmarkIds = Array.from(
+  new Set(
+    filteredGPUData.flatMap(gpu =>
+      Object.keys(gpu.perf[workload] || {})
     )
   )
-    .map(Number)
-    .sort((a, b) => a - b);
+)
+  .map(Number)
+  .sort((a, b) => a - b);
+
+// don't print the last benchmark
+benchmarkIds.pop();
 
   const perfData = [];
   const powerData = [];
