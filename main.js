@@ -2584,50 +2584,47 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 });
 
 // ---------- Layout ----------
-const fontSize = 22; // global font size
+const fontSize = 20;
 
 const heatmapLayout = {
     font: { size: fontSize },
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
     height: 600,
-    width: 1450,
-    margin: { t: 120, l: 160, r: 200 }, // increased right margin for colorbars
-    autosize: true,
+    width: 1400,
+    margin: { t: 120, l: 120, r: 220 }, // more right margin for colorbars
 
-    // Y-axis tick labels
     yaxis: { showticklabels: true, tickfont: { size: fontSize } },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
     // Elasticity colorbar
     coloraxis: {
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
             title: { text: "Elasticity (%)", font: { size: fontSize } },
-            x: 1.12,            // move fully to the right
+            x: 1.05,
             xanchor: "left",
-            len: 0.85,          // same length as second colorbar
             y: 0.5,
+            len: 0.85,
             tickfont: { size: fontSize }
-        },
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]]
+        }
     },
 
-    // Sobol + Monte Carlo shared colorbar
+    // Sobol + Monte Carlo colorbar
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
             title: { text: "Sensitivity (%)", font: { size: fontSize } },
-            x: 1.28,            // move to the right, separate from Elasticity
+            x: 1.22,
             xanchor: "left",
-            len: 0.85,
             y: 0.5,
+            len: 0.85,
             tickfont: { size: fontSize }
         }
     },
 
-    // Annotations (titles above each heatmap)
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
         { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
@@ -2650,6 +2647,7 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
         filename: 'sensitivity_heatmaps'
     });
 });
+
 
 
 
