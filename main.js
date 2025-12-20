@@ -3695,38 +3695,53 @@ async function restoreStateWhenReady(state){
     if (!state) return;
 
     try {
-        // Wait until sliders exist AND GPU_data is ready AND at least one calculation function exists
+        // Wait for UI + calculation functions ONLY
         await waitFor(() => {
             const sliderExists = document.querySelector('input[type="range"]');
-            
-            // **REFINEMENT HERE:** Check if GPU_data is an Array AND has elements
-            const gpuDataReady = Array.isArray(window.GPU_data) && window.GPU_data.length > 0;
-            
-            const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
-            
-            // Note the use of gpuDataReady in the return condition
-            return sliderExists && gpuDataReady && calcReady; 
-        }, 7000); // 7s timeout
+            const calcReady =
+                typeof calculateResults === "function" ||
+                typeof calculate === "function" ||
+                typeof runAllCalculations === "function";
 
-        // ... (rest of the function remains the same: applyInputsFromState, etc.)
-        
+            return sliderExists && calcReady;
+        }, 7000);
+
+        // ------------------------------
+        // RESTORE GPU DATA FIRST
+        // ------------------------------
+        if (state.gpu_data) {
+            window.GPU_data = structuredClone(state.gpu_data);
+        }
+
+        if (state.active_gpu_data) {
+            window.activeGPUData = structuredClone(state.active_gpu_data);
+        }
+
+        // ------------------------------
+        // APPLY INPUTS
+        // ------------------------------
         applyInputsFromState(state);
 
-        // Extra delay for async plot/table rendering
+        // Allow DOM + async listeners to settle
         await new Promise(r => setTimeout(r, 200));
 
-        // Trigger calculation
+        // ------------------------------
+        // RUN CALCULATIONS
+        // ------------------------------
         if (typeof calculateResults === "function") calculateResults();
         else if (typeof calculate === "function") calculate();
         else if (typeof runAllCalculations === "function") runAllCalculations();
-        else {
-            const calcBtn = document.getElementById('calculate') || document.getElementById('run-calc');
-            if (calcBtn) calcBtn.click();
+
+        // ------------------------------
+        // FORCE PLOT REBUILD
+        // ------------------------------
+        if (typeof renderPerfPowerHeatmaps === "function") {
+            renderPerfPowerHeatmaps();
         }
 
         console.log("✅ State restored successfully.");
 
-    } catch(e){
+    } catch (e) {
         console.warn("restoreStateWhenReady() failed:", e);
     }
 }
