@@ -2585,49 +2585,57 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 
 // ---------- Layout ----------
 const heatmapLayout = {
-    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
-    height: 600,
-    width: 1450,
-    margin: { t: 80, l: 160, r: 160 }, // center plots
+    font: { size: 31 }, // <-- default font for axes and titles
+    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
+    height: 600,
+    width: 1450,
+    margin: { t: 120, l: 200, r: 200 }, // increase margins for big text
 
-    yaxis: { showticklabels: true },
-    yaxis2: { showticklabels: false },
-    yaxis3: { showticklabels: false },
+    yaxis: { showticklabels: true, tickfont: { size: 31 } },
+    yaxis2: { showticklabels: false },
+    yaxis3: { showticklabels: false },
 
-    // Elasticity colorbar
-    coloraxis: {
-        colorbar: {
-            title: "Elasticity (%)",
-            x: 1.12,
-            xanchor: "left",
-            len: 0.9,
-            y: 0.5
-        }
-    },
+    coloraxis: {
+        colorbar: {
+            title: { text: "Elasticity (%)", font: { size: 31 } },
+            x: 1.12,
+            xanchor: "left",
+            len: 0.9,
+            y: 0.5
+        }
+    },
 
-    // Shared Sobol + Monte Carlo colorbar
-    coloraxisSM: {
-        cmin: 0,
-        cmax: 100,
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: {
-            title: "Sensitivity (%)", // give explicit title
-            x: 1.28,                 // move slightly right
-            xanchor: "left",
-            len: 0.85,                // same as Elasticity
-            y: 0.5
-        }
-    },
+    coloraxisSM: {
+        cmin: 0,
+        cmax: 100,
+        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
+        colorbar: {
+            title: { text: "Sensitivity (%)", font: { size: 31 } },
+            x: 1.28,
+            xanchor: "left",
+            len: 0.85,
+            y: 0.5,
+            tickfont: { size: 31 }
+        }
+    },
 
-    annotations: [
-        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } },
-        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 14, weight: "bold" } }
-    ]
+    annotations: [
+        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: 31, weight: "bold" } },
+        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: 31, weight: "bold" } },
+        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: 31, weight: "bold" } }
+    ]
 };
 
-
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout);
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+    Plotly.downloadImage(document.getElementById("sensitivityHeatmaps"), {
+        format: 'png',
+        width: 1600,
+        height: 900,
+        filename: 'sensitivity_heatmaps'
+    });
+});
 
 
 // ---------- Tornado Charts (also in %) (with metric toggle) ----------
