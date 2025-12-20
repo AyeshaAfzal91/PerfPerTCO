@@ -2829,7 +2829,7 @@ benchmarkIds.pop();
     }
   );
   const layoutBase = {
-  height: 800,   // increase heatmap height here
+  height: 1200,   // increase heatmap height here
   margin: { t: 80, b: 100, l: 120, r: 40 },
 };
 	
