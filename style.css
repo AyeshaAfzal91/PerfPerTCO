@@ -159,9 +159,9 @@ label {
 
 #gpu-chart,
 #sensitivityHeatmap {
-  max-width: 60%;
-  margin: 0 auto;  /* Center horizontally */
-  display: block;  /* Treat as block element */
+  max-width: 95%; /* Increased from 60% to give the 3 charts room */
+  margin: 0 auto;
+  display: block;
 }
 
 #stacked-tco-chart {
@@ -240,10 +240,6 @@ label {
     /* Chart Wrappers */
     .chart-wrapper {
         height: 70vh;
-    }
-
-    #gpu-chart, #sensitivityHeatmap {
-        max-width: 80%;
     }
 
     #stacked-tco-chart {
