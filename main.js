@@ -2606,7 +2606,7 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
 });
 
 // ---------- Layout ----------
-const fontSize = 18; // slightly smaller for 15 labels
+const fontSize = 28; // slightly smaller for 15 labels
 const heatmapLayout = {
     font: { size: fontSize },
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.08 },
