@@ -1474,9 +1474,9 @@ const tcoLayout = {
 
   legend: {
     orientation: 'v',
-    x: 0.5,
-    y: -0.25,
-    xanchor: 'right',
+    x: 1.02,          
+    y: 1,      
+    xanchor: 'left',
     yanchor: 'top',
     font: { size: 31 }     // ✅ legend text size
   },
