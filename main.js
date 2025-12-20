@@ -2517,22 +2517,22 @@ const metricTitles = {
   power_per_tco: "Power-per-TCO",
   perf_per_watt_per_tco: "Work-per-Watt-per-TCO"
 };
-const elasticityLabelsSymbols = [
-  "C_cap (€)",          // Capital cost
-  "C_op (€)",           // Operational cost
-  "C_var (€)",          // Variable operational cost
-  "C_base (€)",         // Baseline operational cost
-  "W_base (W)",         // Node baseline power
-  "W_GPU (W)",          // GPU power
-  "U_sys (hrs/year)",   // System usage
+const elasticityLabelsSymbols = [ 
+  "C_ineff (€)",          // Capital cost
+  "C_sub (€)",           // Operational cost
+  "C_dep (€)",          // Variable operational cost
+  "W_base (W)",         // Baseline operational cost
+  "T_life (year)",         // Node baseline power
+  "U_sys (hrs/year)",          // GPU power
+  "C_mnt (€/year)",   
   "PUE",                // Power usage effectiveness (unitless)
   "C_elec (€/kWh)",     // Electricity cost
-  "f_hr",               // Fraction of recoverable heat (unitless)
-  "C_hr (€/kWh)",       // Heat reuse revenue
-  "C_mnt (€/year)",     // Node maintenance
-  "C_dep (€/year)",     // Depreciation
-  "C_sub (€/year)",     // Software subscription
-  "C_ineff (€/year)"    // Utilization inefficiency
+  "f_hr" (hrs/year),               // Fraction of recoverable heat (unitless)
+  "C_sw (€)",       // Heat reuse revenue
+  "C_nf (€)",     // Node maintenance
+  "C_ni (€)",     // Depreciation
+  "C_ns (€)",     // Software subscription
+  "C_GPU (€)"   
 ];
 
 
@@ -2633,7 +2633,7 @@ const heatmapLayout = {
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
         { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
         { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
-        { text: "Parameters", xref: "paper", yref: "paper", x: -0.1, y: 0.5, textangle: -90, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
+        { text: "Parameters", xref: "paper", yref: "paper", x: -0.2, y: 0.5, textangle: -90, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
     ]
 };
 
