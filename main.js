@@ -2517,13 +2517,25 @@ const metricTitles = {
   power_per_tco: "Power-per-TCO",
   perf_per_watt_per_tco: "Work-per-Watt-per-TCO"
 };
-
-// Short symbolic labels for 15 parameters
 const elasticityLabelsSymbols = [
-  "C_cap", "C_op", "C_var", "C_base", "W_base", 
-  "W_GPU", "U_sys", "PUE", "C_elec", "f_hr", 
-  "C_hr", "C_mnt", "C_dep", "C_sub", "C_ineff"
+  "C_cap (€)",          // Capital cost
+  "C_op (€)",           // Operational cost
+  "C_var (€)",          // Variable operational cost
+  "C_base (€)",         // Baseline operational cost
+  "W_base (W)",         // Node baseline power
+  "W_GPU (W)",          // GPU power
+  "U_sys (hrs/year)",   // System usage
+  "PUE",                // Power usage effectiveness (unitless)
+  "C_elec (€/kWh)",     // Electricity cost
+  "f_hr",               // Fraction of recoverable heat (unitless)
+  "C_hr (€/kWh)",       // Heat reuse revenue
+  "C_mnt (€/year)",     // Node maintenance
+  "C_dep (€/year)",     // Depreciation
+  "C_sub (€/year)",     // Software subscription
+  "C_ineff (€/year)"    // Utilization inefficiency
 ];
+
+
 
 const metricSelector = document.getElementById("metricSelector");
 ACTIVE_METRICS.forEach(metric => {
