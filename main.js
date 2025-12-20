@@ -2509,19 +2509,82 @@ const zMaxSobol = 100; // Normalized to 100
 const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-// ---------- Layout Settings ----------
-const fontSize = 22; // Updated to 22 per request
+// ---------- Helper Function ----------
+const transpose = m => m[0].map((_, i) => m.map(row => row[i]));
+const flatten2D = arr => Array.isArray(arr) ? arr.reduce((acc, row) => acc.concat(row), []) : [];
+
+// ---------- Prepare Heatmap Data ----------
+// Elasticity: keep as before (Transposed: Parameters x GPUs)
+const zElasticity = {}; // store per metric
+
+ACTIVE_METRICS.forEach(metric => {
+    zElasticity[metric] = allElasticities[metric] || [[]]; // fallback to empty 2D array
+});
+
+// Sobol
+const zSobol = {};
+
+ACTIVE_METRICS.forEach(metric => {
+  const raw = sobolIndicesOptimized[metric]; // [GPU][parameter]
+
+  if (!Array.isArray(raw) || !raw.length) {
+    zSobol[metric] = [];
+    return;
+  }
+
+  // Normalize per parameter across GPUs
+  const normalized = normalizeAcrossDimension(raw); // [parameter][GPU]
+
+  // CRITICAL: convert Float64Array → Array
+  zSobol[metric] = normalized.map(row => Array.from(row));
+});
+
+console.log(
+  "Sobol raw max (TCO):",
+  Math.max(...flatten2D(sobolIndicesOptimized.tco))
+);
+
+console.log(
+  "Sobol heatmap max (TCO):",
+  Math.max(...flatten2D(zSobol.tco))
+);
+
+// Monte Carlo
+const zMonteCarlo = {};
+ACTIVE_METRICS.forEach(metric => {
+    zMonteCarlo[metric] = safeMakePlainArray(safeNormalizeAcrossDimension(monteCarloParamResults[metric] || [[]]));
+});
+
+// Compute global max for scaling per metric
+const zMaxElasticity = {};
+ACTIVE_METRICS.forEach(metric => {
+    zMaxElasticity[metric] = Math.max(...flatten2D(zElasticity[metric]).map(Math.abs), 1);
+});
+const zMaxSobol = 100; // Normalized to 100
+const zMaxMonteCarlo = 100; // Normalized to 100
 
 // ---------- Heatmap Traces ----------
-const heatmapData = [];
+const heatmapData = []; // declare first
 const metricTitles = {
-    tco: "TCO",
-    perf_per_tco: "Work-per-TCO",
-    power_per_tco: "Power-per-TCO",
-    perf_per_watt_per_tco: "Work-per-Watt-per-TCO"
+  tco: "TCO",
+  perf_per_tco: "Work-per-TCO",
+  power_per_tco: "Power-per-TCO",
+  perf_per_watt_per_tco: "Work-per-Watt-per-TCO"
 };
-
-// ... (keep your metricSelector logic here) ...
+const metricSelector = document.getElementById("metricSelector");
+ACTIVE_METRICS.forEach(metric => {
+    const opt = document.createElement("option");
+    opt.value = metric;
+    opt.text = metricTitles[metric];
+    metricSelector.appendChild(opt);
+});
+metricSelector.addEventListener("change", e => {
+    const metric = e.target.value;
+    const visibility = heatmapData.map((_, i) => {
+        return Math.floor(i / 3) === ACTIVE_METRICS.indexOf(metric);
+    });
+    Plotly.update("sensitivityHeatmaps", { visible: visibility });
+});
 
 ACTIVE_METRICS.forEach((metric, metricIdx) => {
     const xLabels = window.results.map(r => r.name);
@@ -2535,14 +2598,14 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         zmin: -zMaxElasticity[metric],
         zmax: zMaxElasticity[metric],
-        coloraxis: "coloraxis", // Use global coloraxis for consistency
+        colorbar: { title: "Elasticity (%)", x: 0.97, len: 0.9, y: 0.5 },
         visible: metric === "tco",
         name: `Elasticity-${metric}`,
         xaxis: "x1",
         yaxis: "y1"
     });
 
-    // Sobol
+    // Sobol (shared colorbar)
     heatmapData.push({
         z: zSobol[metric],
         x: xLabels,
@@ -2558,7 +2621,7 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
         yaxis: "y2"
     });
 
-    // Monte Carlo
+    // Monte Carlo (shared colorbar)
     heatmapData.push({
         z: zMonteCarlo[metric],
         x: xLabels,
@@ -2575,57 +2638,56 @@ ACTIVE_METRICS.forEach((metric, metricIdx) => {
     });
 });
 
-// ---------- Updated Layout ----------
+// ---------- Layout ----------
+const fontSize = 20;
+
 const heatmapLayout = {
     font: { size: fontSize },
-    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.06 },
-    height: 700,
-    width: 1500, // Increased width to ensure it fills the center
-    autosize: true,
-    margin: { t: 120, l: 150, r: 350, b: 100 }, // Large right margin for colorbar titles
+    grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.05 },
+    height: 600,
+    width: 1400,
+    margin: { t: 120, l: 120, r: 220 }, // more right margin for colorbars
 
     yaxis: { showticklabels: true, tickfont: { size: fontSize } },
     yaxis2: { showticklabels: false },
     yaxis3: { showticklabels: false },
 
-    // First Colorbar (Elasticity)
+    // Elasticity colorbar
     coloraxis: {
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
-            title: { text: "Elasticity (%)", font: { size: fontSize }, side: "right" },
-            x: 1.02, // Moved right to avoid overlay
+            title: { text: "Elasticity (%)", font: { size: fontSize } },
+            x: 1.05,
             xanchor: "left",
             y: 0.5,
-            len: 0.8,
-            thickness: 25,
+            len: 0.85,
             tickfont: { size: fontSize }
         }
     },
 
-    // Second Colorbar (Sobol + MC)
+    // Sobol + Monte Carlo colorbar
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
         colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
         colorbar: {
-            title: { text: "Sensitivity (%)", font: { size: fontSize }, side: "right" },
-            x: 1.20, // Moved further right to avoid overlapping the first one
+            title: { text: "Sensitivity (%)", font: { size: fontSize } },
+            x: 1.22,
             xanchor: "left",
             y: 0.5,
-            len: 0.8, // Same length as first bar
-            thickness: 25,
+            len: 0.85,
             tickfont: { size: fontSize }
         }
     },
 
     annotations: [
-        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.14, y: 1.1, showarrow: false, font: { size: fontSize + 2, weight: "bold" } },
-        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.1, showarrow: false, font: { size: fontSize + 2, weight: "bold" } },
-        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.86, y: 1.1, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
+        { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
+        { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
+        { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } }
     ]
 };
 
-// Final Plot Call
+// Plot heatmaps
 Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout, {
     responsive: true,
     displaylogo: false
@@ -2640,7 +2702,6 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
         filename: 'sensitivity_heatmaps'
     });
 });
-
 
 
 
