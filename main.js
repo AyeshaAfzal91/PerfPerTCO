@@ -2599,33 +2599,16 @@ const heatmapLayout = {
 
     // Elasticity colorbar (left)
     coloraxisElasticity: {
-        cmin: -zMaxElasticity.tco,
-        cmax: zMaxElasticity.tco,
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: {
-            title: { text: "Elasticity (%)", font: { size: fontSize } },
-            x: 1.05,          // slightly outside the plot
-            xanchor: "center", // center title
-            y: 0.5,
-            len: 0.85,
-            tickfont: { size: fontSize }
-        }
-    },
+    cmin: -zMaxElasticity.tco,
+    cmax: zMaxElasticity.tco,
+    colorbar: { title: { text: "Elasticity (%)", font: { size: fontSize } }, x: 1.02, xanchor: "center" }
+},
+coloraxisSM: {
+    cmin: 0,
+    cmax: 100,
+    colorbar: { title: { text: "Sensitivity (%)", font: { size: fontSize } }, x: 1.15, xanchor: "center" }
+}
 
-    // Sobol + Monte Carlo colorbar (right)
-    coloraxisSM: {
-        cmin: 0,
-        cmax: 100,
-        colorscale: [[0,"rgb(0,0,255)"], [0.5,"white"], [1,"rgb(255,0,0)"]],
-        colorbar: {
-            title: { text: "Sensitivity (%)", font: { size: fontSize } },
-            x: 1.38,          // move far right
-            xanchor: "center", // center title
-            y: 0.5,
-            len: 0.85,
-            tickfont: { size: fontSize }
-        }
-    },
 
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
