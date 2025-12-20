@@ -2598,9 +2598,9 @@ const fontSize = 18; // slightly smaller for 15 labels
 const heatmapLayout = {
     font: { size: fontSize },
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.08 },
-    height: 700, // taller for more labels
-    width: 1600,
-    margin: { t: 120, l: 250, r: 400 }, // enough for 15 labels
+    height: 700,
+    width: 1800, // wider for space
+    margin: { t: 120, l: 250, r: 400 },
 
     yaxis: { showticklabels: true, tickfont: { size: fontSize } },
     yaxis2: { showticklabels: false },
@@ -2609,19 +2609,19 @@ const heatmapLayout = {
     coloraxisElasticity: {
         cmin: -zMaxElasticity.tco,
         cmax: zMaxElasticity.tco,
-        colorbar: { title: { text: "Elasticity (%)", font: { size: fontSize } }, x: 1.02, xanchor: "center" }
+        colorbar: { title: { text: "Elasticity (%)", font: { size: fontSize } }, x: 1.05, xanchor: "center" }
     },
     coloraxisSM: {
         cmin: 0,
         cmax: 100,
-        colorbar: { title: { text: "Sensitivity (%)", font: { size: fontSize } }, x: 1.18, xanchor: "center" }
+        colorbar: { title: { text: "Sensitivity (%)", font: { size: fontSize } }, x: 1.22, xanchor: "center" }
     },
 
     annotations: [
         { text: "Elasticity", xref: "paper", yref: "paper", x: 0.16, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
         { text: "Sobol", xref: "paper", yref: "paper", x: 0.50, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
         { text: "Monte Carlo", xref: "paper", yref: "paper", x: 0.84, y: 1.08, showarrow: false, font: { size: fontSize, weight: "bold" } },
-        { text: "Parameters", xref: "paper", yref: "paper", x: -0.02, y: 0.5, textangle: -90, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
+        { text: "Parameters", xref: "paper", yref: "paper", x: -0.08, y: 0.5, textangle: -90, showarrow: false, font: { size: fontSize + 2, weight: "bold" } }
     ]
 };
 
