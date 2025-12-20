@@ -1468,7 +1468,7 @@ const tcoLayout = {
     automargin: true
   },
   height: 500,
-  width: 800,
+  width: 1200,
   margin: { t: 60, b: 80, l: 120, r: 400 }, // extra right margin for vertical legend
   legend: {
     orientation: 'v',  // vertical legend
