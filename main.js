@@ -2527,7 +2527,7 @@ const elasticityLabelsSymbols = [
   "C_mnt (€/year)",   
   "PUE",                // Power usage effectiveness (unitless)
   "C_elec (€/kWh)",     // Electricity cost
-  "f_hr" (hrs/year),               // Fraction of recoverable heat (unitless)
+  "f_hr (hrs/year)",               // Fraction of recoverable heat (unitless)
   "C_sw (€)",       // Heat reuse revenue
   "C_nf (€)",     // Node maintenance
   "C_ni (€)",     // Depreciation
