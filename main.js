@@ -1467,7 +1467,7 @@ const tcoLayout = {
     tickfont: { size: 31 },
     automargin: true
   },
-  height: 600,
+  height: 500,
   width: 800,
   margin: { t: 60, b: 80, l: 120, r: 400 }, // extra right margin for vertical legend
   legend: {
