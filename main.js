@@ -1368,7 +1368,7 @@ document.getElementById('gpu-chart').parentElement.insertBefore(gpuDownloadDiv, 
 document.getElementById('gpu-download-btn').addEventListener('click', () => {
   Plotly.toImage('gpu-chart', {
     format: 'png',   // or 'svg'
-    height: 800,
+    height: 400,
     width: 1200,
     scale: 2
   }).then(function (url) {
