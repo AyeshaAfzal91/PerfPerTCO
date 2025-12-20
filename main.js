@@ -1424,7 +1424,7 @@ const totalCosts = nonzeroResults.map(r => {
 });
 
 // Update capTraces and opTraces to include textfont
-/*const capTraces = capLabels.map((label, i) => ({
+const capTraces = capLabels.map((label, i) => ({
   x: tcoLabels,
   y: capBreakdown[i],
   name: `[Capital] ${label}`,
@@ -1436,7 +1436,7 @@ const totalCosts = nonzeroResults.map(r => {
   }),
   textposition: 'inside',
   texttemplate: '%{text}',
-  textfont: { size: 31 }  // <-- text size inside bars
+  textfont: { size: 31 }   // ✅ bar text size
 }));
 
 const opTraces = opLabels.map((label, i) => ({
@@ -1451,38 +1451,42 @@ const opTraces = opLabels.map((label, i) => ({
   }),
   textposition: 'inside',
   texttemplate: '%{text}',
-  textfont: { size: 31 }  // <-- text size inside bars
+  textfont: { size: 31 }   // ✅ bar text size
 }));
-
 const tcoLayout = {
   title: '',
   barmode: 'stack',
+
   xaxis: {
     title: { text: 'GPU Type', font: { size: 31 } },
     tickfont: { size: 31 },
     automargin: true
   },
+
   yaxis: {
     title: { text: 'Total Cost (€)', font: { size: 31 } },
     tickfont: { size: 31 },
     automargin: true
   },
-  height: 500,
-  width: 1200,
-  margin: { t: 60, b: 80, l: 120, r: 400 }, // extra right margin for vertical legend
+
+  height: 600,
+  margin: { t: 60, b: 140, l: 100, r: 100 },
+
   legend: {
-    orientation: 'v',  // vertical legend
-    x: 1.02,           // just outside the plot on the right
-    y: 1,              // top aligned
-    xanchor: 'left',
+    orientation: 'h',
+    x: 0.5,
+    y: -0.25,
+    xanchor: 'center',
     yanchor: 'top',
-    font: { size: 31 } // legend font size
+    font: { size: 31 }     // ✅ legend text size
   },
-  font: { size: 31 } // default font for any other text
-};*/
+
+  font: { size: 31 }       // ✅ default fallback font
+};
+
 
 // Add percentage text for each bar (capital and operational costs)
-const capTraces = capLabels.map((label, i) => ({
+/*const capTraces = capLabels.map((label, i) => ({
   x: tcoLabels,
   y: capBreakdown[i],
   name: `[Capital] ${label}`,
@@ -1538,7 +1542,7 @@ legend: {
       scale: 5         // Higher scale factor for better resolution
     }
   }
-};
+};*/
 
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
