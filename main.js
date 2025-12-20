@@ -2607,7 +2607,7 @@ coloraxisSM: {
     cmin: 0,
     cmax: 100,
     colorbar: { title: { text: "Sensitivity (%)", font: { size: fontSize } }, x: 1.15, xanchor: "center" }
-}
+},
 
 
     annotations: [
