@@ -2610,7 +2610,7 @@ const fontSize = 20; // slightly smaller for 15 labels
 const heatmapLayout = {
     font: { size: fontSize },
     grid: { rows: 1, columns: 3, pattern: "independent", xgap: 0.08 },
-    height: 500,
+    height: 700,
     width: 1800, // wider for space
     margin: { t: 120, l: 250, r: 400 },
 
