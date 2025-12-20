@@ -1268,7 +1268,7 @@ const barLayout = {
   height: 500,
 margin: {
   t: 80,
-  b: 140,   
+  b: 180,   
   l: 120,
   r: 120
 }
