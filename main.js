@@ -2517,22 +2517,22 @@ const metricTitles = {
   power_per_tco: "Power-per-TCO",
   perf_per_watt_per_tco: "Work-per-Watt-per-TCO"
 };
-const elasticityLabelsSymbols = [ 
-  "C_ineff (€)",          // Capital cost
-  "C_sub (€)",           // Operational cost
-  "C_dep (€)",          // Variable operational cost
-  "W_base (W)",         // Baseline operational cost
-  "T_life (year)",         // Node baseline power
-  "U_sys (hrs/year)",          // GPU power
-  "C_mnt (€/year)",   
-  "PUE",                // Power usage effectiveness (unitless)
-  "C_elec (€/kWh)",     // Electricity cost
-  "f_hr (hrs/year)",               // Fraction of recoverable heat (unitless)
-  "C_sw (€)",       // Heat reuse revenue
-  "C_nf (€)",     // Node maintenance
-  "C_ni (€)",     // Depreciation
-  "C_ns (€)",     // Software subscription
-  "C_GPU (€)"   
+const elasticityLabelsSymbols = [
+  "C_GPU (€)",
+  "C_ns (€)",
+  "C_ni (€)",
+  "C_nf (€)",
+  "C_sw (€)",
+  "f_hr (hrs/year)",
+  "C_elec (€/kWh)",
+  "PUE",
+  "C_mnt (€/year)",
+  "U_sys (hrs/year)",
+  "T_life (year)",
+  "W_base (W)",
+  "C_dep (€)",
+  "C_sub (€)",
+  "C_ineff (€)"
 ];
 
 
