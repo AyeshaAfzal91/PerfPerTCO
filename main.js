@@ -3748,39 +3748,42 @@ async function restoreStateWhenReady(state){
     if (!state) return;
 
     try {
-        // 1. Wait for core functions to be available
+        // 1. Wait for UI + Core Logic to be loaded
         await waitFor(() => {
-            return document.querySelector('input[type="range"]') && 
-                   (typeof calculate === "function" || typeof calculateResults === "function");
-        }, 7000);
+            const sliderExists = document.querySelector('input[type="range"]');
+            const calcReady = typeof calculate === "function" || typeof calculateResults === "function";
+            return sliderExists && calcReady;
+        }, 8000);
 
-        // 2. Restore GPU data objects
-        if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
-        if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
-
-        // 3. Apply Slider/Input values
-        applyInputsFromState(state);
-
-        // 4. Give the DOM a moment to settle
-        await new Promise(r => setTimeout(r, 300));
-
-        // 5. Run the Core Calculation
-        if (typeof calculate === "function") calculate();
-        else if (typeof calculateResults === "function") calculateResults();
-
-        // 6. CRITICAL: Force Re-render of all Plots (Tornado, Heatmaps, etc.)
-        // We wait 500ms to ensure the calculation has finished and the DOM is ready for Plotly
-        await new Promise(r => setTimeout(r, 500));
-        
-        if (typeof window.renderAllOutputs === "function") {
-            window.renderAllOutputs();
-        } else {
-            // Fallback if the master function isn't found
-            if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
-            if (typeof renderTornadoPlots === "function") renderTornadoPlots('tco');
+        // 2. Restore GPU Data first
+        if (state.gpu_data) {
+            window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data));
+        }
+        if (state.active_gpu_data) {
+            window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data));
         }
 
-        console.log("✅ All inputs and visual plots successfully restored.");
+        // 3. Apply Slider and Select values to DOM
+        applyInputsFromState(state);
+
+        // 4. Give the browser a moment to process DOM changes
+        await new Promise(r => setTimeout(r, 400));
+
+        // 5. CRITICAL: Trigger the Master Render
+        // This runs calculate() AND all Plotly/Chart.js functions
+        if (typeof window.forceRenderAllVisuals === "function") {
+            window.forceRenderAllVisuals();
+        } else {
+            // Fallback if master function is missing
+            if (typeof calculate === "function") calculate();
+            if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
+        }
+
+        // 6. Final Polish: Ensure Plotly resizes to fit its containers
+        await new Promise(r => setTimeout(r, 500));
+        window.dispatchEvent(new Event('resize'));
+
+        console.log("✅ State and all visual plots restored successfully.");
 
     } catch (e) {
         console.warn("restoreStateWhenReady() failed:", e);
@@ -3930,54 +3933,57 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* --- NEW: Function to trigger all visual plots at once --- */
-window.renderAllOutputs = function() {
-    console.log("🎨 Re-rendering all visual outputs for shared link...");
+/* --- MASTER RENDERING TRIGGER FOR SHARED LINKS --- */
+window.forceRenderAllVisuals = function() {
+    console.log("🎨 Global Re-render Triggered...");
     
-    // 1. Trigger the standard TCO and results table (already inside calculate, but safe to call)
+    // 1. Run main calculation (Updates table and TCO bar/pie charts)
     if (typeof calculate === "function") calculate();
 
-    // 2. Trigger Benchmark Heatmaps
+    // 2. Trigger Benchmark Heatmaps (Heatmap grid)
     if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
 
-    // 3. Trigger Tornado Plots (Defaulting to 'tco' metric)
+    // 3. Trigger Tornado Plots (Default to TCO)
     if (typeof renderTornadoPlots === "function") renderTornadoPlots('tco');
 
     // 4. Trigger Sensitivity Heatmaps
-    // This manually triggers the 'change' event on your metric selector to draw the heatmap
+    // We simulate a change on the metric selector to trigger the internal Plotly logic
     const metricSelector = document.getElementById('metricSelector');
     if (metricSelector) {
         metricSelector.dispatchEvent(new Event('change'));
     }
+    
+    // 5. Ensure AI Tip is updated
+    if (typeof updateAITip === "function") updateAITip();
 };
 
-// Update your exports to include the plotting functions
+// Update Global Exports
 Object.assign(window, {
-  updateAITip,
-  updateValue,
-  calculate,
-  resetForm,
-  exportGPUDataJSON,
-  exportGPUDataCSV,
-  handleMainGPUUpload,
-  handlePriceSourceChange,
-  maybeRefreshGPUPrices,
-  exportChartImage,
-  exportChartCSV,
-  zoomChart,
-  resetZoom,
-  applyPresetProfile,
-  generatePDFReport,
-  promptPassword,
-  validatePassword,
-  saveScenario,
-  compareScenarios,
-  downloadComparisonPDF,
-  renderPerfPowerHeatmaps, // Already there
-  renderTornadoPlots,      // Added
-  renderAllOutputs,        // Added
-  generateBlogPost,
-  shareSetup
+    updateAITip,
+    updateValue,
+    calculate,
+    resetForm,
+    exportGPUDataJSON,
+    exportGPUDataCSV,
+    handleMainGPUUpload,
+    handlePriceSourceChange,
+    maybeRefreshGPUPrices,
+    exportChartImage,
+    exportChartCSV,
+    zoomChart,
+    resetZoom,
+    applyPresetProfile,
+    generatePDFReport,
+    promptPassword,
+    validatePassword,
+    saveScenario,
+    compareScenarios,
+    downloadComparisonPDF,
+    renderPerfPowerHeatmaps,
+    renderTornadoPlots,
+    forceRenderAllVisuals, // NEW
+    generateBlogPost,
+    shareSetup
 });
 
 
