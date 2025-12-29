@@ -1545,7 +1545,7 @@ legend: {
       width: 6000,     // Increase width for higher resolution
       scale: 5         // Higher scale factor for better resolution
     }
-  }
+  },
   font: { size: 18 }       // ✅ default fallback font
 };
 
