@@ -3748,51 +3748,67 @@ async function restoreStateWhenReady(state){
     if (!state) return;
 
     try {
-        // Wait for UI + calculation functions ONLY
+        // 1. Wait for UI + core calculation functions to be available
         await waitFor(() => {
             const sliderExists = document.querySelector('input[type="range"]');
-            const calcReady =
-                typeof calculateResults === "function" ||
-                typeof calculate === "function" ||
-                typeof runAllCalculations === "function";
-
+            const calcReady = typeof calculate === "function" || typeof calculateResults === "function";
             return sliderExists && calcReady;
         }, 7000);
 
-        // ------------------------------
-        // RESTORE GPU DATA FIRST
-        // ------------------------------
+        // 2. Restore GPU Data first so calculations use the shared data
         if (state.gpu_data) {
             window.GPU_data = structuredClone(state.gpu_data);
         }
-
         if (state.active_gpu_data) {
             window.activeGPUData = structuredClone(state.active_gpu_data);
         }
 
-        // ------------------------------
-        // APPLY INPUTS
-        // ------------------------------
+        // 3. Apply Inputs (Sliders, Selects, Checkboxes)
         applyInputsFromState(state);
 
-        // Allow DOM + async listeners to settle
+        // 4. Brief pause for DOM and listeners to settle
         await new Promise(r => setTimeout(r, 200));
 
-		// ------------------------------
-		// RUN CALCULATIONS
-		// ------------------------------
-		if (typeof calculateResults === "function") calculateResults();
-		else if (typeof calculate === "function") calculate();
-		else if (typeof runAllCalculations === "function") runAllCalculations();
+        // 5. Run the Core Calculation to populate window.results
+        if (typeof calculate === "function") {
+            calculate();
+        } else if (typeof calculateResults === "function") {
+            calculateResults();
+        }
 
-		// ------------------------------
-		// FORCE PLOT/TABLE REBUILD
-		// ------------------------------
-		await new Promise(r => setTimeout(r, 200)); // allow DOM listeners to settle
-		
-		if (typeof window.renderPerfPowerHeatmaps === "function") window.renderPerfPowerHeatmaps();
+        // 6. FORCE RE-RENDER OF ALL PLOTS
+        // We add a small delay to ensure 'window.results' is fully ready before plotting
+        await new Promise(r => setTimeout(r, 500));
+        
+        console.log("🔄 Triggering visual re-renders for shared state...");
 
-        console.log("✅ State restored successfully.");
+        // Render Performance/Power Heatmaps
+        if (typeof window.renderPerfPowerHeatmaps === "function") {
+            window.renderPerfPowerHeatmaps();
+        }
+
+        // Trigger Sensitivity Heatmaps (Plotly)
+        // If these are defined as standalone functions in your main-2.js
+        if (typeof window.renderSensitivityHeatmaps === "function") {
+            window.renderSensitivityHeatmaps();
+        }
+
+        // Trigger Tornado Plots (Plotly)
+        if (typeof window.renderTornadoCharts === "function") {
+            window.renderTornadoCharts();
+        }
+        
+        // Trigger TCO/Stacked Charts
+        if (typeof window.renderTCOCharts === "function") {
+            window.renderTCOCharts();
+        }
+
+        // Update AI Insights if applicable
+        if (typeof updateAITip === "function") {
+            updateAITip();
+        }
+
+        console.log("✅ State restored and all plots updated.");
 
     } catch (e) {
         console.warn("restoreStateWhenReady() failed:", e);
