@@ -3939,11 +3939,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== TEMPORARY GLOBAL EXPORTS FOR HTML HANDLERS =====
 Object.assign(window, {
-  toggleGPUFreqSlider,
-  toggleGPUPowerSlider,
+  renderTornadoPlots,
+  updateAITip,
   updateValue,
   calculate,
-  updateAITip,
   resetForm,
   exportGPUDataJSON,
   exportGPUDataCSV,
@@ -3962,9 +3961,9 @@ Object.assign(window, {
   compareScenarios,
   downloadComparisonPDF,
   renderPerfPowerHeatmaps,
-  renderTornadoPlots,
   generateBlogPost,
   copyBlogText
 });
+
 
 
