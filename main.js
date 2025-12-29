@@ -2916,6 +2916,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.getElementById("themeToggle");
   const icon = document.getElementById("themeIcon");
 
+  if (!toggle || !icon) {
+    console.warn("Theme toggle elements not found");
+    return; // Stop if elements missing
+  }
+
   // Load saved preference
   const isDark = localStorage.getItem("darkMode") === "true";
   document.body.classList.toggle("dark", isDark);
@@ -2929,6 +2934,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("darkMode", enabled);
   });
 });
+
 
 // This function updates the tip based on slider values
 function updateAITip(event) {
