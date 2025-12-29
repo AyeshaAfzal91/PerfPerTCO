@@ -3939,7 +3939,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== TEMPORARY GLOBAL EXPORTS FOR HTML HANDLERS =====
 Object.assign(window, {
-  renderTornadoPlots,
   updateAITip,
   updateValue,
   calculate,
