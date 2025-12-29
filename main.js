@@ -3681,30 +3681,28 @@ const spanMap = {
 function applyInputsFromState(state){
     if(!state) return;
 
-    // --- Sliders (Updated with the fix) ---
+    // --- Sliders ---
     Object.entries(state.sliders || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
-        
         el.value = val;
         el.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        // **CRITICAL FIX: Update the display span**
+
         const spanId = spanMap[id];
         if (spanId && typeof updateValue === "function") {
              updateValue(spanId, val); 
         }
     });
 
-    // --- Texts (Copied from Part A) ---
+    // --- Text Inputs ---
     Object.entries(state.texts || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
         el.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    
-    // --- Selects (Copied from Part A) ---
+
+    // --- Selects ---
     Object.entries(state.selects || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -3712,7 +3710,7 @@ function applyInputsFromState(state){
         el.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
-    // --- Checkboxes (Copied from Part A) ---
+    // --- Checkboxes ---
     Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -3720,15 +3718,9 @@ function applyInputsFromState(state){
         el.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
-    // --- Restore GPU data (Copied from Part A) ---
-    if (state.gpu_data) {
-        try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
-        catch(e){ console.warn("Unable to restore GPU_data:", e); }
-    }
-    if (state.active_gpu_data) {
-        try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
-        catch(e){ console.warn("Unable to restore activeGPUData:", e); }
-    }
+    // --- GPU Data ---
+    if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+    if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 }
 
 // ===================== HELPER: waitFor =====================
@@ -3748,57 +3740,37 @@ async function restoreStateWhenReady(state){
     if (!state) return;
 
     try {
-        // Wait for UI + calculation functions ONLY
+        // Wait until UI and calculation functions exist
         await waitFor(() => {
             const sliderExists = document.querySelector('input[type="range"]');
-            const calcReady =
-                typeof calculateResults === "function" ||
-                typeof calculate === "function" ||
-                typeof runAllCalculations === "function";
-
+            const calcReady = typeof calculateResults === "function" || typeof calculate === "function" || typeof runAllCalculations === "function";
             return sliderExists && calcReady;
         }, 7000);
 
-        // ------------------------------
-        // RESTORE GPU DATA FIRST
-        // ------------------------------
-        if (state.gpu_data) {
-            window.GPU_data = structuredClone(state.gpu_data);
-        }
+        // Restore GPU Data first
+        if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+        if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 
-        if (state.active_gpu_data) {
-            window.activeGPUData = structuredClone(state.active_gpu_data);
-        }
-
-        // ------------------------------
-        // APPLY INPUTS
-        // ------------------------------
+        // Apply all inputs
         applyInputsFromState(state);
 
-        // Allow DOM + async listeners to settle
+        // Let DOM listeners settle
         await new Promise(r => setTimeout(r, 200));
 
-        // ------------------------------
-        // RUN CALCULATIONS
-        // ------------------------------
+        // Trigger calculations
         if (typeof calculateResults === "function") calculateResults();
         else if (typeof calculate === "function") calculate();
         else if (typeof runAllCalculations === "function") runAllCalculations();
 
-        // ------------------------------
-        // FORCE PLOT REBUILD
-        // ------------------------------
-        if (typeof runAllCalculations === "function") {
-    runAllCalculations(); // this must rebuild plots
-}
-
+        // Force plot rebuild if needed
+        if (typeof runAllCalculations === "function") runAllCalculations();
 
         console.log("✅ State restored successfully.");
-
     } catch (e) {
         console.warn("restoreStateWhenReady() failed:", e);
     }
 }
+
 
 // ===================== HELPER: COPY TO CLIPBOARD =====================
 /**
@@ -3837,19 +3809,23 @@ async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
 // ===================== SHARE LINK =====================
 async function shareSetup() {
     try {
+        // Wait until GPU_data is loaded before capturing state
+        await waitFor(() => typeof GPU_data !== "undefined" && GPU_data !== null, 5000)
+            .catch(() => console.warn("GPU_data not fully loaded, proceeding anyway."));
+
         const state = getCurrentState();
         const encoded = encodeState(state);
         if (!encoded) throw new Error("Failed to encode state.");
 
         const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-        
-        // --- Embedded Link Logic ---
+
+        // Embedded Link Logic
         if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
             await copyToClipboard(urlIfEmbedded, "Copied shareable link (embedded) to clipboard.");
             return { mode: "embedded", url: urlIfEmbedded };
         }
 
-        // --- Short Link Fallback Logic ---
+        // Short Link Fallback
         const res = await fetch('/.netlify/functions/saveConfig', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3863,10 +3839,7 @@ async function shareSetup() {
         if (!id) throw new Error("No id returned from backend.");
 
         const shortUrl = `${window.location.origin}/s/${id}`;
-        
-        // Use the robust copyToClipboard function
         await copyToClipboard(shortUrl, "Copied shareable short link to clipboard.");
-
         return { mode: "short", id, url: shortUrl };
 
     } catch (e) {
