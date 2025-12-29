@@ -1436,7 +1436,7 @@ const totalCosts = nonzeroResults.map(r => {
   }),
   textposition: 'inside',
   texttemplate: '%{text}',
-  textfont: { size: 31 }   // ✅ bar text size
+  textfont: { size: 31 }   // bar text size
 }));
 
 const opTraces = opLabels.map((label, i) => ({
@@ -1497,6 +1497,7 @@ const capTraces = capLabels.map((label, i) => ({
   }),
   textposition: 'inside',
   texttemplate: '%{text}',  // Show the text as percentage
+  textfont: { size: 18 }   // bar text size
 }));
 
 const opTraces = opLabels.map((label, i) => ({
@@ -1511,6 +1512,7 @@ const opTraces = opLabels.map((label, i) => ({
   }),
   textposition: 'inside',
   texttemplate: '%{text}',  // Show the text as percentage
+  textfont: { size: 18 }   // bar text size
 }));
 
 const tcoLayout = {
@@ -1518,10 +1520,12 @@ const tcoLayout = {
   barmode: 'stack',
   xaxis: {
     title: 'GPU Type',
+    tickfont: { size: 18 },
     automargin: true
   },
   yaxis: {
     title: 'Total Cost (€)',
+    tickfont: { size: 18 },
     automargin: true
   },
   height: 600,
@@ -1531,7 +1535,8 @@ legend: {
   x: 0.5,
   y: -0.2,            // Negative y for bottom placement
   xanchor: 'center',
-  yanchor: 'top'      // Anchor the top of the legend box to the y position
+  yanchor: 'top',      // Anchor the top of the legend box to the y position
+  font: { size: 18 }     // ✅ legend text size
 },
   config: {
     toImageButtonOptions: {
@@ -1541,6 +1546,7 @@ legend: {
       scale: 5         // Higher scale factor for better resolution
     }
   }
+  font: { size: 18 }       // ✅ default fallback font
 };
 
 // Render the Plotly chart
