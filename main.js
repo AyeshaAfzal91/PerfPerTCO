@@ -3956,4 +3956,3 @@ window.renderPerfPowerHeatmaps = renderPerfPowerHeatmaps;
 window.generatePDFReport = generatePDFReport;
 window.generateBlogPost = generateBlogPost;
 window.calculate = calculate;
-window.renderTornadoPlots = renderTornadoPlots; // Add this too
