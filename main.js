@@ -3684,57 +3684,38 @@ const spanMap = {
     Factor_heatreuse: "v_Factor_heatreuse"
 };
 
-function applyInputsFromState(state){
-    if(!state) return;
+function applyInputsFromState(state) {
+    if (!state) return;
 
-    // --- Sliders (Updated with the fix) ---
+    // Sliders & Numbers
     Object.entries(state.sliders || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
-        
         el.value = val;
-        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('input', { bubbles: true })); // Trigger listeners
         
-        // **CRITICAL FIX: Update the display span**
+        // Update the display spans (v_budget, etc.)
         const spanId = spanMap[id];
         if (spanId && typeof updateValue === "function") {
-             updateValue(spanId, val); 
+            updateValue(spanId, val); 
         }
     });
 
-    // --- Texts (Copied from Part A) ---
-    Object.entries(state.texts || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    
-    // --- Selects (Copied from Part A) ---
+    // Dropdowns (CRITICAL FIX)
     Object.entries(state.selects || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true })); // This triggers the plotting logic
     });
 
-    // --- Checkboxes (Copied from Part A) ---
+    // Checkboxes
     Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.checked = Boolean(val);
         el.dispatchEvent(new Event('change', { bubbles: true }));
     });
-
-    // --- Restore GPU data (Copied from Part A) ---
-    if (state.gpu_data) {
-        try { window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data)); }
-        catch(e){ console.warn("Unable to restore GPU_data:", e); }
-    }
-    if (state.active_gpu_data) {
-        try { window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data)); }
-        catch(e){ console.warn("Unable to restore activeGPUData:", e); }
-    }
 }
 
 // ===================== HELPER: waitFor =====================
@@ -3750,49 +3731,31 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
 }
 
 // ===================== RESTORE STATE =====================
-async function restoreStateWhenReady(state){
+async function restoreStateWhenReady(state) {
     if (!state) return;
-
     try {
-        // 1. Wait for UI + Core Logic to be loaded
         await waitFor(() => {
-            const sliderExists = document.querySelector('input[type="range"]');
-            const calcReady = typeof calculate === "function" || typeof calculateResults === "function";
-            return sliderExists && calcReady;
-        }, 8000);
+            return document.querySelector('input[type="range"]') && typeof calculate === "function";
+        }, 7000);
 
-        // 2. Restore GPU Data first
-        if (state.gpu_data) {
-            window.GPU_data = JSON.parse(JSON.stringify(state.gpu_data));
-        }
-        if (state.active_gpu_data) {
-            window.activeGPUData = JSON.parse(JSON.stringify(state.active_gpu_data));
-        }
+        // 1. Restore Data
+        if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+        if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 
-        // 3. Apply Slider and Select values to DOM
+        // 2. Restore Inputs (Now triggers events)
         applyInputsFromState(state);
 
-        // 4. Give the browser a moment to process DOM changes
-        await new Promise(r => setTimeout(r, 400));
-
-        // 5. CRITICAL: Trigger the Master Render
-        // This runs calculate() AND all Plotly/Chart.js functions
-        if (typeof window.forceRenderAllVisuals === "function") {
-            window.forceRenderAllVisuals();
+        // 3. Execution Sequence
+        await new Promise(r => setTimeout(r, 500)); // Wait for UI to settle
+        
+        if (typeof window.refreshAllVisuals === "function") {
+            await window.refreshAllVisuals();
         } else {
-            // Fallback if master function is missing
             if (typeof calculate === "function") calculate();
-            if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
         }
 
-        // 6. Final Polish: Ensure Plotly resizes to fit its containers
-        await new Promise(r => setTimeout(r, 500));
-        window.dispatchEvent(new Event('resize'));
-
-        console.log("✅ State and all visual plots restored successfully.");
-
     } catch (e) {
-        console.warn("restoreStateWhenReady() failed:", e);
+        console.warn("Restoration error:", e);
     }
 }
 
@@ -3939,28 +3902,41 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* --- MASTER RENDERING TRIGGER FOR SHARED LINKS --- */
-window.forceRenderAllVisuals = function() {
-    console.log("🎨 Global Re-render Triggered...");
+/**
+ * This ensures data is calculated first, then visuals are drawn.
+ */
+window.refreshAllVisuals = async function() {
+    console.log("🚀 Starting Full Visual Rebuild...");
     
-    // 1. Run main calculation (Updates table and TCO bar/pie charts)
-    if (typeof calculate === "function") calculate();
+    // 1. Run core calculations (Populates window.results and TCO Bar/Pie charts)
+    if (typeof calculate === "function") {
+        calculate();
+    }
 
-    // 2. Trigger Benchmark Heatmaps (Heatmap grid)
-    if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
+    // 2. Wait for DOM to register calculation results
+    await new Promise(r => setTimeout(r, 100));
 
-    // 3. Trigger Tornado Plots (Default to TCO)
-    if (typeof renderTornadoPlots === "function") renderTornadoPlots('tco');
-
-    // 4. Trigger Sensitivity Heatmaps
-    // We simulate a change on the metric selector to trigger the internal Plotly logic
+    // 3. Force-trigger Sensitivity Heatmap
     const metricSelector = document.getElementById('metricSelector');
     if (metricSelector) {
-        metricSelector.dispatchEvent(new Event('change'));
+        metricSelector.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // 4. Force-trigger Tornado Plots
+    const tornadoSelector = document.getElementById('tornadoMetricSelect');
+    const currentTornadoMetric = tornadoSelector ? tornadoSelector.value : 'tco';
+    if (typeof renderTornadoPlots === "function") {
+        renderTornadoPlots(currentTornadoMetric);
+    }
+
+    // 5. Force-trigger Benchmark Heatmaps
+    if (typeof renderPerfPowerHeatmaps === "function") {
+        renderPerfPowerHeatmaps();
     }
     
-    // 5. Ensure AI Tip is updated
-    if (typeof updateAITip === "function") updateAITip();
+    // 6. Final Layout Fix (Solves Plotly sizing issues)
+    window.dispatchEvent(new Event('resize'));
+    console.log("✅ Visual rebuild complete.");
 };
 
 // Update Global Exports
@@ -3987,8 +3963,8 @@ Object.assign(window, {
     downloadComparisonPDF,
     renderPerfPowerHeatmaps,
     renderTornadoPlots,
-    forceRenderAllVisuals, // NEW
-    generateBlogPost,
+	refreshAllVisuals,
+	generateBlogPost,
     shareSetup
 });
 
