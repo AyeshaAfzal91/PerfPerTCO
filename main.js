@@ -3937,22 +3937,31 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// ---- Expose functions to HTML (ES module fix) ----
-window.toggleGPUFreqSlider = toggleGPUFreqSlider;
-window.toggleGPUPowerSlider = toggleGPUPowerSlider;
-window.updateValue = updateValue;
-window.calculate = calculate;
-window.updateAITip = updateAITip;
-window.resetForm = resetForm;
-window.exportGPUDataJSON = exportGPUDataJSON;
-window.exportGPUDataCSV = exportGPUDataCSV;
-window.handleMainGPUUpload = handleMainGPUUpload;
-window.promptPassword = promptPassword;
-window.validatePassword = validatePassword;
-window.saveScenario = saveScenario;
-window.compareScenarios = compareScenarios;
-window.downloadComparisonPDF = downloadComparisonPDF;
-window.renderPerfPowerHeatmaps = renderPerfPowerHeatmaps;
-window.generatePDFReport = generatePDFReport;
-window.generateBlogPost = generateBlogPost;
-window.calculate = calculate;
+// ===== TEMPORARY GLOBAL EXPORTS FOR HTML HANDLERS =====
+Object.assign(window, {
+  updateAITip,
+  updateValue,
+  calculate,
+  resetForm,
+  exportGPUDataJSON,
+  exportGPUDataCSV,
+  handleMainGPUUpload,
+  handlePriceSourceChange,
+  maybeRefreshGPUPrices,
+  exportChartImage,
+  exportChartCSV,
+  zoomChart,
+  resetZoom,
+  applyPresetProfile,
+  generatePDFReport,
+  promptPassword,
+  validatePassword,
+  saveScenario,
+  compareScenarios,
+  downloadComparisonPDF,
+  renderPerfPowerHeatmaps,
+  renderTornadoPlots,
+  generateBlogPost,
+  copyBlogText
+});
+
