@@ -1231,7 +1231,7 @@ const gpuTrace = {
   textposition: 'top center',
   textfont: {
     color: 'red',
-    size: 31
+    size: 18
   }
 };
 
@@ -1239,7 +1239,7 @@ const gpuTrace = {
 const barLayout = {
   font: {
     family: 'Arial, sans-serif',
-    size: 31,
+    size: 18,
     color: 'black'
   },
 
@@ -1247,24 +1247,24 @@ const barLayout = {
 
   xaxis: {
     title: { text: 'GPU Type', font: { size: 31 } ,  standoff: 100 },
-    tickfont: { size: 31 },
+    tickfont: { size: 18 },
     tickangle: -45
   },
 
   yaxis: {
     title: { text: 'Work-per-TCO (ns/€ * atoms)', font: { size: 31 },  standoff: 100 },
-    tickfont: { size: 31 },
+    tickfont: { size: 18 },
     rangemode: 'tozero'
   },
 
   yaxis2: {
     title: { text: '#GPUs', font: { size: 31, color: 'red' },  standoff: 100 },
-    tickfont: { size: 31, color: 'red' },
+    tickfont: { size: 18, color: 'red' },
     overlaying: 'y',
     side: 'right'
   },
 
-  legend: { font: { size: 31 }, orientation: 'h', y: -0.15 },
+  legend: { font: { size: 18 }, orientation: 'h', y: -0.15 },
   height: 500,
 margin: {
   t: 80,
@@ -1295,7 +1295,7 @@ const gpuTrace2 = {
   marker: { color: 'red', size: 6 },
   text: gpuCounts.map(String),
   textposition: 'top center',
-  textfont: { color: 'red', size: 16 }
+  textfont: { color: 'red', size: 18 }
 };
 
 const powerLayout = {
@@ -1330,16 +1330,16 @@ const gpuTrace3 = {
   marker: { color: 'red', size: 6 },
   text: gpuCounts.map(String),
   textposition: 'top center',
-  textfont: { color: 'red', size: 16 }
+  textfont: { color: 'red', size: 18 }
 };
 
 // Layout
 const perfWattLayout = {
   title: '',
   barmode: 'group',
-  xaxis: { title: 'GPU Type', tickangle: -45, font: { size: 16 }},
-  yaxis: { title: 'Work-per-watt-per-TCO (ns/W/€ * atoms)', rangemode: 'tozero', showgrid: true, font: { size: 16 } },
-  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red', font: { size: 16 } },
+  xaxis: { title: 'GPU Type', tickangle: -45, font: { size: 18 }},
+  yaxis: { title: 'Work-per-watt-per-TCO (ns/W/€ * atoms)', rangemode: 'tozero', showgrid: true, font: { size: 18 } },
+  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red', font: { size: 18 } },
   legend: { orientation: 'h', y: -0.2 },
   height: 500,
   margin: { t: 60, b: 100, l: 80, r: 80 }
