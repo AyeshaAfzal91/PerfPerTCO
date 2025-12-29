@@ -3778,20 +3778,19 @@ async function restoreStateWhenReady(state){
         // Allow DOM + async listeners to settle
         await new Promise(r => setTimeout(r, 200));
 
-        // ------------------------------
-        // RUN CALCULATIONS
-        // ------------------------------
-        if (typeof calculateResults === "function") calculateResults();
-        else if (typeof calculate === "function") calculate();
-        else if (typeof runAllCalculations === "function") runAllCalculations();
+		// ------------------------------
+		// RUN CALCULATIONS
+		// ------------------------------
+		if (typeof calculateResults === "function") calculateResults();
+		else if (typeof calculate === "function") calculate();
+		else if (typeof runAllCalculations === "function") runAllCalculations();
 
-        // ------------------------------
-        // FORCE PLOT REBUILD
-        // ------------------------------
-        if (typeof runAllCalculations === "function") {
-    runAllCalculations(); // this must rebuild plots
-}
-
+		// ------------------------------
+		// FORCE PLOT/TABLE REBUILD
+		// ------------------------------
+		await new Promise(r => setTimeout(r, 200)); // allow DOM listeners to settle
+		
+		if (typeof window.renderPerfPowerHeatmaps === "function") window.renderPerfPowerHeatmaps();
 
         console.log("✅ State restored successfully.");
 
