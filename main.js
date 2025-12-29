@@ -3748,43 +3748,40 @@ async function restoreStateWhenReady(state){
     if (!state) return;
 
     try {
-        // 1. Wait for UI + core calculation functions to be available
+        // 1. Wait for core functions to be available
         await waitFor(() => {
-            const sliderExists = document.querySelector('input[type="range"]');
-            const calcReady = typeof calculate === "function" || typeof calculateResults === "function";
-            return sliderExists && calcReady;
+            return document.querySelector('input[type="range"]') && 
+                   (typeof calculate === "function" || typeof calculateResults === "function");
         }, 7000);
 
-        // 2. Restore GPU Data first so calculations use the shared data
-        if (state.gpu_data) {
-            window.GPU_data = structuredClone(state.gpu_data);
-        }
-        if (state.active_gpu_data) {
-            window.activeGPUData = structuredClone(state.active_gpu_data);
-        }
+        // 2. Restore GPU data objects
+        if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+        if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 
-        // 3. Apply Inputs (Sliders, Selects, Checkboxes)
+        // 3. Apply Slider/Input values
         applyInputsFromState(state);
 
-        // 4. Brief pause for DOM and listeners to settle
-        await new Promise(r => setTimeout(r, 200));
+        // 4. Give the DOM a moment to settle
+        await new Promise(r => setTimeout(r, 300));
 
-        // 5. Run Calculations
-		if (typeof calculate === "function") calculate();
-		else if (typeof calculateResults === "function") calculateResults();
-		
-		// 6. FORCE PLOT REBUILD
-		// Small delay ensures the DOM containers are ready for Plotly/Chart.js
-		await new Promise(r => setTimeout(r, 600)); 
-		
-		if (typeof window.runAllVisualizations === "function") {
-		    window.runAllVisualizations();
-		} else {
-		    // Fallback if master function isn't used
-		    if (typeof window.renderPerfPowerHeatmaps === "function") window.renderPerfPowerHeatmaps();
-		}
-		
-		console.log("State and all visual plots restored successfully.");
+        // 5. Run the Core Calculation
+        if (typeof calculate === "function") calculate();
+        else if (typeof calculateResults === "function") calculateResults();
+
+        // 6. CRITICAL: Force Re-render of all Plots (Tornado, Heatmaps, etc.)
+        // We wait 500ms to ensure the calculation has finished and the DOM is ready for Plotly
+        await new Promise(r => setTimeout(r, 500));
+        
+        if (typeof window.renderAllOutputs === "function") {
+            window.renderAllOutputs();
+        } else {
+            // Fallback if the master function isn't found
+            if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
+            if (typeof renderTornadoPlots === "function") renderTornadoPlots('tco');
+        }
+
+        console.log("✅ All inputs and visual plots successfully restored.");
+
     } catch (e) {
         console.warn("restoreStateWhenReady() failed:", e);
     }
@@ -3933,45 +3930,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* -------------------------------------------------------------------------
-   1. WRAP SENSITIVITY LOGIC
-   Ensure the Plotly heatmap is inside a named function
-   ------------------------------------------------------------------------- */
-function renderSensitivityHeatmaps() {
-    // Ensure data exists before plotting
-    if (typeof heatmapData !== 'undefined' && typeof heatmapLayout !== 'undefined') {
-        Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout, { 
-            responsive: true, 
-            displaylogo: false 
-        });
-    }
-}
-
-/* -------------------------------------------------------------------------
-   2. MASTER VISUALIZATION TRIGGER
-   This function runs everything needed to populate the "Output" side of the UI
-   ------------------------------------------------------------------------- */
-function runAllVisualizations() {
-    console.log("🎨 Triggering all visual outputs...");
+/* --- NEW: Function to trigger all visual plots at once --- */
+window.renderAllOutputs = function() {
+    console.log("🎨 Re-rendering all visual outputs for shared link...");
     
-    // Trigger Tornado Plots (default to 'tco')
-    if (typeof renderTornadoPlots === "function") {
-        renderTornadoPlots('tco');
+    // 1. Trigger the standard TCO and results table (already inside calculate, but safe to call)
+    if (typeof calculate === "function") calculate();
+
+    // 2. Trigger Benchmark Heatmaps
+    if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
+
+    // 3. Trigger Tornado Plots (Defaulting to 'tco' metric)
+    if (typeof renderTornadoPlots === "function") renderTornadoPlots('tco');
+
+    // 4. Trigger Sensitivity Heatmaps
+    // This manually triggers the 'change' event on your metric selector to draw the heatmap
+    const metricSelector = document.getElementById('metricSelector');
+    if (metricSelector) {
+        metricSelector.dispatchEvent(new Event('change'));
     }
+};
 
-    // Trigger Sensitivity Heatmaps
-    renderSensitivityHeatmaps();
-
-    // Trigger Performance/Power Heatmaps
-    if (typeof renderPerfPowerHeatmaps === "function") {
-        renderPerfPowerHeatmaps();
-    }
-}
-
-/* -------------------------------------------------------------------------
-   3. UPDATED GLOBAL EXPORTS
-   Add the rendering functions to the window object
-   ------------------------------------------------------------------------- */
+// Update your exports to include the plotting functions
 Object.assign(window, {
   updateAITip,
   updateValue,
@@ -3993,10 +3973,9 @@ Object.assign(window, {
   saveScenario,
   compareScenarios,
   downloadComparisonPDF,
-  renderTornadoPlots,
-  renderSensitivityHeatmaps,
-  renderPerfPowerHeatmaps,
-  runAllVisualizations, 
+  renderPerfPowerHeatmaps, // Already there
+  renderTornadoPlots,      // Added
+  renderAllOutputs,        // Added
   generateBlogPost,
   shareSetup
 });
