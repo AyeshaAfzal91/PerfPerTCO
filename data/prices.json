@@ -11513,5 +11513,54 @@
     "livePrice": 5814.55,
     "date": "2025-12-28T04:10:25Z",
     "url": "https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html"
+  },
+  {
+    "gpu": "H100",
+    "staticPrice": 25818,
+    "livePrice": 25818,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "https://www.deltacomputer.com/nvidia-h100-80gb.html"
+  },
+  {
+    "gpu": "GH200",
+    "staticPrice": 25000,
+    "livePrice": 38436.6,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "https://www.deltacomputer.com/d14n-m2-gh-edu.html"
+  },
+  {
+    "gpu": "A100",
+    "staticPrice": 7264,
+    "livePrice": 7264,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "Not Available"
+  },
+  {
+    "gpu": "A40",
+    "staticPrice": 4275,
+    "livePrice": 4275,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "Not Available"
+  },
+  {
+    "gpu": "L4",
+    "staticPrice": 2200,
+    "livePrice": 2140.12,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "https://www.deltacomputer.com/nvidia-l4.html"
+  },
+  {
+    "gpu": "L40",
+    "staticPrice": 6024,
+    "livePrice": 5814.21,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html"
+  },
+  {
+    "gpu": "L40S",
+    "staticPrice": 6100,
+    "livePrice": 5814.21,
+    "date": "2025-12-29T04:12:58Z",
+    "url": "https://www.deltacomputer.com/nvidia-l40s-48gb-edu-startup.html"
   }
 ]
