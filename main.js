@@ -3960,8 +3960,7 @@ Object.assign(window, {
   compareScenarios,
   downloadComparisonPDF,
   renderPerfPowerHeatmaps,
-  generateBlogPost,
-  copyBlogText
+  generateBlogPost
 });
 
 
