@@ -8,32 +8,38 @@ const supabase = createClient(
 
 export async function handler(event) {
   if (event.httpMethod !== "GET") {
-    return { statusCode: 405, body: JSON.stringify({ error: "Method Not Allowed" }) };
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" })
+    };
   }
 
-  const id = event.queryStringParameters?.id;
-  if (!id) {
-    return { statusCode: 400, body: JSON.stringify({ error: "Missing ID" }) };
+  const token = event.queryStringParameters?.token;
+  if (!token) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing token" })
+    };
   }
 
   try {
     const { data, error } = await supabase
       .from("shared_configs")
       .select("config")
-      .eq("id", id)
+      .eq("share_token", token)
       .single();
 
     if (error) throw error;
-    if (!data) {
-      return { statusCode: 404, body: JSON.stringify({ error: "Config not found" }) };
-    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ data: data.config }) // always return as `data`
+      body: JSON.stringify({ data: data.config })
     };
   } catch (err) {
     console.error("getConfig error:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
 }
