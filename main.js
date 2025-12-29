@@ -3769,47 +3769,22 @@ async function restoreStateWhenReady(state){
         // 4. Brief pause for DOM and listeners to settle
         await new Promise(r => setTimeout(r, 200));
 
-        // 5. Run the Core Calculation to populate window.results
-        if (typeof calculate === "function") {
-            calculate();
-        } else if (typeof calculateResults === "function") {
-            calculateResults();
-        }
-
-        // 6. FORCE RE-RENDER OF ALL PLOTS
-        // We add a small delay to ensure 'window.results' is fully ready before plotting
-        await new Promise(r => setTimeout(r, 500));
-        
-        console.log("🔄 Triggering visual re-renders for shared state...");
-
-        // Render Performance/Power Heatmaps
-        if (typeof window.renderPerfPowerHeatmaps === "function") {
-            window.renderPerfPowerHeatmaps();
-        }
-
-        // Trigger Sensitivity Heatmaps (Plotly)
-        // If these are defined as standalone functions in your main-2.js
-        if (typeof window.renderSensitivityHeatmaps === "function") {
-            window.renderSensitivityHeatmaps();
-        }
-
-        // Trigger Tornado Plots (Plotly)
-        if (typeof window.renderTornadoCharts === "function") {
-            window.renderTornadoCharts();
-        }
-        
-        // Trigger TCO/Stacked Charts
-        if (typeof window.renderTCOCharts === "function") {
-            window.renderTCOCharts();
-        }
-
-        // Update AI Insights if applicable
-        if (typeof updateAITip === "function") {
-            updateAITip();
-        }
-
-        console.log("✅ State restored and all plots updated.");
-
+        // 5. Run Calculations
+		if (typeof calculate === "function") calculate();
+		else if (typeof calculateResults === "function") calculateResults();
+		
+		// 6. FORCE PLOT REBUILD
+		// Small delay ensures the DOM containers are ready for Plotly/Chart.js
+		await new Promise(r => setTimeout(r, 600)); 
+		
+		if (typeof window.runAllVisualizations === "function") {
+		    window.runAllVisualizations();
+		} else {
+		    // Fallback if master function isn't used
+		    if (typeof window.renderPerfPowerHeatmaps === "function") window.renderPerfPowerHeatmaps();
+		}
+		
+		console.log("State and all visual plots restored successfully.");
     } catch (e) {
         console.warn("restoreStateWhenReady() failed:", e);
     }
@@ -3958,7 +3933,45 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// ===== TEMPORARY GLOBAL EXPORTS FOR HTML HANDLERS =====
+/* -------------------------------------------------------------------------
+   1. WRAP SENSITIVITY LOGIC
+   Ensure the Plotly heatmap is inside a named function
+   ------------------------------------------------------------------------- */
+function renderSensitivityHeatmaps() {
+    // Ensure data exists before plotting
+    if (typeof heatmapData !== 'undefined' && typeof heatmapLayout !== 'undefined') {
+        Plotly.newPlot("sensitivityHeatmaps", heatmapData, heatmapLayout, { 
+            responsive: true, 
+            displaylogo: false 
+        });
+    }
+}
+
+/* -------------------------------------------------------------------------
+   2. MASTER VISUALIZATION TRIGGER
+   This function runs everything needed to populate the "Output" side of the UI
+   ------------------------------------------------------------------------- */
+function runAllVisualizations() {
+    console.log("🎨 Triggering all visual outputs...");
+    
+    // Trigger Tornado Plots (default to 'tco')
+    if (typeof renderTornadoPlots === "function") {
+        renderTornadoPlots('tco');
+    }
+
+    // Trigger Sensitivity Heatmaps
+    renderSensitivityHeatmaps();
+
+    // Trigger Performance/Power Heatmaps
+    if (typeof renderPerfPowerHeatmaps === "function") {
+        renderPerfPowerHeatmaps();
+    }
+}
+
+/* -------------------------------------------------------------------------
+   3. UPDATED GLOBAL EXPORTS
+   Add the rendering functions to the window object
+   ------------------------------------------------------------------------- */
 Object.assign(window, {
   updateAITip,
   updateValue,
@@ -3980,7 +3993,10 @@ Object.assign(window, {
   saveScenario,
   compareScenarios,
   downloadComparisonPDF,
+  renderTornadoPlots,
+  renderSensitivityHeatmaps,
   renderPerfPowerHeatmaps,
+  runAllVisualizations, 
   generateBlogPost,
   shareSetup
 });
