@@ -3601,72 +3601,81 @@ function downloadComparisonPDF() {
 ---------------------*/
 
 // ===================== STATE ENCODE / DECODE =====================
-function encodeState(obj){
-  try {
-    const json = JSON.stringify(obj);
-    if (typeof LZString !== "undefined" && LZString.compressToEncodedURIComponent) {
-      return LZString.compressToEncodedURIComponent(json);
-    } else {
-      return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
+/* --------------------
+  Wattlytics State Module
+  - Updated for type="module" compatibility
+  - Handles URL/Database state restoration
+---------------------*/
+function encodeState(obj) {
+    try {
+        const json = JSON.stringify(obj);
+        // @ts-ignore
+        if (typeof LZString !== "undefined" && LZString.compressToEncodedURIComponent) {
+            return LZString.compressToEncodedURIComponent(json);
+        } else {
+            return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
+        }
+    } catch (e) {
+        console.error("encodeState error:", e);
+        return null;
     }
-  } catch(e){
-    console.error("encodeState error:", e);
-    return null;
-  }
 }
 
-function decodeState(str){
-  try {
-    if (typeof LZString !== "undefined" && LZString.decompressFromEncodedURIComponent) {
-      return JSON.parse(LZString.decompressFromEncodedURIComponent(str));
-    } else {
-      const json = decodeURIComponent(escape(atob(decodeURIComponent(str))));
-      return JSON.parse(json);
+function decodeState(str) {
+    try {
+        // @ts-ignore
+        if (typeof LZString !== "undefined" && LZString.decompressFromEncodedURIComponent) {
+            return JSON.parse(LZString.decompressFromEncodedURIComponent(str));
+        } else {
+            const json = decodeURIComponent(escape(atob(decodeURIComponent(str))));
+            return JSON.parse(json);
+        }
+    } catch (e) {
+        console.error("decodeState error:", e);
+        return null;
     }
-  } catch(e){
-    console.error("decodeState error:", e);
-    return null;
-  }
 }
 
 // ===================== GET & APPLY STATE =====================
-function getCurrentState(){
-  const state = {
-    sliders: {},
-    selects: {},
-    checkboxes: {},
-    texts: {},
-    gpu_data: typeof GPU_data !== "undefined" ? GPU_data : null,
-    active_gpu_data: typeof activeGPUData !== "undefined" ? activeGPUData : null,
-    meta: {
-      savedAt: (new Date()).toISOString(),
-      origin: window.location.origin
-    }
-  };
+function getCurrentState() {
+    const state = {
+        sliders: {},
+        selects: {},
+        checkboxes: {},
+        texts: {},
+        gpu_data: window.GPU_data || null,
+        active_gpu_data: window.activeGPUData || null,
+        meta: {
+            savedAt: (new Date()).toISOString(),
+            origin: window.location.origin
+        }
+    };
 
-  document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
-    if (input.id) state.sliders[input.id] = Number(input.value);
-  });
+    document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
+        if (input.id) state.sliders[input.id] = Number(input.value);
+    });
 
-  document.querySelectorAll('select').forEach(s => {
-    if (s.id) state.selects[s.id] = s.value;
-  });
+    document.querySelectorAll('select').forEach(s => {
+        if (s.id) state.selects[s.id] = s.value;
+    });
 
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    if (cb.id) state.checkboxes[cb.id] = cb.checked;
-  });
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.id) state.checkboxes[cb.id] = cb.checked;
+    });
 
-  document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
-    if (inp.id) state.texts[inp.id] = inp.value;
-  });
+    document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
+        if (inp.id) state.texts[inp.id] = inp.value;
+    });
 
-  return state;
+    return state;
 }
 
-// Define the map outside the function so it's only created once
 const spanMap = {
     benchmarkId: "benchmarkVal",
     total_budget: "v_budget",
+    max_total_power: "v_max_power",
+    target_performance: "v_perf",
+    same_n_gpu: "v_same_n_gpu",
     C_node_server: "v_node_server",
     C_node_infra: "v_node_infra",
     C_node_facility: "v_node_facility",
@@ -3692,21 +3701,21 @@ function applyInputsFromState(state) {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
-        el.dispatchEvent(new Event('input', { bubbles: true })); // Trigger listeners
+        // Trigger input event so listeners in main-3.js react
+        el.dispatchEvent(new Event('input', { bubbles: true }));
         
-        // Update the display spans (v_budget, etc.)
         const spanId = spanMap[id];
-        if (spanId && typeof updateValue === "function") {
-            updateValue(spanId, val); 
+        if (spanId && typeof window.updateValue === "function") {
+            window.updateValue(spanId, val); 
         }
     });
 
-    // Dropdowns (CRITICAL FIX)
+    // Dropdowns
     Object.entries(state.selects || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
-        el.dispatchEvent(new Event('change', { bubbles: true })); // This triggers the plotting logic
+        el.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
     // Checkboxes
@@ -3716,228 +3725,134 @@ function applyInputsFromState(state) {
         el.checked = Boolean(val);
         el.dispatchEvent(new Event('change', { bubbles: true }));
     });
+
+    // Data Restoration
+    if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+    if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 }
 
-// ===================== HELPER: waitFor =====================
-function waitFor(conditionFn, timeout = 5000, interval = 50) {
-  const start = Date.now();
-  return new Promise((resolve, reject) => {
-    (function check() {
-      if (conditionFn()) return resolve(true);
-      if (Date.now() - start > timeout) return reject("waitFor timeout");
-      setTimeout(check, interval);
-    })();
-  });
+// ===================== HELPERS =====================
+function waitFor(conditionFn, timeout = 7000, interval = 100) {
+    const start = Date.now();
+    return new Promise((resolve, reject) => {
+        (function check() {
+            if (conditionFn()) return resolve(true);
+            if (Date.now() - start > timeout) return reject("waitFor timeout");
+            setTimeout(check, interval);
+        })();
+    });
 }
 
-// ===================== RESTORE STATE =====================
+async function copyToClipboard(text, successMsg = "Link copied.") {
+    try {
+        await navigator.clipboard.writeText(text);
+        if (confirm(successMsg + "\n\nOpen link in a new tab now?")) {
+            window.open(text, '_blank');
+        }
+    } catch (err) {
+        prompt("Copy the link manually:", text);
+    }
+}
+
+// ===================== RESTORE STATE (THE FIX) =====================
 async function restoreStateWhenReady(state) {
     if (!state) return;
     try {
         await waitFor(() => {
-            return document.querySelector('input[type="range"]') && typeof calculate === "function";
-        }, 7000);
+            return document.querySelector('input[type="range"]') && 
+                   typeof window.calculate === "function";
+        }, 8000);
 
-        // 1. Restore Data
-        if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
-        if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
-
-        // 2. Restore Inputs (Now triggers events)
+        // 1. Restore Values
         applyInputsFromState(state);
 
-        // 3. Execution Sequence
-        await new Promise(r => setTimeout(r, 500)); // Wait for UI to settle
-        
-        if (typeof window.refreshAllVisuals === "function") {
-            await window.refreshAllVisuals();
+        // 2. Delay for Plotly/DOM
+        await new Promise(r => setTimeout(r, 600));
+
+        // 3. EXECUTE ALL VISUALS (Requires renderAllOutputs from main-3.js)
+        if (typeof window.renderAllOutputs === "function") {
+            window.renderAllOutputs();
         } else {
-            if (typeof calculate === "function") calculate();
+            if (typeof window.calculate === "function") window.calculate();
+            if (typeof window.renderPerfPowerHeatmaps === "function") window.renderPerfPowerHeatmaps();
         }
+
+        // 4. Force Plotly Resize
+        window.dispatchEvent(new Event('resize'));
+        console.log("✅ Visual Restoration Complete.");
 
     } catch (e) {
-        console.warn("Restoration error:", e);
+        console.warn("restoreStateWhenReady() failed:", e);
     }
 }
 
-// ===================== HELPER: COPY TO CLIPBOARD =====================
-/**
- * Attempts to copy text to the clipboard and offers to open the link in a new tab.
- * @param {string} text - The text (URL) to copy.
- * @param {string} successMsg - Message to display on successful copy.
- */
-async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
-    try {
-        await navigator.clipboard.writeText(text);
-        
-        // --- UX IMPROVEMENT: Use confirm() to offer the New Tab option ---
-        const userChoice = confirm(
-            successMsg + "\n\nWould you like to open this link in a new tab now?"
-        );
-        
-        if (userChoice) {
-            // User clicked 'OK' (or similar button)
-            window.open(text, '_blank');
-        }
-        // If the user clicks 'Cancel' (or similar button), they proceed to share the copied link.
-        
-        return true;
-    } catch (err) {
-        console.warn("Clipboard write failed (Security error or no permission):", err);
-        
-        // --- Fallback Mechanism (for security failure) ---
-        prompt(
-            "Automatic clipboard access failed due to browser security. Please copy the link manually from this box:", 
-            text
-        );
-        return false;
-    }
-}
-
-// ===================== SHARE LINK =====================
+// ===================== EXPORTS =====================
 async function shareSetup() {
     try {
         const state = getCurrentState();
         const encoded = encodeState(state);
-        if (!encoded) throw new Error("Failed to encode state.");
-
         const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-        
-        // --- Embedded Link Logic ---
-        if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
-            await copyToClipboard(urlIfEmbedded, "Copied shareable link (embedded) to clipboard.");
-            return { mode: "embedded", url: urlIfEmbedded };
+
+        if (urlIfEmbedded.length < 2000) {
+            await copyToClipboard(urlIfEmbedded, "Embedded share link copied.");
+            return;
         }
 
-        // --- Short Link Fallback Logic ---
         const res = await fetch('/.netlify/functions/saveConfig', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ config: state })
         });
-
-        if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
-
         const data = await res.json();
-        const id = data.id || data.ID || data.key;
-        if (!id) throw new Error("No id returned from backend.");
-
-        const shortUrl = `${window.location.origin}/s/${id}`;
-        
-        // Use the robust copyToClipboard function
-        await copyToClipboard(shortUrl, "Copied shareable short link to clipboard.");
-
-        return { mode: "short", id, url: shortUrl };
+        const shortUrl = `${window.location.origin}/s/${data.id || data.key}`;
+        await copyToClipboard(shortUrl, "Short share link copied.");
 
     } catch (e) {
-        console.error("shareSetup error:", e);
-        alert("Could not create share link: " + e.message);
-        return null;
+        alert("Share failed: " + e.message);
     }
 }
 
-// ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
-  const path = window.location.pathname;
-  const params = new URLSearchParams(window.location.search);
-  let state = null;
+    const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    let state = null;
 
-  // Case 1: /s/<id>
-  if (path.startsWith("/s/")) {
-    const id = path.replace("/s/", "").trim();
-    if (id) {
-      try {
+    if (path.startsWith("/s/")) {
+        const id = path.split("/s/")[1];
         const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
         if (res.ok) {
-          const json = await res.json();
-          if (json?.data) state = json.data;
+            const json = await res.json();
+            state = json.data || json.config;
         }
-      } catch (err) {
-        console.error("Error fetching shared config:", err);
-      }
+    } else if (params.has("d")) {
+        state = decodeState(params.get("d"));
     }
-  }
 
-  // Case 2: ?d=<compressed>
-  if (!state && params.has("d")) {
-    try {
-      state = decodeState(params.get("d"));
-    } catch (err) {
-      console.error("Error decoding state from URL:", err);
+    if (state) {
+        await restoreStateWhenReady(state);
+        return true;
     }
-  }
-
-  if (state) {
-    await restoreStateWhenReady(state);
-    console.log("✅ State restored and calculations triggered from URL.");
-    return true;
-  }
-
-  return false;
+    return false;
 }
 
-// ===================== DOMContentLoaded LISTENER =====================
-document.addEventListener("DOMContentLoaded", () => {
-  // Setup Share button
-  const shareBtn = document.getElementById("shareBtn");
-  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
-
-  // Restore state from URL if possible
-  tryRestoreFromUrlOnLoad().then(restored => {
-    if (restored) {
-      console.log("✅ URL state applied.");
-    } else {
-      console.log("ℹ️ No URL state found; running default initialization.");
-
-      // --- DEFAULT INITIALIZATION ---
-      if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
-      if (typeof calculate === "function") calculate();
-      if (typeof runAllCalculations === "function") runAllCalculations();
-      // Add any other default setup here
-    }
-  }).catch(err => {
-    console.error("Error during URL restoration:", err);
-    // fallback to defaults
-    if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
-    if (typeof calculate === "function") calculate();
-  });
+// Attach to window so HTML buttons work with type="module"
+Object.assign(window, {
+    shareSetup,
+    tryRestoreFromUrlOnLoad,
+    getCurrentState
 });
 
-/**
- * This ensures data is calculated first, then visuals are drawn.
- */
-window.refreshAllVisuals = async function() {
-    console.log("🚀 Starting Full Visual Rebuild...");
-    
-    // 1. Run core calculations (Populates window.results and TCO Bar/Pie charts)
-    if (typeof calculate === "function") {
-        calculate();
-    }
+// Initialization
+document.addEventListener("DOMContentLoaded", () => {
+    const shareBtn = document.getElementById("shareBtn");
+    if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-    // 2. Wait for DOM to register calculation results
-    await new Promise(r => setTimeout(r, 100));
-
-    // 3. Force-trigger Sensitivity Heatmap
-    const metricSelector = document.getElementById('metricSelector');
-    if (metricSelector) {
-        metricSelector.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    // 4. Force-trigger Tornado Plots
-    const tornadoSelector = document.getElementById('tornadoMetricSelect');
-    const currentTornadoMetric = tornadoSelector ? tornadoSelector.value : 'tco';
-    if (typeof renderTornadoPlots === "function") {
-        renderTornadoPlots(currentTornadoMetric);
-    }
-
-    // 5. Force-trigger Benchmark Heatmaps
-    if (typeof renderPerfPowerHeatmaps === "function") {
-        renderPerfPowerHeatmaps();
-    }
-    
-    // 6. Final Layout Fix (Solves Plotly sizing issues)
-    window.dispatchEvent(new Event('resize'));
-    console.log("✅ Visual rebuild complete.");
-};
+    tryRestoreFromUrlOnLoad().then(restored => {
+        if (!restored) {
+            if (typeof window.calculate === "function") window.calculate();
+        }
+    });
+});
 
 // Update Global Exports
 Object.assign(window, {
