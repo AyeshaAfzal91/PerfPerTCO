@@ -2665,7 +2665,11 @@ function getGPUVector(matrix, gpuIndex) {
   // matrix is [parameter][gpu]
   return matrix.map(row => row[gpuIndex]);
 }
-function renderTornadoPlots(metric) {
+window.renderTornadoPlots = function renderTornadoPlots(metric) {
+  const tornadoContainer = document.getElementById("gpuTornadoPlots");
+  tornadoContainer.innerHTML = "";
+
+  window.results.forEach((gpu, i) => {
   const tornadoContainer = document.getElementById("gpuTornadoPlots");
   tornadoContainer.innerHTML = "";
 
@@ -2721,7 +2725,8 @@ function renderTornadoPlots(metric) {
 
     Plotly.newPlot(chartDiv, [traceElasticity, traceSobol, traceMC], layout);
   });
-}
+});
+};
 	
 renderTornadoPlots("tco");
 
