@@ -3967,7 +3967,6 @@ Object.assign(window, {
     compareScenarios,
     downloadComparisonPDF,
     renderPerfPowerHeatmaps,
-    renderTornadoPlots,
 	refreshAllVisuals,
 	generateBlogPost,
     shareSetup
