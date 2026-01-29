@@ -648,12 +648,6 @@ function resetForm() {
   // Remove dynamically injected download containers
 document.querySelectorAll(".download-btn-container").forEach(el => el.remove());
 
-  elementsToRemove.forEach(id => {
-    const el = document.getElementById(id);
-    if (el && el.parentNode) {
-      el.parentNode.removeChild(el);
-    }
-  });
 
 document.getElementById("scenario-comparison").innerHTML = "";
 localStorage.removeItem("scenario1");
