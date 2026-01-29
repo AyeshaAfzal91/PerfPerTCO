@@ -535,6 +535,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+window.GPU_data = window.GPU_data || [];
+window.activeGPUData = window.activeGPUData || [];
+
+
 if (typeof GPU_data === "undefined") {
   var GPU_data = [...activeGPUData];
 }
