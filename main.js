@@ -3790,34 +3790,41 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
 function isAppReady() {
   return (
     typeof calculate === "function" &&
-    window.GPU_data &&
-    window.activeGPUData &&
+    typeof refreshAllVisuals === "function" &&
     document.getElementById("gpu-chart")
   );
 }
+
 
 // ===================== RESTORE STATE =====================
 async function restoreStateWhenReady(state) {
   if (!state) return;
 
   try {
-    // 🔑 Wait for app readiness (not just DOM)
-    await waitFor(isAppReady, 10000);
+    // Wait for app functions and chart element
+    await waitFor(() => 
+      typeof calculate === "function" &&
+      typeof refreshAllVisuals === "function" &&
+      document.getElementById("gpu-chart")
+    , 10000);
 
-    // 1. Restore GPU data FIRST
+    // 1️⃣ Restore GPU data FIRST
     if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
     if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 
-    // 2. Restore inputs (fires events)
+    // 2️⃣ Ensure GPU data is actually ready before calculating
+    await waitFor(() => window.GPU_data && window.activeGPUData, 5000);
+
+    // 3️⃣ Restore input values (sliders, selects, checkboxes)
     applyInputsFromState(state);
 
-    // 3. Hard recalc (this was missing reliability)
-    calculate();
+    // 4️⃣ Recalculate results
+    if (typeof calculate === "function") calculate();
 
-    // 4. Let calculations settle
+    // 5️⃣ Wait briefly for calculations to settle
     await new Promise(r => setTimeout(r, 300));
 
-    // 5. Rebuild all visuals
+    // 6️⃣ Rebuild all visuals (charts, heatmaps, tornado plots, etc.)
     if (typeof refreshAllVisuals === "function") {
       await refreshAllVisuals();
     }
@@ -3912,7 +3919,7 @@ async function tryRestoreFromUrlOnLoad() {
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
-  // Case 1: /s/<id>
+  // Case 1: /s/<id> short link
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
     if (id) {
@@ -3938,6 +3945,7 @@ async function tryRestoreFromUrlOnLoad() {
   }
 
   if (state) {
+    // ✅ Wait until everything is ready and restore state
     await restoreStateWhenReady(state);
     console.log("✅ State restored and calculations triggered from URL.");
     return true;
@@ -3945,6 +3953,7 @@ async function tryRestoreFromUrlOnLoad() {
 
   return false;
 }
+
 
 // ===================== DOMContentLoaded LISTENER =====================
 document.addEventListener("DOMContentLoaded", () => {
