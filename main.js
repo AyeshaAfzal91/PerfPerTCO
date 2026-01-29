@@ -1273,9 +1273,9 @@ const barLayout = {
     side: 'right'
   },
 
-  legend: { font: { size: 18 }, orientation: 'h', y: -0.31 },
+  legend: { font: { size: 18 }, orientation: 'h', y: -0.28 },
   height: 500,
-	  margin: { t: 20, b: 60, l: 60, r: 60 }
+	  margin: { t: 80, b: 60, l: 60, r: 60 }
  // margin: { t: 80, b: 180, l: 120, r: 120 }
 };
 
