@@ -2906,14 +2906,10 @@ function showFormula() {
     `);
 }
 
+// Attach click listener after DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
+  document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
 });
-
-// Function to display the password prompt when the "Show Formula" button is clicked
-/* function promptPassword() {
-  document.getElementById('password-prompt').style.display = 'block';
-}
 
 function validatePassword() {
   const enteredPassword = document.getElementById('password').value;
@@ -2926,7 +2922,7 @@ function validatePassword() {
   } else {
     document.getElementById('error-message').style.display = 'block';
   }
-} */
+} 
 
 // Dark mode toggle logic
 document.addEventListener("DOMContentLoaded", () => {
