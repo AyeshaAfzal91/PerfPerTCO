@@ -3787,34 +3787,48 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
   });
 }
 
+function isAppReady() {
+  return (
+    typeof calculate === "function" &&
+    window.GPU_data &&
+    window.activeGPUData &&
+    document.getElementById("gpu-chart")
+  );
+}
+
 // ===================== RESTORE STATE =====================
 async function restoreStateWhenReady(state) {
-    if (!state) return;
-    try {
-        await waitFor(() => {
-            return document.querySelector('input[type="range"]') && typeof calculate === "function";
-        }, 7000);
+  if (!state) return;
 
-        // 1. Restore Data
-        if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
-        if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
+  try {
+    // 🔑 Wait for app readiness (not just DOM)
+    await waitFor(isAppReady, 10000);
 
-        // 2. Restore Inputs (Now triggers events)
-        applyInputsFromState(state);
+    // 1. Restore GPU data FIRST
+    if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+    if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 
-        // 3. Execution Sequence
-        await new Promise(r => setTimeout(r, 500)); // Wait for UI to settle
-        
-        if (typeof window.refreshAllVisuals === "function") {
-            await window.refreshAllVisuals();
-        } else {
-            if (typeof calculate === "function") calculate();
-        }
+    // 2. Restore inputs (fires events)
+    applyInputsFromState(state);
 
-    } catch (e) {
-        console.warn("Restoration error:", e);
+    // 3. Hard recalc (this was missing reliability)
+    calculate();
+
+    // 4. Let calculations settle
+    await new Promise(r => setTimeout(r, 300));
+
+    // 5. Rebuild all visuals
+    if (typeof refreshAllVisuals === "function") {
+      await refreshAllVisuals();
     }
+
+    console.log("✅ State fully restored (inputs + outputs)");
+
+  } catch (e) {
+    console.warn("Restoration error:", e);
+  }
 }
+
 
 // ===================== HELPER: COPY TO CLIPBOARD =====================
 /**
