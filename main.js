@@ -634,6 +634,8 @@ function resetForm() {
   document.getElementById("resultsTable").innerHTML = "";
   document.getElementById("comparison-message-container").innerHTML = "";
   document.getElementById("gpu-chart").innerHTML = "";
+  document.getElementById("power-chart").innerHTML = "";
+  document.getElementById("perf-watt-chart").innerHTML = "";
   document.getElementById("stacked-tco-chart").innerHTML = "";
   document.getElementById("pie-tco-chart").innerHTML = "";
   document.getElementById("gpuTornadoPlots").innerHTML = "";
@@ -643,15 +645,8 @@ function resetForm() {
   document.getElementById("gpuPerfPowerHeatmap").innerHTML = "";
 
 
-  // Remove extra chart titles and download buttons
-  const elementsToRemove = [
-    "chart-title-perf-tco",
-    "chart-title-tco-breakdown",
-    "gpu-download-btn",
-    "download-btn",
-    "heatmap-download-btn",
-    "download-pie-btn"
-  ];
+  // Remove dynamically injected download containers
+document.querySelectorAll(".download-btn-container").forEach(el => el.remove());
 
   elementsToRemove.forEach(id => {
     const el = document.getElementById(id);
