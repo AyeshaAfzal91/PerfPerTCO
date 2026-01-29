@@ -732,3 +732,21 @@ td strong {
   transition: all 0.3s ease;
 }
 
+/* Dark mode for feature tables */
+body.dark table.feature-table thead {
+    background-color: #1e1e1e;
+    color: #f4f4f4;
+}
+
+body.dark table.feature-table tbody tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+body.dark table.feature-table tbody tr:hover {
+    background-color: #3a3a3a;
+}
+
+body.dark table.feature-table th,
+body.dark table.feature-table td {
+    color: #f4f4f4;
+}
