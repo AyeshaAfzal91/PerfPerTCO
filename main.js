@@ -4035,7 +4035,12 @@ Object.assign(window, {
     renderPerfPowerHeatmaps,
 	refreshAllVisuals,
 	generateBlogPost,
-    shareSetup
+    shareSetup,
+    tryRestoreFromUrlOnLoad,
+    restoreStateWhenReady,     
+    applyInputsFromState,      // optional
+    getCurrentState,           // optional
+    isAppReady                 // optional
 });
 
 
