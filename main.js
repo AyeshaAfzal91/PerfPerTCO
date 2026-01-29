@@ -2911,6 +2911,49 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
 });
 
+function showUncertaintyFormula() {
+  alert(`
+Elasticity (local sensitivity)
+------------------------------
+For each input parameter x_i, Wattlytics computes a discrete, dimensionless elasticity E_{x_i} w.r.t. the output metric M:
+
+    E_{x_i} ≈ (∂M / ∂x_i) * (x_i / M) × 100
+
+The partial derivative ∂M/∂x_i is derived analytically from the model, avoiding numerical differentiation. 
+Elasticity reflects the local slope at the nominal operating point; values may exceed ±100%.
+
+Sobol total-order indices (global sensitivity)
+---------------------------------------------
+Sobol indices measure global sensitivity over finite input ranges (e.g., ±20%):
+
+    S_{T_i} ≈ ( (1/N) Σ_{k=1}^{N} (M_A^{(k)} - M_{A_B^{(i)}}^{(k)})^2 ) / (2 * Var(M)) × 100
+
+Here:
+- A and B are N×n independent sample matrices (N=2000, n=15)
+- M_A^{(k)} = f(A^{(k)}), M_{A_B^{(i)}}^{(k)} = f(A_B^{(i,k)})
+- Numerator = squared output difference by perturbing x_i
+- Denominator = total output variance
+
+One-at-a-time Monte Carlo (uncertainty propagation)
+---------------------------------------------------
+Each input x_i is perturbed individually while other parameters are fixed:
+
+    U_{x_i} = sqrt(Var(M^{(1)},...,M^{(N)})) / M_0 × 100
+
+where:
+- N = number of Monte Carlo samples (2000)
+- M_0 = baseline output
+- U_{x_i} = % uncertainty in M due to x_i
+  `);
+}
+
+// Attach click listener after DOM is loaded
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("showUncertaintyBtn");
+  if (btn) btn.addEventListener("click", showUncertaintyFormula);
+});
+
+
 function promptPassword() { document.getElementById('password-prompt').style.display = 'block'; }
 
 function validatePassword() {
