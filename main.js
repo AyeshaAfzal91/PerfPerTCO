@@ -1572,15 +1572,26 @@ legend: {
 
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
-	
+
 // Add a button to download the plot as PNG or SVG with high resolution
 if (!document.getElementById('download-btn')) {
-  const downloadButtonDiv = document.createElement('div');
-  downloadButtonDiv.classList.add('download-btn-container');
-  downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
+  const chartContainer = document.getElementById('stacked-tco-chart');
 
-  // Append AFTER the chart instead of before
-  document.getElementById('stacked-tco-chart').parentElement.appendChild(downloadButtonDiv);
+// Create wrapper
+const wrapperDiv = document.createElement('div');
+wrapperDiv.classList.add('chart-with-download'); // Optional CSS class for styling
+
+// Move the chart into wrapper
+chartContainer.parentElement.insertBefore(wrapperDiv, chartContainer);
+wrapperDiv.appendChild(chartContainer);
+
+// Create button
+const downloadButtonDiv = document.createElement('div');
+downloadButtonDiv.classList.add('download-btn-container');
+downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
+
+// Append button to wrapper (below chart)
+wrapperDiv.appendChild(downloadButtonDiv);
 
   // Add event listener for the button
   document.getElementById('download-btn').addEventListener('click', () => {
