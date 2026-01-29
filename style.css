@@ -176,9 +176,10 @@ label {
 
 #stacked-tco-chart {
   max-width: 100%;
+  max-height: 60%;
   margin: 0 auto 120px auto;  
   display: block;
-  height: 25vh;
+  height: 50vh;
   position: relative;
   z-index: 2;
 }
