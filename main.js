@@ -2911,6 +2911,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
 });
 
+function promptPassword() { document.getElementById('password-prompt').style.display = 'block'; }
+
 function validatePassword() {
   const enteredPassword = document.getElementById('password').value;
   const correctPassword = 'TCO25'; // Replace with your password
@@ -3963,6 +3965,7 @@ Object.assign(window, {
     resetZoom,
     applyPresetProfile,
     generatePDFReport,
+	promptPassword,
     validatePassword,
     saveScenario,
     compareScenarios,
