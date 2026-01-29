@@ -3697,12 +3697,9 @@ function getCurrentState(){
     selects: {},
     checkboxes: {},
     texts: {},
-    gpu_data: typeof GPU_data !== "undefined" ? GPU_data : null,
-    active_gpu_data: typeof activeGPUData !== "undefined" ? activeGPUData : null,
-    meta: {
-      savedAt: (new Date()).toISOString(),
-      origin: window.location.origin
-    }
+    gpu_data: window.GPU_data || null,
+    active_gpu_data: window.activeGPUData || null,
+    meta: { savedAt: new Date().toISOString(), origin: window.location.origin }
   };
 
   document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
@@ -3762,21 +3759,33 @@ function applyInputsFromState(state) {
         }
     });
 
-    // Dropdowns (CRITICAL FIX)
-    Object.entries(state.selects || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event('change', { bubbles: true })); // This triggers the plotting logic
-    });
+  // Texts
+  Object.entries(state.texts || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
 
-    // Checkboxes
-    Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.checked = Boolean(val);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+  // Selects
+  Object.entries(state.selects || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  // Checkboxes
+  Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.checked = Boolean(val);
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  // GPU Data
+  if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+  if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 }
 
 // ===================== HELPER: waitFor =====================
@@ -3794,7 +3803,8 @@ function waitFor(conditionFn, timeout = 5000, interval = 50) {
 function isAppReady() {
   return (
     typeof calculate === "function" &&
-    typeof refreshAllVisuals === "function" &&
+    Array.isArray(window.GPU_data) &&
+    Array.isArray(window.activeGPUData) &&
     document.getElementById("gpu-chart")
   );
 }
@@ -3805,38 +3815,20 @@ async function restoreStateWhenReady(state) {
   if (!state) return;
 
   try {
-    // Wait for app functions and chart element
-    await waitFor(() => 
-      typeof calculate === "function" &&
-      typeof refreshAllVisuals === "function" &&
-      document.getElementById("gpu-chart")
-    , 10000);
-
-    // 1️⃣ Restore GPU data FIRST
-    if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
-    if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
-
-    // 2️⃣ Ensure GPU data is actually ready before calculating
-    await waitFor(() => window.GPU_data && window.activeGPUData, 5000);
-
-    // 3️⃣ Restore input values (sliders, selects, checkboxes)
+    await waitFor(isAppReady, 10000);
     applyInputsFromState(state);
 
-    // 4️⃣ Recalculate results
-    if (typeof calculate === "function") calculate();
+    // Extra delay for plots/charts
+    await new Promise(r => setTimeout(r, 200));
 
-    // 5️⃣ Wait briefly for calculations to settle
-    await new Promise(r => setTimeout(r, 300));
+    // Trigger calculation
+    if (typeof calculateResults === "function") calculateResults();
+    else if (typeof calculate === "function") calculate();
+    else if (typeof runAllCalculations === "function") runAllCalculations();
 
-    // 6️⃣ Rebuild all visuals (charts, heatmaps, tornado plots, etc.)
-    if (typeof refreshAllVisuals === "function") {
-      await refreshAllVisuals();
-    }
-
-    console.log("✅ State fully restored (inputs + outputs)");
-
+    console.log("✅ State fully restored.");
   } catch (e) {
-    console.warn("Restoration error:", e);
+    console.warn("restoreStateWhenReady error:", e);
   }
 }
 
@@ -3877,45 +3869,38 @@ async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
 
 // ===================== SHARE LINK =====================
 async function shareSetup() {
-    try {
-        const state = getCurrentState();
-        const encoded = encodeState(state);
-        if (!encoded) throw new Error("Failed to encode state.");
+  try {
+    const state = getCurrentState();
+    const encoded = encodeState(state);
+    if (!encoded) throw new Error("Failed to encode state.");
 
-        const urlIfEmbedded = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-        
-        // --- Embedded Link Logic ---
-        if (urlIfEmbedded.length <= 2000 && encoded.length < 1200) {
-            await copyToClipboard(urlIfEmbedded, "Copied shareable link (embedded) to clipboard.");
-            return { mode: "embedded", url: urlIfEmbedded };
-        }
-
-        // --- Short Link Fallback Logic ---
-        const res = await fetch('/.netlify/functions/saveConfig', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ config: state })
-        });
-
-        if (!res.ok) throw new Error(`Save failed: ${res.status} ${await res.text()}`);
-
-        const data = await res.json();
-        const id = data.id || data.ID || data.key;
-        if (!id) throw new Error("No id returned from backend.");
-
-        const shortUrl = `${window.location.origin}/s/${id}`;
-        
-        // Use the robust copyToClipboard function
-        await copyToClipboard(shortUrl, "Copied shareable short link to clipboard.");
-
-        return { mode: "short", id, url: shortUrl };
-
-    } catch (e) {
-        console.error("shareSetup error:", e);
-        alert("Could not create share link: " + e.message);
-        return null;
+    const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
+      await copyToClipboard(embeddedUrl, "Copied embedded link!");
+      return { mode: "embedded", url: embeddedUrl };
     }
+
+    const res = await fetch("/.netlify/functions/saveConfig", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config: state })
+    });
+
+    if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+    const data = await res.json();
+    const id = data.id || data.ID || data.key;
+    if (!id) throw new Error("No ID returned from backend");
+
+    const shortUrl = `${window.location.origin}/s/${id}`;
+    await copyToClipboard(shortUrl, "Copied short link!");
+    return { mode: "short", id, url: shortUrl };
+  } catch (e) {
+    console.error("shareSetup error:", e);
+    alert("Could not create share link: " + e.message);
+    return null;
+  }
 }
+
 
 // ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
@@ -3923,7 +3908,6 @@ async function tryRestoreFromUrlOnLoad() {
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
-  // Case 1: /s/<id> short link
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
     if (id) {
@@ -3934,30 +3918,44 @@ async function tryRestoreFromUrlOnLoad() {
           if (json?.data) state = json.data;
         }
       } catch (err) {
-        console.error("Error fetching shared config:", err);
+        console.error("Fetching shared config failed:", err);
       }
     }
   }
 
-  // Case 2: ?d=<compressed>
   if (!state && params.has("d")) {
-    try {
-      state = decodeState(params.get("d"));
-    } catch (err) {
-      console.error("Error decoding state from URL:", err);
-    }
+    state = decodeState(params.get("d"));
   }
 
   if (state) {
-    // ✅ Wait until everything is ready and restore state
     await restoreStateWhenReady(state);
-    console.log("✅ State restored and calculations triggered from URL.");
+    console.log("✅ URL state applied.");
     return true;
   }
 
   return false;
 }
 
+// ===================== MODULE-READY INIT =====================
+(async () => {
+  // Setup share button
+  const shareBtn = document.getElementById("shareBtn");
+  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
+
+  // Try restore URL state
+  try {
+    const restored = await tryRestoreFromUrlOnLoad();
+    if (!restored) {
+      if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
+      if (typeof calculate === "function") calculate();
+      if (typeof runAllCalculations === "function") runAllCalculations();
+    }
+  } catch (err) {
+    console.error("URL restore failed:", err);
+    if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
+    if (typeof calculate === "function") calculate();
+  }
+})();
 
 // ===================== DOMContentLoaded LISTENER =====================
 document.addEventListener("DOMContentLoaded", () => {
@@ -4053,7 +4051,9 @@ Object.assign(window, {
     restoreStateWhenReady,     
     applyInputsFromState,      // optional
     getCurrentState,           // optional
-    isAppReady                 // optional
+    isAppReady,                 // optional
+  encodeState,
+  decodeState
 });
 
 
