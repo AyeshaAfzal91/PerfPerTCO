@@ -1505,54 +1505,35 @@ legend: {
   font: { size: 18 }       // ✅ default fallback font
 };
 
-const chart = document.getElementById('stacked-tco-chart');
-
-if (!chart.closest('.chart-with-download')) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'chart-with-download';
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.alignItems = 'center';
-  wrapper.style.marginBottom = '30px';
-
-  chart.parentNode.insertBefore(wrapper, chart);
-  wrapper.appendChild(chart);
-}
-
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
+	
+// Add a button to download the plot as PNG or SVG with high resolution
+const downloadButtonDiv = document.createElement('div');
+downloadButtonDiv.classList.add('download-btn-container');
+downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
+document.getElementById('stacked-tco-chart').parentElement.insertBefore(downloadButtonDiv, document.getElementById('stacked-tco-chart'));
 
-if (!document.getElementById('download-btn')) {
-  const wrapper = document.querySelector('#stacked-tco-chart').parentElement;
-
-  const btnDiv = document.createElement('div');
-  btnDiv.className = 'download-btn-container';
-  btnDiv.style.marginTop = '16px';
-
-  btnDiv.innerHTML = `
-    <button id="download-btn">
-      Download TCO Breakdown Stack Chart (High Resolution)
-    </button>
-  `;
-
-  wrapper.appendChild(btnDiv);
-
-  document.getElementById('download-btn').addEventListener('click', () => {
-    Plotly.toImage('stacked-tco-chart', {
-      format: 'png',
-      width: 1200,
-      height: 600,
-      scale: 2
-    }).then(url => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'tco_breakdown_high_res.png';
-      a.click();
-    });
+// Add event listener for the button
+document.getElementById('download-btn').addEventListener('click', () => {
+  Plotly.toImage('stacked-tco-chart', {
+    format: 'png',  // You can change this to 'svg' or 'jpeg' if needed
+    height: 400,    // Set height for high resolution
+    width: 1200,    // Set width for high resolution
+    scale: 2        // Increase scale for higher resolution
+  }).then(function (url) {
+    if (url) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tco_breakdown_high_res.png';  // Filename for the downloaded PNG
+      link.click();
+    } else {
+      console.error("Failed to generate image");
+    }
+  }).catch(err => {
+    console.error("Error during image generation:", err);
   });
-}
-
-
+});
 
 /// ---------- Plotly Pi TCO Chart ----------
 const pieTraces = nonzeroResults.map((gpu, index) => {
