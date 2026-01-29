@@ -2906,8 +2906,10 @@ function showFormula() {
     `);
 }
 
+document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
+
 // Function to display the password prompt when the "Show Formula" button is clicked
-function promptPassword() {
+/* function promptPassword() {
   document.getElementById('password-prompt').style.display = 'block';
 }
 
@@ -2922,7 +2924,7 @@ function validatePassword() {
   } else {
     document.getElementById('error-message').style.display = 'block';
   }
-}
+} */
 
 // Dark mode toggle logic
 document.addEventListener("DOMContentLoaded", () => {
