@@ -1440,67 +1440,6 @@ const totalCosts = nonzeroResults.map(r => {
   return capitalTotal + operationalTotal;
 }); 
 
-// Update capTraces and opTraces to include textfont
-/* const capTraces = capLabels.map((label, i) => ({
-  x: tcoLabels,
-  y: capBreakdown[i],
-  name: `[Capital] ${label}`,
-  type: 'bar',
-  marker: { color: plotlyColors[i] },
-  text: capBreakdown[i].map((value, idx) => {
-    const percentage = ((value / totalCosts[idx]) * 100).toFixed(2);
-    return percentage > 1 ? `${percentage}%` : '';
-  }),
-  textposition: 'inside',
-  texttemplate: '%{text}',
-  textfont: { size: 31 }   // bar text size
-}));
-
-const opTraces = opLabels.map((label, i) => ({
-  x: tcoLabels,
-  y: opBreakdown[i],
-  name: `[Operational] ${label}`,
-  type: 'bar',
-  marker: { color: plotlyColors[i + capLabels.length] },
-  text: opBreakdown[i].map((value, idx) => {
-    const percentage = ((value / totalCosts[idx]) * 100).toFixed(2);
-    return percentage > 1 ? `${percentage}%` : '';
-  }),
-  textposition: 'inside',
-  texttemplate: '%{text}',
-  textfont: { size: 31 }   // ✅ bar text size
-}));
-const tcoLayout = {
-  title: '',
-  barmode: 'stack',
-
-  xaxis: {
-    title: { text: 'GPU Type', font: { size: 31 } },
-    tickfont: { size: 31 },
-    automargin: true
-  },
-
-  yaxis: {
-    title: { text: 'Total Cost (€)', font: { size: 31 } },
-    tickfont: { size: 31 },
-    automargin: true
-  },
-
-  height: 600,
-  margin: { t: 60, b: 140, l: 100, r: 100 },
-
-  legend: {
-    orientation: 'v',
-    x: 1.02,          
-    y: 1,      
-    xanchor: 'left',
-    yanchor: 'top',
-    font: { size: 31 }     // ✅ legend text size
-  },
-  font: { size: 31 }       // ✅ default fallback font
-}; */
-
-
 // Add percentage text for each bar (capital and operational costs)
 const capTraces = capLabels.map((label, i) => ({
   x: tcoLabels,
@@ -1553,7 +1492,7 @@ legend: {
   y: 1,            // Negative y for bottom placement
   xanchor: 'left',
   yanchor: 'top',      // Anchor the top of the legend box to the y position
-  font: { size: 18 }     // ✅ legend text size
+  font: { size: 14 }     // ✅ legend text size
 },
   config: {
     toImageButtonOptions: {
