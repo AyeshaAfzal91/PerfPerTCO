@@ -3938,14 +3938,15 @@ async function tryRestoreFromUrlOnLoad() {
 
 // ===================== MODULE-READY INIT =====================
 (async () => {
-  // Setup share button
+  // Setup Share button
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-  // Try restore URL state
+  // Try to restore state from URL
   try {
     const restored = await tryRestoreFromUrlOnLoad();
     if (!restored) {
+      // Default initialization if no state found
       if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
       if (typeof calculate === "function") calculate();
       if (typeof runAllCalculations === "function") runAllCalculations();
@@ -3956,33 +3957,6 @@ async function tryRestoreFromUrlOnLoad() {
     if (typeof calculate === "function") calculate();
   }
 })();
-
-// ===================== DOMContentLoaded LISTENER =====================
-document.addEventListener("DOMContentLoaded", () => {
-  // Setup Share button
-  const shareBtn = document.getElementById("shareBtn");
-  if (shareBtn) shareBtn.addEventListener("click", shareSetup);
-
-  // Restore state from URL if possible
-  tryRestoreFromUrlOnLoad().then(restored => {
-    if (restored) {
-      console.log("✅ URL state applied.");
-    } else {
-      console.log("ℹ️ No URL state found; running default initialization.");
-
-      // --- DEFAULT INITIALIZATION ---
-      if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
-      if (typeof calculate === "function") calculate();
-      if (typeof runAllCalculations === "function") runAllCalculations();
-      // Add any other default setup here
-    }
-  }).catch(err => {
-    console.error("Error during URL restoration:", err);
-    // fallback to defaults
-    if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
-    if (typeof calculate === "function") calculate();
-  });
-});
 
 /**
  * This ensures data is calculated first, then visuals are drawn.
