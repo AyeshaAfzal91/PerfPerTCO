@@ -1354,39 +1354,51 @@ const perfWattLayout = {
   margin: { t: 60, b: 100, l: 80, r: 80 }
 };
 
-function renderCharts() {
-  if (!document.getElementById('power-chart')) {
-    console.error("Power chart div not found!");
-    return;
-  }
-	Plotly.newPlot('gpu-chart', [perfTrace, gpuTrace], barLayout, { responsive: true });
-	Plotly.newPlot('power-chart', [powerPerTCOTrace, gpuTrace2], powerLayout, { responsive: true });
-	Plotly.newPlot('perf-watt-chart', [perfPerWattTrace, gpuTrace3], perfWattLayout, { responsive: true });
+function renderChartsWithDownloads() {
+  const charts = [
+    { id: 'gpu-chart', traces: [perfTrace, gpuTrace], layout: barLayout, filename: 'gpu_chart_high_res.png', label: 'Performance per TCO' },
+    { id: 'power-chart', traces: [powerPerTCOTrace, gpuTrace2], layout: powerLayout, filename: 'power_chart_high_res.png', label: 'Power per TCO' },
+    { id: 'perf-watt-chart', traces: [perfPerWattTrace, gpuTrace3], layout: perfWattLayout, filename: 'perf_per_watt_chart_high_res.png', label: 'Performance per Watt' }
+  ];
+
+  charts.forEach(chart => {
+    const chartDiv = document.getElementById(chart.id);
+    if (!chartDiv) {
+      console.error(`${chart.id} div not found!`);
+      return;
+    }
+
+    // Render Plotly chart
+    Plotly.newPlot(chart.id, chart.traces, chart.layout, { responsive: true });
+
+    // Create download button container
+    const downloadDiv = document.createElement('div');
+    downloadDiv.classList.add('download-btn-container');
+    downloadDiv.innerHTML = `<button id="${chart.id}-download-btn">Download ${chart.label} Chart (High Resolution)</button>`;
+
+    // Append button below chart
+    chartDiv.parentElement.appendChild(downloadDiv);
+
+    // Add click listener
+    document.getElementById(`${chart.id}-download-btn`).addEventListener('click', () => {
+      Plotly.toImage(chart.id, {
+        format: 'png',   // or 'svg'
+        height: 400,
+        width: 1200,
+        scale: 2
+      }).then(url => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = chart.filename;
+        link.click();
+      });
+    });
+  });
 }
 
-// Call this after your nonzeroResults is ready
-renderCharts();
+// Call after your data is ready
+renderChartsWithDownloads();
 
-// Add a button to download the GPU chart as PNG or SVG with high resolution
-const gpuDownloadDiv = document.createElement('div');
-gpuDownloadDiv.classList.add('download-btn-container');
-gpuDownloadDiv.innerHTML = `<button id="gpu-download-btn">Download Performance per TCO Chart (High Resolution)</button>`;
-document.getElementById('gpu-chart').parentElement.appendChild(gpuDownloadDiv); 
-
-	// Add event listener for GPU chart download
-document.getElementById('gpu-download-btn').addEventListener('click', () => {
-  Plotly.toImage('gpu-chart', {
-    format: 'png',   // or 'svg'
-    height: 400,
-    width: 1200,
-    scale: 2
-  }).then(function (url) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'gpu_chart_high_res.png';
-    link.click();
-  });
-});
 
 /// ---------- Plotly Stacked TCO Chart ----------
 
