@@ -1379,8 +1379,8 @@ function renderChartsWithDownloads() {
     document.getElementById(`${chart.id}-download-btn`).addEventListener('click', () => {
       Plotly.toImage(chart.id, {
         format: 'png',   // or 'svg'
-        height: 400,
-        width: 1200,
+        height: 500,
+      //  width: 1200,
         scale: 2
       }).then(url => {
         const link = document.createElement('a');
