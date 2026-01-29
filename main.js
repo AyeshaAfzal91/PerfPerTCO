@@ -1371,9 +1371,9 @@ renderCharts();
 const gpuDownloadDiv = document.createElement('div');
 gpuDownloadDiv.classList.add('download-btn-container');
 gpuDownloadDiv.innerHTML = `<button id="gpu-download-btn">Download Performance per TCO Chart (High Resolution)</button>`;
-document.getElementById('gpu-chart').parentElement.insertBefore(gpuDownloadDiv, document.getElementById('gpu-chart'));
+document.getElementById('gpu-chart').parentElement.appendChild(gpuDownloadDiv); 
 
-// Add event listener for GPU chart download
+	// Add event listener for GPU chart download
 document.getElementById('gpu-download-btn').addEventListener('click', () => {
   Plotly.toImage('gpu-chart', {
     format: 'png',   // or 'svg'
