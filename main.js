@@ -1255,7 +1255,7 @@ const barLayout = {
   barmode: 'group',
 
   xaxis: {
-    title: { text: 'GPU Type', font: { size: 18 } ,  standoff: 100 },
+    title: { text: 'GPU Type', font: { size: 18 } ,  standoff: 10 },
     tickfont: { size: 18 },
     tickangle: -45
   },
@@ -1275,7 +1275,7 @@ const barLayout = {
 
   legend: { font: { size: 18 }, orientation: 'h', y: -0.25 },
   height: 500,
-	  margin: { t: 60, b: 60, l: 60, r: 60 }
+	  margin: { t: 100, b: 60, l: 60, r: 60 }
  // margin: { t: 80, b: 180, l: 120, r: 120 }
 };
 
