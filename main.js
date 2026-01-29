@@ -1442,10 +1442,10 @@ const totalCosts = nonzeroResults.map(r => {
   const capitalTotal = r.capital_components ? r.capital_components.reduce((sum, val) => sum + val, 0) : 0;
   const operationalTotal = r.operational_components ? r.operational_components.reduce((sum, val) => sum + val, 0) : 0;
   return capitalTotal + operationalTotal;
-});
+}); 
 
 // Update capTraces and opTraces to include textfont
-/* const capTraces = capLabels.map((label, i) => ({
+ const capTraces = capLabels.map((label, i) => ({
   x: tcoLabels,
   y: capBreakdown[i],
   name: `[Capital] ${label}`,
@@ -1502,11 +1502,11 @@ const tcoLayout = {
     font: { size: 31 }     // ✅ legend text size
   },
   font: { size: 31 }       // ✅ default fallback font
-};*/
+};
 
 
 // Add percentage text for each bar (capital and operational costs)
-const capTraces = capLabels.map((label, i) => ({
+/*const capTraces = capLabels.map((label, i) => ({
   x: tcoLabels,
   y: capBreakdown[i],
   name: `[Capital] ${label}`,
@@ -1568,7 +1568,7 @@ legend: {
     }
   },
   font: { size: 18 }       // ✅ default fallback font
-};
+};*/
 
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
