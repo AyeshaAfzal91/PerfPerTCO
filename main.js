@@ -2906,7 +2906,9 @@ function showFormula() {
     `);
 }
 
-document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("showFormulaBtn").addEventListener("click", showFormula);
+});
 
 // Function to display the password prompt when the "Show Formula" button is clicked
 /* function promptPassword() {
