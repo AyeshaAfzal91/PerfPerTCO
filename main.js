@@ -1572,33 +1572,37 @@ legend: {
 
 // Render the Plotly chart
 Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { displayModeBar: true });
-
+	
 // Add a button to download the plot as PNG or SVG with high resolution
-const downloadButtonDiv = document.createElement('div');
-downloadButtonDiv.classList.add('download-btn-container');
-downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
-document.getElementById('stacked-tco-chart').parentElement.insertBefore(downloadButtonDiv, document.getElementById('stacked-tco-chart'));
+if (!document.getElementById('download-btn')) {
+  const downloadButtonDiv = document.createElement('div');
+  downloadButtonDiv.classList.add('download-btn-container');
+  downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
 
-// Add event listener for the button
-document.getElementById('download-btn').addEventListener('click', () => {
-  Plotly.toImage('stacked-tco-chart', {
-    format: 'png',  // You can change this to 'svg' or 'jpeg' if needed
-    height: 400,    // Set height for high resolution
-    width: 1200,    // Set width for high resolution
-    scale: 2        // Increase scale for higher resolution
-  }).then(function (url) {
-    if (url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'tco_breakdown_high_res.png';  // Filename for the downloaded PNG
-      link.click();
-    } else {
-      console.error("Failed to generate image");
-    }
-  }).catch(err => {
-    console.error("Error during image generation:", err);
+  // Append AFTER the chart instead of before
+  document.getElementById('stacked-tco-chart').parentElement.appendChild(downloadButtonDiv);
+
+  // Add event listener for the button
+  document.getElementById('download-btn').addEventListener('click', () => {
+    Plotly.toImage('stacked-tco-chart', {
+      format: 'png',  // You can change this to 'svg' or 'jpeg' if needed
+      height: 400,    // Set height for high resolution
+      width: 1200,    // Set width for high resolution
+      scale: 2        // Increase scale for higher resolution
+    }).then(function (url) {
+      if (url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'tco_breakdown_high_res.png';  // Filename for the downloaded PNG
+        link.click();
+      } else {
+        console.error("Failed to generate image");
+      }
+    }).catch(err => {
+      console.error("Error during image generation:", err);
+    });
   });
-});
+}
 
 /// ---------- Plotly Pi TCO Chart ----------
 const pieTraces = nonzeroResults.map((gpu, index) => {
@@ -1651,10 +1655,9 @@ if (!document.getElementById('download-pie-btn')) {
   pieDownloadBtn.innerHTML = `
     <button id="download-pie-btn">Download TCO Breakdown Pie Chart (High Resolution)</button>
   `;
-  document.getElementById('pie-tco-chart').parentElement.insertBefore(
-    pieDownloadBtn,
-    document.getElementById('pie-tco-chart')
-  );
+
+  // Append AFTER the chart instead of insertBefore
+  document.getElementById('pie-tco-chart').parentElement.appendChild(pieDownloadBtn);
 
   document.getElementById('download-pie-btn').addEventListener('click', () => {
     Plotly.toImage('pie-tco-chart', {
@@ -1672,6 +1675,7 @@ if (!document.getElementById('download-pie-btn')) {
     });
   });
 }
+
 
 // ---------- Disable other sliders if the user selects Fix Budget and vice versa ----------
 function toggleSliders() {
