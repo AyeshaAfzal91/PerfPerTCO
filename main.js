@@ -1273,7 +1273,7 @@ const barLayout = {
     side: 'right'
   },
 
-  legend: { font: { size: 18 }, orientation: 'h', y: -0.35 },
+  legend: { font: { size: 18 }, orientation: 'h', y: -0.31 },
   height: 500,
 	  margin: { t: 20, b: 60, l: 60, r: 60 }
  // margin: { t: 80, b: 180, l: 120, r: 120 }
@@ -1545,7 +1545,7 @@ const tcoLayout = {
     tickfont: { size: 18 },
     automargin: true
   },
-  height: 400,
+  height: 380,
   margin: { t: 60, b: 80, l: 80, r: 200 }, // Extra right margin for vertical legend
 legend: {
   orientation: 'v',   // Horizontal for bottom placement
