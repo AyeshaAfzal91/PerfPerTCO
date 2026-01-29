@@ -1546,7 +1546,7 @@ const tcoLayout = {
     automargin: true
   },
   height: 380,
-  margin: { t: 60, b: 80, l: 80, r: 200 }, // Extra right margin for vertical legend
+  margin: { t: 60, b: 120, l: 80, r: 200 }, // Extra right margin for vertical legend
 legend: {
   orientation: 'v',   // Horizontal for bottom placement
   x: 1.02,
@@ -1571,45 +1571,48 @@ Plotly.newPlot('stacked-tco-chart', [...capTraces, ...opTraces], tcoLayout, { di
 
 // Add a button to download the plot as PNG or SVG with high resolution
 if (!document.getElementById('download-btn')) {
-  const chartContainer = document.getElementById('stacked-tco-chart');
+  const chart = document.getElementById('stacked-tco-chart');
 
-// Create wrapper
-const wrapperDiv = document.createElement('div');
-wrapperDiv.classList.add('chart-with-download'); // Optional CSS class for styling
+  // Create wrapper
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.marginBottom = '30px';
 
-// Move the chart into wrapper
-chartContainer.parentElement.insertBefore(wrapperDiv, chartContainer);
-wrapperDiv.appendChild(chartContainer);
+  // Insert wrapper and move chart inside it
+  chart.parentNode.insertBefore(wrapper, chart);
+  wrapper.appendChild(chart);
 
-// Create button
-const downloadButtonDiv = document.createElement('div');
-downloadButtonDiv.classList.add('download-btn-container');
-downloadButtonDiv.innerHTML = `<button id="download-btn">Download TCO Breakdown Stack Chart (High Resolution)</button>`;
+  // Create button container
+  const btnDiv = document.createElement('div');
+  btnDiv.className = 'download-btn-container';
+  btnDiv.style.marginTop = '12px';
 
-// Append button to wrapper (below chart)
-wrapperDiv.appendChild(downloadButtonDiv);
+  btnDiv.innerHTML = `
+    <button id="download-btn">
+      Download TCO Breakdown Stack Chart (High Resolution)
+    </button>
+  `;
 
-  // Add event listener for the button
+  wrapper.appendChild(btnDiv);
+
+  // Click handler
   document.getElementById('download-btn').addEventListener('click', () => {
     Plotly.toImage('stacked-tco-chart', {
-      format: 'png',  // You can change this to 'svg' or 'jpeg' if needed
-      height: 400,    // Set height for high resolution
-      width: 1200,    // Set width for high resolution
-      scale: 2        // Increase scale for higher resolution
-    }).then(function (url) {
-      if (url) {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'tco_breakdown_high_res.png';  // Filename for the downloaded PNG
-        link.click();
-      } else {
-        console.error("Failed to generate image");
-      }
-    }).catch(err => {
-      console.error("Error during image generation:", err);
+      format: 'png',
+      width: 1200,
+      height: 500,
+      scale: 2
+    }).then(url => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tco_breakdown_high_res.png';
+      a.click();
     });
   });
 }
+
 
 /// ---------- Plotly Pi TCO Chart ----------
 const pieTraces = nonzeroResults.map((gpu, index) => {
