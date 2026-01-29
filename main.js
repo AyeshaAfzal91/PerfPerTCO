@@ -537,6 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.GPU_data = window.GPU_data || [];
 window.activeGPUData = window.activeGPUData || [];
+window.results= window.results || [];
 
 
 if (typeof GPU_data === "undefined") {
@@ -3691,14 +3692,15 @@ function decodeState(str){
 }
 
 // ===================== GET & APPLY STATE =====================
-function getCurrentState(){
+function getCurrentState() {
   const state = {
     sliders: {},
     selects: {},
     checkboxes: {},
     texts: {},
-    gpu_data: window.GPU_data || null,
-    active_gpu_data: window.activeGPUData || null,
+    gpu_data: window.GPU_data || [],
+    active_gpu_data: window.activeGPUData || [],
+    results: window.results || {},   // include calculation outputs if needed
     meta: { savedAt: new Date().toISOString(), origin: window.location.origin }
   };
 
@@ -3720,6 +3722,7 @@ function getCurrentState(){
 
   return state;
 }
+
 
 // Define the map outside the function so it's only created once
 const spanMap = {
@@ -3813,24 +3816,27 @@ function isAppReady() {
 // ===================== RESTORE STATE =====================
 async function restoreStateWhenReady(state) {
   if (!state) return;
-
   try {
     await waitFor(isAppReady, 10000);
     applyInputsFromState(state);
 
-    // Extra delay for plots/charts
+    // Extra delay for charts
     await new Promise(r => setTimeout(r, 200));
 
-    // Trigger calculation
+    // Trigger calculations
     if (typeof calculateResults === "function") calculateResults();
     else if (typeof calculate === "function") calculate();
     else if (typeof runAllCalculations === "function") runAllCalculations();
+
+    // Force charts/visuals to rebuild
+    if (typeof refreshAllVisuals === "function") await refreshAllVisuals();
 
     console.log("✅ State fully restored.");
   } catch (e) {
     console.warn("restoreStateWhenReady error:", e);
   }
 }
+
 
 
 // ===================== HELPER: COPY TO CLIPBOARD =====================
@@ -3871,15 +3877,9 @@ async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
 async function shareSetup() {
   try {
     const state = getCurrentState();
-    const encoded = encodeState(state);
-    if (!encoded) throw new Error("Failed to encode state.");
+    const encoded = encodeState(state); // optional if you want to embed
 
-    const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
-      await copyToClipboard(embeddedUrl, "Copied embedded link!");
-      return { mode: "embedded", url: embeddedUrl };
-    }
-
+    // Always POST full state to serverless for a short link
     const res = await fetch("/.netlify/functions/saveConfig", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -3900,6 +3900,7 @@ async function shareSetup() {
     return null;
   }
 }
+
 
 // ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
