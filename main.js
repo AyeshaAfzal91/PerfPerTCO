@@ -1255,7 +1255,7 @@ const barLayout = {
   barmode: 'group',
 
   xaxis: {
-    title: { text: 'GPU Type', font: { size: 18 } ,  standoff: 0 },
+    title: { text: 'GPU Type', font: { size: 18 } ,  standoff: -20 },
     tickfont: { size: 18 },
     tickangle: -45
   },
@@ -1273,9 +1273,9 @@ const barLayout = {
     side: 'right'
   },
 
-  legend: { font: { size: 18 }, orientation: 'h', y: -0.3 },
+  legend: { font: { size: 18 }, orientation: 'h', y: -0.35 },
   height: 500,
-	  margin: { t: 100, b: 60, l: 60, r: 60 }
+	  margin: { t: 20, b: 60, l: 60, r: 60 }
  // margin: { t: 80, b: 180, l: 120, r: 120 }
 };
 
@@ -1545,7 +1545,7 @@ const tcoLayout = {
     tickfont: { size: 18 },
     automargin: true
   },
-  height: 300,
+  height: 400,
   margin: { t: 60, b: 80, l: 80, r: 200 }, // Extra right margin for vertical legend
 legend: {
   orientation: 'v',   // Horizontal for bottom placement
