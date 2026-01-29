@@ -770,9 +770,9 @@ body.dark .theme-switch input:checked + .slider {
   }
 
   .ai-tips {
-    position: absolute; /* Ensure top works */
-    top: 15px;          /* Lower AI tips panel */
-  }  
+    position: static;   /* or remove position entirely */
+    margin: 10px auto;  /* slightly tighter spacing */
+  } 
 }
 
 
