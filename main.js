@@ -645,8 +645,24 @@ function resetForm() {
   document.getElementById("gpuPerfPowerHeatmap").innerHTML = "";
 
 
-  // Remove dynamically injected download containers
+// Remove dynamically injected download containers
 document.querySelectorAll(".download-btn-container").forEach(el => el.remove());
+
+// Remove static elements by ID
+const elementsToRemove = [
+  "chart-title-perf-tco",
+  "chart-title-tco-breakdown",
+  "download-btn",
+  "heatmap-download-btn",
+  "download-pie-btn"
+];
+
+elementsToRemove.forEach(id => {
+  const el = document.getElementById(id);
+  if (el && el.parentNode) {
+    el.parentNode.removeChild(el);
+  }
+});
 
 
 document.getElementById("scenario-comparison").innerHTML = "";
