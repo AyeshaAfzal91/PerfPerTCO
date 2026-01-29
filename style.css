@@ -422,79 +422,9 @@ label {
   transform: translateX(24px);
 }
 
-/* Slider color on dark mode */
-.theme-switch input:checked + .slider {
-  background-color: #4a90e2;
-}
-
 .theme-switch .emoji {
   font-size: 18px;
   user-select: none;
-}
-
-/* DARK MODE STYLES */
-body.dark {
-  background-color: #1c1c1c;
-  color: #f4f4f4;
-}
-
-body.dark #about,
-body.dark #leftColumn,
-body.dark #rightColumn,
-body.dark #output,
-body.dark #resultsTable {
-  background-color: #2a2a2a;
-  color: #f4f4f4;
-  box-shadow: none;
-}
-
-body.dark label,
-body.dark th,
-body.dark td {
-  color: #ddd;
-}
-
-body.dark .medium-button {
-  background-color: #444;
-  color: white;
-}
-
-body.dark .medium-button:hover {
-  background-color: #666;
-}
-
-body.dark .chart-title,
-body.dark .main-chart-title {
-  color: #e0e0e0;
-}
-
-/* DARK MODE STYLES */
-/* =========================
-   DARK MODE STYLES
-   ========================= */
-body.dark {
-  background-color: #1c1c1c;
-  color: #f4f4f4;
-}
-
-/* Main containers */
-body.dark #about,
-body.dark #leftColumn,
-body.dark #rightColumn,
-body.dark #output,
-body.dark #resultsTable {
-  background-color: #2a2a2a;
-  color: #f4f4f4;
-  box-shadow: none;
-}
-
-/* General text */
-body.dark label,
-body.dark h1,
-body.dark h2,
-body.dark h3,
-body.dark p {
-  color: #f4f4f4;
 }
 
 /* =========================
@@ -526,36 +456,6 @@ body.dark #resultsTable tbody tr:hover {
   background-color: #3a3a3a;
 }
 
-body.dark .medium-button {
-  background-color: #444;
-  color: white;
-}
-
-body.dark .medium-button:hover {
-  background-color: #666;
-}
-
-body.dark .chart-title,
-body.dark .main-chart-title {
-  color: white; /* Ensure chart titles are white */
-}
-
-/* Optionally, ensure any other headings or print-related elements are white */
-body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
-  color: white; /* Force white color on all headings */
-}
-
-body.dark pre, body.dark code, body.dark .print-statement {
-  color: white; /* Ensure print statements or code sections are white */
-}
-
-body.dark .dark-message p {
-  color: white;
-}
-body.dark .dark-message strong {
-  color: white; /* Ensure strong text is white too */
-}
-
 .ai-tips {
   background-color: #f0f8ff;
   color: #333;
@@ -565,11 +465,6 @@ body.dark .dark-message strong {
   border-radius: 6px;
   max-width: 1280px;
   font-size: 14px;
-}
-body.dark .ai-tips {
-  background-color: #2a2a2a;
-  color: #f4f4f4;
-  border-left-color: #77aaff;
 }
 
 #refresh-container {
@@ -661,12 +556,6 @@ body.dark .cite-section {
   color: #f4f4f4;
 }
 
-body.dark .bibtex-block {
-  background-color: #1e1e1e;
-  color: #ddd;
-  border-left-color: #77aaff;
-}
-
 table.feature-table {
   width: auto; /* Let the table shrink to content */
   border-collapse: separate;
@@ -732,21 +621,123 @@ td strong {
   transition: all 0.3s ease;
 }
 
-/* Dark mode for feature tables */
+/* DARK MODE STYLES */
+body.dark {
+  background-color: #1c1c1c;
+  color: #f4f4f4;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Main containers */
+body.dark #about,
+body.dark #leftColumn,
+body.dark #rightColumn,
+body.dark #output,
+body.dark #resultsTable,
+body.dark .cite-section {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+  box-shadow: none;
+}
+
+/* General text & headings */
+body.dark label,
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark h4,
+body.dark h5,
+body.dark h6,
+body.dark p,
+body.dark pre,
+body.dark code,
+body.dark .print-statement {
+  color: #f4f4f4;
+}
+
+/* Results Table */
+body.dark #resultsTable table {
+  color: #f4f4f4;
+}
+
+body.dark #resultsTable th,
+body.dark #resultsTable td {
+  color: #f4f4f4;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+body.dark #resultsTable thead th {
+  background-color: #000;
+  border-bottom: 2px solid #555;
+}
+
+body.dark #resultsTable tbody tr:nth-child(even) {
+  background-color: #2f2f2f;
+}
+
+body.dark #resultsTable tbody tr:hover {
+  background-color: #3a3a3a;
+}
+
+/* Buttons */
+body.dark .medium-button {
+  background-color: #444;
+  color: white;
+}
+
+body.dark .medium-button:hover {
+  background-color: #666;
+}
+
+body.dark .share-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+body.dark .share-btn:hover {
+  opacity: 0.8;
+}
+
+/* Chart titles */
+body.dark .chart-title,
+body.dark .main-chart-title {
+  color: white;
+}
+
+/* AI tips */
+body.dark .ai-tips {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+  border-left-color: #77aaff;
+}
+
+/* Citation section */
+body.dark .bibtex-block {
+  background-color: #1e1e1e;
+  color: #ddd;
+  border-left-color: #77aaff;
+}
+
+/* Feature tables */
 body.dark table.feature-table thead {
-    background-color: #1e1e1e;
-    color: #f4f4f4;
+  background-color: #1e1e1e;
+  color: #f4f4f4;
 }
 
 body.dark table.feature-table tbody tr:nth-child(even) {
-    background-color: #2a2a2a;
+  background-color: #2a2a2a;
 }
 
 body.dark table.feature-table tbody tr:hover {
-    background-color: #3a3a3a;
+  background-color: #3a3a3a;
 }
 
 body.dark table.feature-table th,
 body.dark table.feature-table td {
-    color: #f4f4f4;
+  color: #f4f4f4;
+}
+
+/* Slider dark mode */
+body.dark .theme-switch input:checked + .slider {
+  background-color: #4a90e2;
 }
