@@ -3963,7 +3963,6 @@ Object.assign(window, {
     resetZoom,
     applyPresetProfile,
     generatePDFReport,
-    promptPassword,
     validatePassword,
     saveScenario,
     compareScenarios,
