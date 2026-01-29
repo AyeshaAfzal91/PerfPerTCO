@@ -178,7 +178,7 @@ label {
   max-width: 70%;
   margin: 0 auto 120px auto;  
   display: block;
-  height: 500px;
+  height: 50vh;
   position: relative;
   z-index: 2;
 }
@@ -250,10 +250,6 @@ label {
     /* Chart Wrappers */
     .chart-wrapper {
         height: 70vh;
-    }
-
-    #stacked-tco-chart {
-        width: 100%;
     }
 
     /* Tornado Plots */
@@ -371,6 +367,15 @@ label {
 .toast.show {
   bottom: 20px;
   opacity: 1;
+}
+
+/* Toast notifications on very narrow screens */
+@media (max-width: 480px) {
+  .toast {
+    width: 90%;        /* Take most of the screen width */
+    padding: 10px;     /* Slightly smaller padding */
+    font-size: 12px;   /* Smaller text for mobile */
+  }
 }
 
 /* Toggle container */
@@ -679,24 +684,28 @@ body.dark #resultsTable tbody tr:hover {
   background-color: #3a3a3a;
 }
 
-/* Buttons */
+/* Dark mode buttons */
+body.dark .medium-button,
+body.dark .share-btn {
+  color: white; /* Shared text color */
+}
+
 body.dark .medium-button {
-  background-color: #444;
-  color: white;
+  background-color: #444; /* Unique background */
 }
 
 body.dark .medium-button:hover {
-  background-color: #666;
+  background-color: #666; /* Unique hover background */
 }
 
 body.dark .share-btn {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #4CAF50; /* Unique background */
 }
 
 body.dark .share-btn:hover {
-  opacity: 0.8;
+  opacity: 0.8; /* Unique hover effect */
 }
+
 
 /* Chart titles */
 body.dark .chart-title,
@@ -741,3 +750,29 @@ body.dark table.feature-table td {
 body.dark .theme-switch input:checked + .slider {
   background-color: #4a90e2;
 }
+
+/* Short vertical screens */
+@media (max-height: 700px) {
+  /* Reduce chart wrapper height */
+  .chart-wrapper {
+    padding: 10px;
+    min-height: 50vh;  /* Shorter chart container */
+  }
+
+  /* Tornado plots top spacing */
+  #gpuTornadoPlots {
+    margin-top: 50px;  /* Avoid overlapping content */
+  }
+
+  /* Move absolute elements down */
+  #themeToggleContainer {
+    top: 15px;  /* Lower theme toggle */
+  }
+
+  .ai-tips {
+    position: absolute; /* Ensure top works */
+    top: 15px;          /* Lower AI tips panel */
+  }  
+}
+
+
