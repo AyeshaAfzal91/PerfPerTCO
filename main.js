@@ -3871,11 +3871,18 @@ async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
 async function shareSetup() {
   try {
     const state = getCurrentState();
+    const encoded = encodeState(state);
+    if (!encoded) throw new Error("Failed to encode state.");
 
-    // Always save to serverless endpoint
+    const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
+      await copyToClipboard(embeddedUrl, "Copied embedded link!");
+      return { mode: "embedded", url: embeddedUrl };
+    }
+
     const res = await fetch("/.netlify/functions/saveConfig", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ config: state })
     });
 
@@ -3893,8 +3900,6 @@ async function shareSetup() {
     return null;
   }
 }
-
-
 
 // ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
