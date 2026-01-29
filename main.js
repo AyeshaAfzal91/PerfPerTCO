@@ -637,7 +637,7 @@ function resetForm() {
   document.getElementById("stacked-tco-chart").innerHTML = "";
   document.getElementById("pie-tco-chart").innerHTML = "";
   document.getElementById("gpuTornadoPlots").innerHTML = "";
-  document.getElementById("sensitivityHeatmap").innerHTML = "";
+  document.getElementById("sensitivityHeatmaps").innerHTML = "";
   document.getElementById("blogOutput").value = "";
   document.getElementById("download-csv").style.display = "none";
   document.getElementById("gpuPerfPowerHeatmap").innerHTML = "";
