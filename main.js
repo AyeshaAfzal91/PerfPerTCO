@@ -3902,6 +3902,7 @@ async function tryRestoreFromUrlOnLoad() {
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
+  // 1️⃣ Check short link
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
     if (id) {
@@ -3917,18 +3918,27 @@ async function tryRestoreFromUrlOnLoad() {
     }
   }
 
+  // 2️⃣ Fallback to embedded
   if (!state && params.has("d")) {
     state = decodeState(params.get("d"));
   }
 
+  // 3️⃣ Only restore when app is fully ready
   if (state) {
     await restoreStateWhenReady(state);
+
+    // Force refresh visuals after restore (important for short links)
+    if (typeof window.refreshAllVisuals === "function") {
+      await window.refreshAllVisuals();
+    }
+
     console.log("✅ URL state applied.");
     return true;
   }
 
   return false;
 }
+
 
 // ===================== MODULE-READY INIT =====================
 (async () => {
