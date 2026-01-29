@@ -1273,9 +1273,9 @@ const barLayout = {
     side: 'right'
   },
 
-  legend: { font: { size: 18 }, orientation: 'h', y: -0.15 },
+  legend: { font: { size: 18 }, orientation: 'h', y: -0.25 },
   height: 500,
-	  margin: { t: 60, b: 100, l: 80, r: 80 }
+	  margin: { t: 60, b: 60, l: 60, r: 60 }
  // margin: { t: 80, b: 180, l: 120, r: 120 }
 };
 
@@ -1306,9 +1306,9 @@ const gpuTrace2 = {
 const powerLayout = {
   title: '',
   barmode: 'group',
-  xaxis: { title: 'GPU Type', tickangle: -45 },
-  yaxis: { title: 'Power-per-TCO (W/€)', rangemode: 'tozero', showgrid: true },
-  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', color: 'red' },
+  xaxis: { title: 'GPU Type', font: { size: 18 },tickangle: -45 },
+  yaxis: { title: 'Power-per-TCO (W/€)', rangemode: 'tozero', font: { size: 18 }, showgrid: true },
+  yaxis2: { title: '#GPUs', overlaying: 'y', side: 'right', showgrid: false, tickformat: ',d', font: { size: 18 }, color: 'red' },
   legend: { orientation: 'h', y: -0.2 },
   height: 500,
   margin: { t: 60, b: 100, l: 80, r: 80 }
