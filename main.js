@@ -1930,15 +1930,17 @@ function showPowerModel() {
             </tbody>
         </table>
         <br>
-        <button id="closeModalBtn">Close</button>
     `;
 
-    document.body.appendChild(modal);
-
-    // Close modal
-    document.getElementById("closeModalBtn").addEventListener("click", () => {
+    // Create close button separately and attach listener immediately
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.addEventListener("click", () => {
         document.body.removeChild(modal);
     });
+
+    modal.appendChild(closeBtn);
+    document.body.appendChild(modal);
 }
 
 // ---------- Show Power Plots (All Benchmarks, All GPUs) ----------
