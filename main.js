@@ -3822,7 +3822,7 @@ async function shareSetup() {
     if (!encoded) throw new Error("Failed to encode state.");
 
     const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    if (embeddedUrl.length <= 1000 && encoded.length < 500) {
+    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
       await copyToClipboard(embeddedUrl, "Copied embedded link!");
       return { mode: "embedded", url: embeddedUrl };
     }
@@ -3847,12 +3847,6 @@ async function shareSetup() {
     return null;
   }
 }
-
-1. Links fixing
-2. Carbon emission
-3. ISC poster 
-
-
 
 // ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
@@ -3991,6 +3985,5 @@ Object.assign(window, {
   encodeState,
   decodeState
 });
-
 
 
