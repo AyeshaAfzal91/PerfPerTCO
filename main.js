@@ -3762,7 +3762,7 @@ async function restoreStateWhenReady(state) {
   if (!state) return;
 
   try {
-    await waitFor(isAppReady, 15000);
+    await waitFor(isAppReady, 10000);
     applyInputsFromState(state);
 
     // Extra delay for plots/charts
@@ -3848,12 +3848,19 @@ async function shareSetup() {
   }
 }
 
+1. Links fixing
+2. Carbon emission
+3. ISC poster 
+
+
+
+// ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
-  // 1️⃣ Check for server-hosted short link
+  // 1️⃣ Check short link
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
     if (id) {
@@ -3869,57 +3876,25 @@ async function tryRestoreFromUrlOnLoad() {
     }
   }
 
-  // 2️⃣ Fallback to embedded link
+  // 2️⃣ Fallback to embedded
   if (!state && params.has("d")) {
     state = decodeState(params.get("d"));
   }
 
-  if (!state) return false;
+  // 3️⃣ Only restore when app is fully ready
+  if (state) {
+    await restoreStateWhenReady(state);
 
-  try {
-    // 3️⃣ Wait for basic app readiness
-    await waitFor(() => {
-      return (
-        typeof calculate === "function" &&
-        Array.isArray(window.GPU_data) &&
-        Array.isArray(window.activeGPUData) &&
-        document.getElementById("gpu-chart")
-      );
-    }, 20000, 50); // longer timeout for slow chart loading
-
-    // 4️⃣ Apply sliders, selects, checkboxes, texts immediately
-    applyInputsFromState(state);
-
-    // 5️⃣ Wait for charts to finish rendering
-    //    Example: wait for Plotly charts to emit 'plotly_afterplot'
-    await Promise.all(
-      Array.from(document.querySelectorAll(".plotly-graph-div")).map(chartDiv => {
-        return new Promise(resolve => {
-          if (chartDiv.data && chartDiv.data.length > 0) {
-            // chart already has data → assume ready
-            resolve(true);
-          } else {
-            chartDiv.on('plotly_afterplot', () => resolve(true));
-          }
-        });
-      })
-    );
-
-    // 6️⃣ Trigger calculations and refresh all visuals
-    if (typeof calculateResults === "function") calculateResults();
-    else if (typeof calculate === "function") calculate();
-    else if (typeof runAllCalculations === "function") runAllCalculations();
-
+    // Force refresh visuals after restore (important for short links)
     if (typeof window.refreshAllVisuals === "function") {
       await window.refreshAllVisuals();
     }
 
-    console.log("✅ Persistent link state fully restored with charts.");
+    console.log("✅ URL state applied.");
     return true;
-  } catch (err) {
-    console.warn("State restoration failed:", err);
-    return false;
   }
+
+  return false;
 }
 
 
