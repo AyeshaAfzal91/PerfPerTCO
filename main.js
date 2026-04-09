@@ -3848,13 +3848,12 @@ async function shareSetup() {
   }
 }
 
-// ===================== RESTORE FROM URL =====================
 async function tryRestoreFromUrlOnLoad() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
-  // 1️⃣ Check short link
+  // 1️⃣ Check for server-hosted short link
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
     if (id) {
@@ -3870,22 +3869,45 @@ async function tryRestoreFromUrlOnLoad() {
     }
   }
 
-  // 2️⃣ Fallback to embedded
+  // 2️⃣ Fallback to embedded link
   if (!state && params.has("d")) {
     state = decodeState(params.get("d"));
   }
 
-  // 3️⃣ Only restore when app is fully ready
+  // 3️⃣ Restore state only if we have it
   if (state) {
-    await restoreStateWhenReady(state);
+    try {
+      // Wait for the app to be fully ready (DOM + GPU data + charts)
+      await waitFor(() => {
+        return (
+          typeof calculate === "function" &&
+          Array.isArray(window.GPU_data) &&
+          Array.isArray(window.activeGPUData) &&
+          document.getElementById("gpu-chart")
+        );
+      }, 15000, 50); // Increased timeout to 15s for slower loads
 
-    // Force refresh visuals after restore (important for short links)
-    if (typeof window.refreshAllVisuals === "function") {
-      await window.refreshAllVisuals();
+      // Apply inputs
+      applyInputsFromState(state);
+
+      // Extra delay for charts/plots to be ready
+      await new Promise(r => setTimeout(r, 300));
+
+      // Trigger calculations
+      if (typeof calculateResults === "function") calculateResults();
+      else if (typeof calculate === "function") calculate();
+      else if (typeof runAllCalculations === "function") runAllCalculations();
+
+      // Ensure all visuals are refreshed
+      if (typeof window.refreshAllVisuals === "function") {
+        await window.refreshAllVisuals();
+      }
+
+      console.log("✅ URL state fully applied and visuals updated.");
+      return true;
+    } catch (err) {
+      console.warn("State restoration failed:", err);
     }
-
-    console.log("✅ URL state applied.");
-    return true;
   }
 
   return false;
