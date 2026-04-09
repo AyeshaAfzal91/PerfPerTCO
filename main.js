@@ -3642,6 +3642,7 @@ function getCurrentState(){
   const state = {
     sliders: {},
     selects: {},
+    radios: {},           // <<< NEW
     checkboxes: {},
     texts: {},
     gpu_data: window.GPU_data || null,
@@ -3649,18 +3650,27 @@ function getCurrentState(){
     meta: { savedAt: new Date().toISOString(), origin: window.location.origin }
   };
 
+  // Sliders / numbers
   document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
     if (input.id) state.sliders[input.id] = Number(input.value);
   });
 
+  // Selects
   document.querySelectorAll('select').forEach(s => {
     if (s.id) state.selects[s.id] = s.value;
   });
 
+  // Radios (Save the checked value for each radio group)
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    if (r.name && r.checked) state.radios[r.name] = r.value;
+  });
+
+  // Checkboxes
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     if (cb.id) state.checkboxes[cb.id] = cb.checked;
   });
 
+  // Texts
   document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
     if (inp.id) state.texts[inp.id] = inp.value;
   });
@@ -3701,7 +3711,7 @@ function applyInputsFromState(state) {
 
         const spanId = spanMap[id];
         if (spanId && typeof updateValue === "function") {
-            updateValue(spanId, val); 
+            updateValue(spanId, val);
         }
     });
 
@@ -3717,27 +3727,21 @@ function applyInputsFromState(state) {
     Object.entries(state.selects || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
+        el.value = val;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
-        // Special handling for calculationMode radios
-        if (id === "calculationMode") {
-            // Wait until radios exist in DOM
-            waitFor(() => document.querySelector(`input[name="calculationMode"][value="${val}"]`), 5000)
-            .then(() => {
-                const radio = document.querySelector(`input[name="calculationMode"][value="${val}"]`);
-                if (radio) {
-                    radio.checked = true;
-                    radio.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-
-                // Ensure correct slider is shown
-                if (typeof toggleSliders === "function") toggleSliders();
-            })
-            .catch(() => console.warn("calculationMode radio not found for state restore"));
-        } else {
-            el.value = val;
-            el.dispatchEvent(new Event('change', { bubbles: true }));
+    // Radios <<< NEW
+    Object.entries(state.radios || {}).forEach(([name, val]) => {
+        const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+        if (radio) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
         }
     });
+
+    // Call toggleSliders to ensure correct slider shows after restoring radio
+    if (typeof toggleSliders === "function") toggleSliders();
 
     // Checkboxes
     Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
