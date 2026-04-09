@@ -3643,6 +3643,7 @@ function getCurrentState(){
     sliders: {},
     selects: {},
     checkboxes: {},
+    radios: {}, // Added to capture Fix Power/Budget toggle
     texts: {},
     gpu_data: window.GPU_data || null,
     active_gpu_data: window.activeGPUData || null,
@@ -3659,6 +3660,11 @@ function getCurrentState(){
 
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     if (cb.id) state.checkboxes[cb.id] = cb.checked;
+  });
+
+  // Added: Capture active radio buttons (like calculationMode)
+  document.querySelectorAll('input[type="radio"]:checked').forEach(rb => {
+    if (rb.name) state.radios[rb.name] = rb.id;
   });
 
   document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
@@ -3692,65 +3698,54 @@ const spanMap = {
 function applyInputsFromState(state) {
     if (!state) return;
 
-    // ---------------- Sliders & Numbers ----------------
+    // 1. Restore Radios FIRST (This triggers toggleSliders visibility)
+    Object.entries(state.radios || {}).forEach(([name, id]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.checked = true;
+        el.dispatchEvent(new Event('change', { bubbles: true })); 
+    });
+
+    // 2. Sliders & Numbers
     Object.entries(state.sliders || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
-        el.dispatchEvent(new Event('input', { bubbles: true })); // Trigger listeners
-
-        // Update the display spans (v_budget, etc.)
+        el.dispatchEvent(new Event('input', { bubbles: true })); 
+        
         const spanId = spanMap[id];
         if (spanId && typeof updateValue === "function") {
             updateValue(spanId, val); 
         }
     });
 
-    // ---------------- Texts ----------------
-    Object.entries(state.texts || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-    });
+  // 3. Texts
+  Object.entries(state.texts || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
 
-    // ---------------- Selects ----------------
-    Object.entries(state.selects || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
+  // 4. Selects
+  Object.entries(state.selects || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
 
-        // Standard select
-        if (el.tagName === "SELECT") {
-            el.value = val;
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        } else {
-            // Custom chooser (button-style)
-            const optionBtn = el.querySelector(`[data-value="${val}"]`);
-            if (optionBtn) optionBtn.click(); // triggers internal selection
-            else {
-                // fallback
-                el.value = val;
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
+  // 5. Checkboxes
+  Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.checked = Boolean(val);
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
 
-        // Special case: calculationMode radio/chooser
-        if (id === "calculationMode") {
-            toggleSliders(); // ensures correct slider is visible
-        }
-    });
-
-    // ---------------- Checkboxes ----------------
-    Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.checked = Boolean(val);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    // ---------------- GPU Data ----------------
-    if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
-    if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
+  // GPU Data
+  if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+  if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 }
 
 // ===================== HELPER: waitFor =====================
@@ -3799,33 +3794,20 @@ async function restoreStateWhenReady(state) {
 
 
 // ===================== HELPER: COPY TO CLIPBOARD =====================
-/**
- * Attempts to copy text to the clipboard and offers to open the link in a new tab.
- * @param {string} text - The text (URL) to copy.
- * @param {string} successMsg - Message to display on successful copy.
- */
 async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
     try {
         await navigator.clipboard.writeText(text);
-        
-        // --- UX IMPROVEMENT: Use confirm() to offer the New Tab option ---
         const userChoice = confirm(
             successMsg + "\n\nWould you like to open this link in a new tab now?"
         );
-        
         if (userChoice) {
-            // User clicked 'OK' (or similar button)
             window.open(text, '_blank');
         }
-        // If the user clicks 'Cancel' (or similar button), they proceed to share the copied link.
-        
         return true;
     } catch (err) {
-        console.warn("Clipboard write failed (Security error or no permission):", err);
-        
-        // --- Fallback Mechanism (for security failure) ---
+        console.warn("Clipboard write failed:", err);
         prompt(
-            "Automatic clipboard access failed due to browser security. Please copy the link manually from this box:", 
+            "Automatic clipboard access failed. Please copy manually:", 
             text
         );
         return false;
@@ -3872,7 +3854,6 @@ async function tryRestoreFromUrlOnLoad() {
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
-  // 1️⃣ Check short link
   if (path.startsWith("/s/")) {
     const id = path.replace("/s/", "").trim();
     if (id) {
@@ -3888,39 +3869,30 @@ async function tryRestoreFromUrlOnLoad() {
     }
   }
 
-  // 2️⃣ Fallback to embedded
   if (!state && params.has("d")) {
     state = decodeState(params.get("d"));
   }
 
-  // 3️⃣ Only restore when app is fully ready
   if (state) {
     await restoreStateWhenReady(state);
-
-    // Force refresh visuals after restore (important for short links)
     if (typeof window.refreshAllVisuals === "function") {
       await window.refreshAllVisuals();
     }
-
     console.log("✅ URL state applied.");
     return true;
   }
-
   return false;
 }
 
 
 // ===================== MODULE-READY INIT =====================
 (async () => {
-  // Setup Share button
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-  // Try to restore state from URL
   try {
     const restored = await tryRestoreFromUrlOnLoad();
     if (!restored) {
-      // Default initialization if no state found
       if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
       if (typeof calculate === "function") calculate();
       if (typeof runAllCalculations === "function") runAllCalculations();
@@ -3932,39 +3904,20 @@ async function tryRestoreFromUrlOnLoad() {
   }
 })();
 
-/**
- * This ensures data is calculated first, then visuals are drawn.
- */
 window.refreshAllVisuals = async function() {
     console.log("🚀 Starting Full Visual Rebuild...");
-    
-    // 1. Run core calculations (Populates window.results and TCO Bar/Pie charts)
-    if (typeof calculate === "function") {
-        calculate();
-    }
-
-    // 2. Wait for DOM to register calculation results
+    if (typeof calculate === "function") calculate();
     await new Promise(r => setTimeout(r, 100));
 
-    // 3. Force-trigger Sensitivity Heatmap
     const metricSelector = document.getElementById('metricSelector');
-    if (metricSelector) {
-        metricSelector.dispatchEvent(new Event('change', { bubbles: true }));
-    }
+    if (metricSelector) metricSelector.dispatchEvent(new Event('change', { bubbles: true }));
 
-    // 4. Force-trigger Tornado Plots
     const tornadoSelector = document.getElementById('tornadoMetricSelect');
     const currentTornadoMetric = tornadoSelector ? tornadoSelector.value : 'tco';
-    if (typeof renderTornadoPlots === "function") {
-        renderTornadoPlots(currentTornadoMetric);
-    }
+    if (typeof renderTornadoPlots === "function") renderTornadoPlots(currentTornadoMetric);
 
-    // 5. Force-trigger Benchmark Heatmaps
-    if (typeof renderPerfPowerHeatmaps === "function") {
-        renderPerfPowerHeatmaps();
-    }
+    if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
     
-    // 6. Final Layout Fix (Solves Plotly sizing issues)
     window.dispatchEvent(new Event('resize'));
     console.log("✅ Visual rebuild complete.");
 };
