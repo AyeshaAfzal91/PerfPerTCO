@@ -3609,12 +3609,9 @@ function downloadComparisonPDF() {
 ---------------------*/
 
 // ===================== STATE ENCODE / DECODE =====================
-// ===================== STATE ENCODE / DECODE =====================
 function encodeState(obj){
   try {
-    // JSON.stringify the minified state
     const json = JSON.stringify(obj);
-    // Use LZString if available
     if (typeof LZString !== "undefined" && LZString.compressToEncodedURIComponent) {
       return LZString.compressToEncodedURIComponent(json);
     } else {
@@ -3640,35 +3637,34 @@ function decodeState(str){
   }
 }
 
-// ===================== GET MINIFIED STATE =====================
+// ===================== GET & APPLY STATE =====================
 function getCurrentState(){
-  const state = { s:{}, c:{}, t:{}, sel:{} }; // sliders, checkboxes, texts, selects
+  const state = {
+    sliders: {},
+    selects: {},
+    checkboxes: {},
+    texts: {},
+    gpu_data: window.GPU_data || null,
+    active_gpu_data: window.activeGPUData || null,
+    meta: { savedAt: new Date().toISOString(), origin: window.location.origin }
+  };
 
-  // Sliders & Numbers (minified keys: first letters or short codes)
   document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
-    if (!input.id) return;
-    state.s[input.id] = Number(input.value);
+    if (input.id) state.sliders[input.id] = Number(input.value);
   });
 
-  // Checkboxes
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    if (!cb.id) return;
-    state.c[cb.id] = cb.checked;
-  });
-
-  // Text inputs
-  document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
-    if (!inp.id) return;
-    state.t[inp.id] = inp.value;
-  });
-
-  // Selects
   document.querySelectorAll('select').forEach(s => {
-    if (!s.id) return;
-    state.sel[s.id] = s.value;
+    if (s.id) state.selects[s.id] = s.value;
   });
 
-  // ⚡ NOTE: GPU data and meta are removed to keep URL short
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (cb.id) state.checkboxes[cb.id] = cb.checked;
+  });
+
+  document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
+    if (inp.id) state.texts[inp.id] = inp.value;
+  });
+
   return state;
 }
 
@@ -3825,13 +3821,26 @@ async function shareSetup() {
     const encoded = encodeState(state);
     if (!encoded) throw new Error("Failed to encode state.");
 
-    // Always generate embedded link, ignore server-side
     const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+    if (embeddedUrl.length <= 500 && encoded.length < 1200) {
+      await copyToClipboard(embeddedUrl, "Copied embedded link!");
+      return { mode: "embedded", url: embeddedUrl };
+    }
 
-    await copyToClipboard(embeddedUrl, "Copied short embedded link!");
-    console.log("✅ Short embedded URL generated:", embeddedUrl);
-    return { mode: "embedded", url: embeddedUrl };
+    const res = await fetch("/.netlify/functions/saveConfig", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config: state })
+    });
 
+    if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+    const data = await res.json();
+    const id = data.id || data.ID || data.key;
+    if (!id) throw new Error("No ID returned from backend");
+
+    const shortUrl = `${window.location.origin}/s/${id}`;
+    await copyToClipboard(shortUrl, "Copied short link!");
+    return { mode: "short", id, url: shortUrl };
   } catch (e) {
     console.error("shareSetup error:", e);
     alert("Could not create share link: " + e.message);
@@ -3976,5 +3985,3 @@ Object.assign(window, {
   encodeState,
   decodeState
 });
-
-
