@@ -3609,6 +3609,7 @@ function downloadComparisonPDF() {
 ---------------------*/
 
 // ===================== STATE ENCODE / DECODE =====================
+// ===================== STATE ENCODE / DECODE =====================
 function encodeState(obj){
   try {
     const json = JSON.stringify(obj);
@@ -3642,37 +3643,33 @@ function getCurrentState(){
   const state = {
     sliders: {},
     selects: {},
-    radios: {},           // <<< NEW
     checkboxes: {},
     texts: {},
+    radios: {},       // <-- NEW: save radio states
     gpu_data: window.GPU_data || null,
     active_gpu_data: window.activeGPUData || null,
     meta: { savedAt: new Date().toISOString(), origin: window.location.origin }
   };
 
-  // Sliders / numbers
   document.querySelectorAll('input[type="range"], input[type="number"]').forEach(input => {
     if (input.id) state.sliders[input.id] = Number(input.value);
   });
 
-  // Selects
   document.querySelectorAll('select').forEach(s => {
     if (s.id) state.selects[s.id] = s.value;
   });
 
-  // Radios (Save the checked value for each radio group)
-  document.querySelectorAll('input[type="radio"]').forEach(r => {
-    if (r.name && r.checked) state.radios[r.name] = r.value;
-  });
-
-  // Checkboxes
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     if (cb.id) state.checkboxes[cb.id] = cb.checked;
   });
 
-  // Texts
   document.querySelectorAll('input[type="text"], input[type="email"]').forEach(inp => {
     if (inp.id) state.texts[inp.id] = inp.value;
+  });
+
+  // Save radio states
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    if (r.name && r.checked) state.radios[r.name] = r.value;
   });
 
   return state;
@@ -3702,53 +3699,56 @@ const spanMap = {
 function applyInputsFromState(state) {
     if (!state) return;
 
+    // Restore radios first (important for toggleSliders)
+    Object.entries(state.radios || {}).forEach(([name, val]) => {
+        const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+        if (radio) {
+            radio.checked = true;
+            setTimeout(() => {
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+            }, 10);
+        }
+    });
+
+    // Ensure sliders are shown correctly after radio restore
+    setTimeout(() => {
+        if (typeof toggleSliders === "function") toggleSliders();
+    }, 20);
+
     // Sliders & Numbers
     Object.entries(state.sliders || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
         el.dispatchEvent(new Event('input', { bubbles: true }));
-
         const spanId = spanMap[id];
         if (spanId && typeof updateValue === "function") {
-            updateValue(spanId, val);
+            updateValue(spanId, val); 
         }
     });
 
     // Texts
     Object.entries(state.texts || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event('input', { bubbles: true }));
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = val;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     // Selects
     Object.entries(state.selects || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = val;
+      el.dispatchEvent(new Event('change', { bubbles: true }));
     });
-
-    // Radios <<< NEW
-    Object.entries(state.radios || {}).forEach(([name, val]) => {
-        const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
-        if (radio) {
-            radio.checked = true;
-            radio.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    });
-
-    // Call toggleSliders to ensure correct slider shows after restoring radio
-    if (typeof toggleSliders === "function") toggleSliders();
 
     // Checkboxes
     Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.checked = Boolean(val);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.checked = Boolean(val);
+      el.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
     // GPU Data
@@ -3777,60 +3777,32 @@ function isAppReady() {
   );
 }
 
-
 // ===================== RESTORE STATE =====================
 async function restoreStateWhenReady(state) {
   if (!state) return;
-
   try {
     await waitFor(isAppReady, 10000);
     applyInputsFromState(state);
-
-    // Extra delay for plots/charts
     await new Promise(r => setTimeout(r, 200));
-
-    // Trigger calculation
     if (typeof calculateResults === "function") calculateResults();
     else if (typeof calculate === "function") calculate();
     else if (typeof runAllCalculations === "function") runAllCalculations();
-
     console.log("✅ State fully restored.");
   } catch (e) {
     console.warn("restoreStateWhenReady error:", e);
   }
 }
 
-
 // ===================== HELPER: COPY TO CLIPBOARD =====================
-/**
- * Attempts to copy text to the clipboard and offers to open the link in a new tab.
- * @param {string} text - The text (URL) to copy.
- * @param {string} successMsg - Message to display on successful copy.
- */
 async function copyToClipboard(text, successMsg = "Copied link to clipboard.") {
     try {
         await navigator.clipboard.writeText(text);
-        
-        // --- UX IMPROVEMENT: Use confirm() to offer the New Tab option ---
-        const userChoice = confirm(
-            successMsg + "\n\nWould you like to open this link in a new tab now?"
-        );
-        
-        if (userChoice) {
-            // User clicked 'OK' (or similar button)
-            window.open(text, '_blank');
-        }
-        // If the user clicks 'Cancel' (or similar button), they proceed to share the copied link.
-        
+        const userChoice = confirm(successMsg + "\n\nWould you like to open this link in a new tab now?");
+        if (userChoice) window.open(text, '_blank');
         return true;
     } catch (err) {
-        console.warn("Clipboard write failed (Security error or no permission):", err);
-        
-        // --- Fallback Mechanism (for security failure) ---
-        prompt(
-            "Automatic clipboard access failed due to browser security. Please copy the link manually from this box:", 
-            text
-        );
+        console.warn("Clipboard write failed:", err);
+        prompt("Automatic clipboard access failed. Copy manually:", text);
         return false;
     }
 }
@@ -3842,26 +3814,10 @@ async function shareSetup() {
     const encoded = encodeState(state);
     if (!encoded) throw new Error("Failed to encode state.");
 
+    // ALWAYS embed link
     const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
-      await copyToClipboard(embeddedUrl, "Copied embedded link!");
-      return { mode: "embedded", url: embeddedUrl };
-    }
-
-    const res = await fetch("/.netlify/functions/saveConfig", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ config: state })
-    });
-
-    if (!res.ok) throw new Error(`Save failed: ${res.status}`);
-    const data = await res.json();
-    const id = data.id || data.ID || data.key;
-    if (!id) throw new Error("No ID returned from backend");
-
-    const shortUrl = `${window.location.origin}/s/${id}`;
-    await copyToClipboard(shortUrl, "Copied short link!");
-    return { mode: "short", id, url: shortUrl };
+    await copyToClipboard(embeddedUrl, "Copied embedded link!");
+    return { mode: "embedded", url: embeddedUrl };
   } catch (e) {
     console.error("shareSetup error:", e);
     alert("Could not create share link: " + e.message);
@@ -3875,55 +3831,27 @@ async function tryRestoreFromUrlOnLoad() {
   const params = new URLSearchParams(window.location.search);
   let state = null;
 
-  // 1️⃣ Check short link
-  if (path.startsWith("/s/")) {
-    const id = path.replace("/s/", "").trim();
-    if (id) {
-      try {
-        const res = await fetch(`/.netlify/functions/getConfig?id=${id}`);
-        if (res.ok) {
-          const json = await res.json();
-          if (json?.data) state = json.data;
-        }
-      } catch (err) {
-        console.error("Fetching shared config failed:", err);
-      }
-    }
-  }
-
-  // 2️⃣ Fallback to embedded
-  if (!state && params.has("d")) {
+  if (params.has("d")) {
     state = decodeState(params.get("d"));
   }
 
-  // 3️⃣ Only restore when app is fully ready
   if (state) {
     await restoreStateWhenReady(state);
-
-    // Force refresh visuals after restore (important for short links)
-    if (typeof window.refreshAllVisuals === "function") {
-      await window.refreshAllVisuals();
-    }
-
+    if (typeof window.refreshAllVisuals === "function") await window.refreshAllVisuals();
     console.log("✅ URL state applied.");
     return true;
   }
-
   return false;
 }
 
-
 // ===================== MODULE-READY INIT =====================
 (async () => {
-  // Setup Share button
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) shareBtn.addEventListener("click", shareSetup);
 
-  // Try to restore state from URL
   try {
     const restored = await tryRestoreFromUrlOnLoad();
     if (!restored) {
-      // Default initialization if no state found
       if (typeof loadStaticGPUPrices === "function") loadStaticGPUPrices();
       if (typeof calculate === "function") calculate();
       if (typeof runAllCalculations === "function") runAllCalculations();
@@ -3935,39 +3863,17 @@ async function tryRestoreFromUrlOnLoad() {
   }
 })();
 
-/**
- * This ensures data is calculated first, then visuals are drawn.
- */
+// ===================== FULL VISUAL REFRESH =====================
 window.refreshAllVisuals = async function() {
     console.log("🚀 Starting Full Visual Rebuild...");
-    
-    // 1. Run core calculations (Populates window.results and TCO Bar/Pie charts)
-    if (typeof calculate === "function") {
-        calculate();
-    }
-
-    // 2. Wait for DOM to register calculation results
+    if (typeof calculate === "function") calculate();
     await new Promise(r => setTimeout(r, 100));
-
-    // 3. Force-trigger Sensitivity Heatmap
     const metricSelector = document.getElementById('metricSelector');
-    if (metricSelector) {
-        metricSelector.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    // 4. Force-trigger Tornado Plots
+    if (metricSelector) metricSelector.dispatchEvent(new Event('change', { bubbles: true }));
     const tornadoSelector = document.getElementById('tornadoMetricSelect');
     const currentTornadoMetric = tornadoSelector ? tornadoSelector.value : 'tco';
-    if (typeof renderTornadoPlots === "function") {
-        renderTornadoPlots(currentTornadoMetric);
-    }
-
-    // 5. Force-trigger Benchmark Heatmaps
-    if (typeof renderPerfPowerHeatmaps === "function") {
-        renderPerfPowerHeatmaps();
-    }
-    
-    // 6. Final Layout Fix (Solves Plotly sizing issues)
+    if (typeof renderTornadoPlots === "function") renderTornadoPlots(currentTornadoMetric);
+    if (typeof renderPerfPowerHeatmaps === "function") renderPerfPowerHeatmaps();
     window.dispatchEvent(new Event('resize'));
     console.log("✅ Visual rebuild complete.");
 };
