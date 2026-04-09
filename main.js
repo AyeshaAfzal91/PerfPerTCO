@@ -3762,7 +3762,7 @@ async function restoreStateWhenReady(state) {
   if (!state) return;
 
   try {
-    await waitFor(isAppReady, 10000);
+    await waitFor(isAppReady, 15000);
     applyInputsFromState(state);
 
     // Extra delay for plots/charts
