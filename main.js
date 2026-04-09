@@ -3874,43 +3874,52 @@ async function tryRestoreFromUrlOnLoad() {
     state = decodeState(params.get("d"));
   }
 
-  // 3️⃣ Restore state only if we have it
-  if (state) {
-    try {
-      // Wait for the app to be fully ready (DOM + GPU data + charts)
-      await waitFor(() => {
-        return (
-          typeof calculate === "function" &&
-          Array.isArray(window.GPU_data) &&
-          Array.isArray(window.activeGPUData) &&
-          document.getElementById("gpu-chart")
-        );
-      }, 15000, 50); // Increased timeout to 15s for slower loads
+  if (!state) return false;
 
-      // Apply inputs
-      applyInputsFromState(state);
+  try {
+    // 3️⃣ Wait for basic app readiness
+    await waitFor(() => {
+      return (
+        typeof calculate === "function" &&
+        Array.isArray(window.GPU_data) &&
+        Array.isArray(window.activeGPUData) &&
+        document.getElementById("gpu-chart")
+      );
+    }, 20000, 50); // longer timeout for slow chart loading
 
-      // Extra delay for charts/plots to be ready
-      await new Promise(r => setTimeout(r, 300));
+    // 4️⃣ Apply sliders, selects, checkboxes, texts immediately
+    applyInputsFromState(state);
 
-      // Trigger calculations
-      if (typeof calculateResults === "function") calculateResults();
-      else if (typeof calculate === "function") calculate();
-      else if (typeof runAllCalculations === "function") runAllCalculations();
+    // 5️⃣ Wait for charts to finish rendering
+    //    Example: wait for Plotly charts to emit 'plotly_afterplot'
+    await Promise.all(
+      Array.from(document.querySelectorAll(".plotly-graph-div")).map(chartDiv => {
+        return new Promise(resolve => {
+          if (chartDiv.data && chartDiv.data.length > 0) {
+            // chart already has data → assume ready
+            resolve(true);
+          } else {
+            chartDiv.on('plotly_afterplot', () => resolve(true));
+          }
+        });
+      })
+    );
 
-      // Ensure all visuals are refreshed
-      if (typeof window.refreshAllVisuals === "function") {
-        await window.refreshAllVisuals();
-      }
+    // 6️⃣ Trigger calculations and refresh all visuals
+    if (typeof calculateResults === "function") calculateResults();
+    else if (typeof calculate === "function") calculate();
+    else if (typeof runAllCalculations === "function") runAllCalculations();
 
-      console.log("✅ URL state fully applied and visuals updated.");
-      return true;
-    } catch (err) {
-      console.warn("State restoration failed:", err);
+    if (typeof window.refreshAllVisuals === "function") {
+      await window.refreshAllVisuals();
     }
-  }
 
-  return false;
+    console.log("✅ Persistent link state fully restored with charts.");
+    return true;
+  } catch (err) {
+    console.warn("State restoration failed:", err);
+    return false;
+  }
 }
 
 
