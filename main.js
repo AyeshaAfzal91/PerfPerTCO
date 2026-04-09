@@ -3692,13 +3692,13 @@ const spanMap = {
 function applyInputsFromState(state) {
     if (!state) return;
 
-    // Sliders & Numbers
+    // ---------------- Sliders & Numbers ----------------
     Object.entries(state.sliders || {}).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (!el) return;
         el.value = val;
         el.dispatchEvent(new Event('input', { bubbles: true })); // Trigger listeners
-        
+
         // Update the display spans (v_budget, etc.)
         const spanId = spanMap[id];
         if (spanId && typeof updateValue === "function") {
@@ -3706,33 +3706,51 @@ function applyInputsFromState(state) {
         }
     });
 
-  // Texts
-  Object.entries(state.texts || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-  });
+    // ---------------- Texts ----------------
+    Object.entries(state.texts || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = val;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
 
-  // Selects
-  Object.entries(state.selects || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  });
+    // ---------------- Selects ----------------
+    Object.entries(state.selects || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
 
-  // Checkboxes
-  Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.checked = Boolean(val);
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  });
+        // Standard select
+        if (el.tagName === "SELECT") {
+            el.value = val;
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        } else {
+            // Custom chooser (button-style)
+            const optionBtn = el.querySelector(`[data-value="${val}"]`);
+            if (optionBtn) optionBtn.click(); // triggers internal selection
+            else {
+                // fallback
+                el.value = val;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
 
-  // GPU Data
-  if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
-  if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
+        // Special case: calculationMode radio/chooser
+        if (id === "calculationMode") {
+            toggleSliders(); // ensures correct slider is visible
+        }
+    });
+
+    // ---------------- Checkboxes ----------------
+    Object.entries(state.checkboxes || {}).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.checked = Boolean(val);
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    // ---------------- GPU Data ----------------
+    if (state.gpu_data) window.GPU_data = structuredClone(state.gpu_data);
+    if (state.active_gpu_data) window.activeGPUData = structuredClone(state.active_gpu_data);
 }
 
 // ===================== HELPER: waitFor =====================
