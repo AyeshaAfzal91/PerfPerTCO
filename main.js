@@ -3822,7 +3822,7 @@ async function shareSetup() {
     if (!encoded) throw new Error("Failed to encode state.");
 
     const embeddedUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    if (embeddedUrl.length <= 500 && encoded.length < 1200) {
+    if (embeddedUrl.length <= 2000 && encoded.length < 1200) {
       await copyToClipboard(embeddedUrl, "Copied embedded link!");
       return { mode: "embedded", url: embeddedUrl };
     }
