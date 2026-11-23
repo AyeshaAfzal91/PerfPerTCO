@@ -1,7 +1,10 @@
 Nov: 
-- https://wattlytics.netlify.app
-- https://wattlytics-dev.netlify.app/
-- https://github.com/AyeshaAfzal91/PerfPerTCO
+- Master:
+-- https://wattlytics.netlify.app
+-- https://github.com/AyeshaAfzal91/PerfPerTCO
+- Working:
+-- https://wattlytics-dev.netlify.app/
+-- https://github.com/manfredo103/Wattlytics 
 - Reference Paper: https://arxiv.org/pdf/2604.08182
 
 Tasks:
